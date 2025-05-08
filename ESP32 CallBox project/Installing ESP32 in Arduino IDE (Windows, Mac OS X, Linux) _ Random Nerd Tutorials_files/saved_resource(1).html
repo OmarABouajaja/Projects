@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!-- saved from url=(0023)https://sda.fyi/topics/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="origin-trial" content="Ajm9ltDXBX1372/v/oN7k0jqTZ9U9xKCjugeZWjMJDxrF65GjE76aL1JPv0uneNh3TIQYGW54bTNM0bLyF1FtggAAABWeyJvcmlnaW4iOiJodHRwczovL3NkYS5meWk6NDQzIiwiZmVhdHVyZSI6IlByaXZhY3lTYW5kYm94QWRzQVBJcyIsImV4cGlyeSI6MTY2MTI5OTE5OX0=">
+    </head>
+    <body marginwidth="0" marginheight="0">
+        <script>
+        (function() { 
+            if (!('browsingTopics' in document && document.featurePolicy.allowsFeature('browsing-topics'))) {
+                window.parent.postMessage(JSON.stringify({ log: 'Topics feature not enabled', message: 'topicsLog'}), '*');
+                return
+            }
+
+            document.browsingTopics()
+                .then(function(topics) {
+                    if (!topics || !topics.length) {
+                        window.parent.postMessage(JSON.stringify({ log: 'No topics returned', message: 'topicsLog'}), '*');
+                        return
+                    }
+
+                    window.parent.postMessage(JSON.stringify({ topics, message: 'topicsAPIResults'}), '*');
+                })
+                .catch(function (err) { 
+                    window.parent.postMessage(JSON.stringify({ log: err, message: 'topicsLog'}), '*');
+                })
+            })()
+        </script>
+    
+</body></html>
