@@ -1,5 +1,0 @@
-
-        window.$adManagementConfig = window.$adManagementConfig || {};
-        window.$adManagementConfig.web = window.$adManagementConfig.web || {};
-        window.$adManagementConfig.web.keywords = {"status":"PROCESSED","sales_kw":"arduino ide,esp32,mac os x,windows,linux,button,esp32 board,new sketch,installation procedure,computer,message,version,tutorial,boards manager,uploading","sales_cat":"596,599,600,602,615","sales_safety":"GGT0"};
-      
