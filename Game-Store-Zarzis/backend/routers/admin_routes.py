@@ -154,7 +154,7 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
             
         # 4. Send Invitation Email
         # We import here to avoid circular dependencies if simple structure
-        from services.email_service import send_staff_invitation
+        from email_service import send_staff_invitation
         
         email_sent = send_staff_invitation(
             email=request_data.email,

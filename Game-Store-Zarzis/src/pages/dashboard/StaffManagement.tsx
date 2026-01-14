@@ -261,7 +261,8 @@ const StaffManagement = () => {
         if (!skipEmail) {
           // console.log("📨 Triggering MailerSend API...");
           try {
-            const emailResponse = await fetch('http://localhost:8000/api/email/staff-invite', {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+            const emailResponse = await fetch(`${API_URL}/api/email/staff-invite`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
