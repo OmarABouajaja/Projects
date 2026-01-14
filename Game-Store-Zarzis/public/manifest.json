@@ -1,0 +1,25 @@
+{
+  "name": "Game Store Zarzis - Réparation Tech & Zone Gaming",
+  "short_name": "Game Store Zarzis",
+  "description": "Game Store Zarzis - Services professionnels de réparation tech (smartphones, PC, consoles PS4/PS5) et zone gaming premium avec 10 postes, écrans 4K. Expertise technique garantie à Zarzis, Tunisie.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/gamestorelogocmp.png",
+      "sizes": "48x48",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["business", "entertainment", "games"],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
+

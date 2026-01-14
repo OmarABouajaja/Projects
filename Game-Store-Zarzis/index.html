@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e1a" />
+  <title>Game Store Management System - Complete Business Platform</title>
+  <meta name="description"
+    content="Modern, full-featured management system for gaming cafés and console rental stores. Real-time session tracking, inventory management, POS system, client loyalty program, and comprehensive analytics. Built with React, TypeScript, and Supabase. Trilingual support (EN/FR/AR). Open-source and ready for deployment." />
+  <meta name="keywords"
+    content="gaming cafe management, console rental system, point of sale, inventory management, session tracking, loyalty program, React TypeScript, Supabase, business management software, gaming lounge software, real-time analytics, open source management system" />
+  <meta name="author" content="Omar Abouajaja" />
+  <meta name="publisher" content="Omar Abouajaja" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="googlebot" content="index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1" />
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+
+  <!-- Additional Social Media Tags -->
+  <meta name="twitter:app:name:iphone" content="Game Store Zarzis" />
+  <meta name="twitter:app:name:ipad" content="Game Store Zarzis" />
+  <meta name="twitter:app:name:googleplay" content="Game Store Zarzis" />
+
+  <!-- Facebook Specific -->
+  <meta property="fb:app_id" content="your-facebook-app-id" />
+  <meta property="og:video" content="" />
+  <meta property="og:video:secure_url" content="" />
+  <meta property="og:video:type" content="video/mp4" />
+  <meta property="og:video:width" content="1280" />
+  <meta property="og:video:height" content="720" />
+  <link rel="canonical" href="https://www.gamestorezarzis.com.tn" />
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+  <link rel="manifest" href="/manifest.json" />
+
+  <!-- SPA Redirect Script for GitHub Pages -->
+  <script type="text/javascript">
+    (function (l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search.slice(1).split('&').map(function (p) {
+          return p.replace(/~and~/g, '&')
+        }).join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    }(window.location))
+  </script>
+
+  <!-- Language alternatives -->
+  <link rel="alternate" hreflang="fr" href="https://www.gamestorezarzis.com.tn" />
+  <link rel="alternate" hreflang="en" href="https://www.gamestorezarzis.com.tn?lang=en" />
+  <link rel="alternate" hreflang="ar" href="https://www.gamestorezarzis.com.tn?lang=ar" />
+  <link rel="alternate" hreflang="x-default" href="https://www.gamestorezarzis.com.tn" />
+
+  <!-- Preconnect to critical external resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- DNS prefetch for external services -->
+  <link rel="dns-prefetch" href="https://wa.me" />
+  <link rel="dns-prefetch" href="https://www.instagram.com" />
+  <link rel="dns-prefetch" href="https://www.tiktok.com" />
+
+  <!-- Module preload for critical components -->
+  <link rel="modulepreload" href="/src/main.tsx" />
+  <link rel="modulepreload" href="/src/App.tsx" />
+
+  <!-- Inline critical CSS for faster FCP -->
+  <style>
+    body {
+      margin: 0;
+      background: hsl(222 47% 6%);
+      color: hsl(210 40% 98%);
+      font-family: Inter, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale
+    }
+
+    #root {
+      min-height: 100vh
+    }
+
+    /* Prevent layout shift */
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block
+    }
+
+    /* Improve touch targets */
+    button,
+    a[role="button"] {
+      min-height: 44px;
+      min-width: 44px
+    }
+
+    @media (min-width:640px) {
+
+      button,
+      a[role="button"] {
+        min-height: 48px;
+        min-width: 48px
+      }
+    }
+
+    /* Essential animations - must be included */
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    @keyframes rgb-shift {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    @keyframes soft-glow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 12px hsl(185 100% 50% / 0.25))
+      }
+
+      50% {
+        filter: drop-shadow(0 0 22px hsl(320 100% 60% / 0.35))
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translate3d(0, 0, 0)
+      }
+
+      50% {
+        transform: translate3d(0, -15px, 0)
+      }
+    }
+
+    @keyframes ps-float {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 0.8
+      }
+
+      25% {
+        transform: translateY(-20px) rotate(3deg) scale(1.05);
+        opacity: 1
+      }
+
+      50% {
+        transform: translateY(-10px) rotate(-2deg) scale(0.95);
+        opacity: 0.9
+      }
+
+      75% {
+        transform: translateY(-25px) rotate(2deg) scale(1.02);
+        opacity: 0.85
+      }
+    }
+
+    @keyframes ps-blink-slow {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+  </style>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+  <!-- Enhanced Open Graph for Social Media Sharing -->
+  <meta property="og:title" content="🎮 Game Store Management System - Complete Business Platform" />
+  <meta property="og:description"
+    content="Modern management system for gaming cafés. Real-time session tracking, inventory, POS, loyalty program, and analytics. Built with React + TypeScript + Supabase. Trilingual (EN/FR/AR). Open-source and production-ready." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://github.com/your-username/game-store-zarzis" />
+  <meta property="og:site_name" content="Game Store Management System" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="fr_FR" />
+  <meta property="og:locale:alternate" content="ar_AR" />
+
+  <!-- Open Graph Image -->
+  <meta property="og:image" content="/public/og-image.png" />
+  <meta property="og:image:secure_url" content="/public/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Game Store Management System - Modern platform for gaming café management" />
+
+  <!-- Additional Open Graph Properties -->
+  <meta property="og:determiner" content="a" />
+  <meta property="article:author" content="Omar Abouajaja" />
+  <meta property="article:publisher" content="https://www.linkedin.com/in/omar-abouajaja" />
+  <meta property="article:section" content="Business Management Software" />
+  <meta property="article:tag" content="management system" />
+  <meta property="article:tag" content="gaming cafe" />
+  <meta property="article:tag" content="react" />
+  <meta property="article:tag" content="typescript" />
+  <meta property="article:tag" content="supabase" />
+
+  <!-- Enhanced Twitter Card for Better Tweet Previews -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@your_twitter" />
+  <meta name="twitter:creator" content="@your_twitter" />
+  <meta name="twitter:title" content="🎮 Game Store Management System - Complete Business Platform" />
+  <meta name="twitter:description"
+    content="Modern management system for gaming cafés. Real-time session tracking, inventory management, POS, loyalty program. React + TypeScript + Supabase. Trilingual (EN/FR/AR). Open-source." />
+  <meta name="twitter:image" content="/public/twitter-card.png" />
+  <meta name="twitter:image:alt" content="Game Store Management System - Modern platform for gaming café management" />
+  <meta name="twitter:url" content="https://github.com/your-username/game-store-zarzis" />
+  <meta name="twitter:domain" content="github.com" />
+
+  <!-- Additional Twitter-specific tags -->
+  <meta name="twitter:label1" content="Location" />
+  <meta name="twitter:data1" content="Zarzis, Tunisia 🇹🇳" />
+  <meta name="twitter:label2" content="Hours" />
+  <meta name="twitter:data2" content="7/7 - 9h to 00h" />
+
+  <!-- LinkedIn Specific Tags -->
+  <meta property="og:image:secure_url" content="https://www.gamestorezarzis.com.tn/gamestorelogocmp.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <!-- Additional Social Media Tags -->
+  <meta name="pinterest" content="nopin" />
+  <meta name="pinterest-rich-pin" content="false" />
+
+  <!-- WhatsApp Specific -->
+  <meta property="og:image:width" content="400" />
+  <meta property="og:image:height" content="400" />
+
+  <!-- Discord Rich Embed -->
+  <meta name="theme-color" content="#b91c1c" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Additional Platform-Specific Tags -->
+  <meta name="application-name" content="Game Store Zarzis" />
+  <meta name="apple-mobile-web-app-title" content="GS Zarzis" />
+  <meta name="msapplication-TileColor" content="#b91c1c" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+
+  <!-- Pinterest Specific -->
+  <meta name="pinterest-rich-pin" content="false" />
+  <meta name="pinterest" content="nopin" description="Game Store Zarzis - Premium Gaming & Tech Repair" />
+
+  <!-- Telegram Specific -->
+  <meta property="telegram:channel" content="@GameStoreZarzis" />
+
+  <!-- Additional Search Engine Tags -->
+  <meta name="rating" content="general" />
+  <meta name="referrer" content="origin-when-cross-origin" />
+  <meta name="format-detection" content="telephone=yes,address=no,email=no" />
+
+  <!-- Performance and Caching Hints -->
+  <meta http-equiv="Cache-Control" content="max-age=86400" />
+  <meta http-equiv="Expires" content="86400" />
+
+  <!-- Structured Data - SoftwareApplication -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Game Store Management System",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Modern, full-featured management system for gaming cafés and console rental stores. Features real-time session tracking, inventory management, POS system, client loyalty program, and comprehensive analytics.",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Person",
+        "name": "Omar Abouajaja",
+        "url": "https://www.linkedin.com/in/omar-abouajaja"
+      },
+      "programmingLanguage": [
+        "TypeScript",
+        "JavaScript",
+        "SQL"
+      ],
+      "screenshot": "/public/og-image.png",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "5.0",
+        "ratingCount": "1"
+      },
+      "featureList": [
+        "Real-time session tracking",
+        "Inventory management",
+        "Point-of-sale system",
+        "Client loyalty program",
+        "Staff management",
+        "Comprehensive analytics",
+        "Trilingual support (EN/FR/AR)",
+        "Mobile responsive design"
+      ]
+    }
+  </script>
+
+  <!-- Structured Data - Organization -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Game Store Management System",
+      "url": "https://github.com/your-username/game-store-zarzis",
+      "logo": "/public/og-image.png",
+      "description": "Open-source management system for gaming cafés",
+      "founder": {
+        "@type": "Person",
+        "name": "Omar Abouajaja",
+        "url": "https://www.linkedin.com/in/omar-abouajaja"
+      },
+      "sameAs": [
+        "https://www.linkedin.com/in/omar-abouajaja"
+      ]
+    }
+  </script>
+  <!-- EXAMPLE: Local Business Schema (Uncomment and customize for your specific store) -->
+  <!--
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Game Store Zarzis",
+      "alternateName": "Game Store Zarzis - Réparation Tech & Zone Gaming",
+      "image": "https://www.gamestorezarzis.com.tn/gamestorelogocmp.png",
+      "logo": "https://www.gamestorezarzis.com.tn/gamestorelogocmp.png",
+      "description": "Game Store Zarzis - Services professionnels de réparation technologique et zone gaming premium à Zarzis, Tunisie...",
+      "priceRange": "$$",
+      "paymentAccepted": "Cash, Mobile Money, Bank Transfer",
+      "currenciesAccepted": "TND"
+    }
+    </script>
+  -->
+
+  <!-- EXAMPLE: FAQ Schema -->
+  <!--
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Quels services proposez-vous ?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "..."
+          }
+        }
+      ]
+    }
+    </script>
+  -->
+
+  <!-- Performance hints -->
+  <meta http-equiv="x-dns-prefetch-control" content="on" />
+
+  <!-- Cache control hints -->
+  <meta http-equiv="Cache-Control" content="public, max-age=31536000, immutable" />
+
+  <!-- Google Search Console Verification (add your verification code here) -->
+  <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE" /> -->
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="rating" content="general" />
+  <meta name="distribution" content="global" />
+  <meta name="revisit-after" content="7 days" />
+  <meta name="language" content="French, English, Arabic" />
+  <meta name="coverage" content="Worldwide" />
+  <meta name="target" content="all" />
+
+  <!-- Rich Snippets Support -->
+  <meta name="application-name" content="Game Store Zarzis" />
+  <meta name="msapplication-TileColor" content="#0a0e1a" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx" defer></script>
+</body>
+
+</html>

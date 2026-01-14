@@ -1,0 +1,67 @@
+{
+    "help.clients": {
+        "fr": "Gérez votre base de clients, consultez l'historique et échangez des points de fidélité.",
+        "en": "Manage your customer database, view history, and redeem loyalty points.",
+        "ar": "إدارة قاعدة بيانات العملاء، وعرض السجل، واستبدال نقاط الولاء."
+    },
+    "help.services": {
+        "fr": "Suivez toutes les réparations. Utilisez 'Nouvelle Demande' pour enregistrer un travail.",
+        "en": "Track all repair jobs and service requests. Use 'New Request' to log a job.",
+        "ar": "تتبع جميع أعمال الإصلاح. استخدم 'طلب جديد' لتسجيل وظيفة."
+    },
+    "help.sessions": {
+        "fr": "Gérez les sessions actives. Cliquez sur une console pour Démarrer/Terminer/Prolonger.",
+        "en": "Manage active sessions. Click a console to Start/End/Extend play time.",
+        "ar": "إدارة الجلسات النشطة. انقر فوق وحدة تحكم لبدء / إنهاء / تمديد وقت اللعب."
+    },
+    "help.settings": {
+        "fr": "Configurez les horaires, tarifs, programme de fidélité et préférences d'interface.",
+        "en": "Configure store hours, pricing, loyalty program, and interface preferences.",
+        "ar": "تكوين ساعات المتجر والتسعير وبرنامج الولاء وتفضيلات الواجهة."
+    },
+    "onboarding.client.welcome": {
+        "fr": "Bienvenue à Game Store Zarzis !",
+        "en": "Welcome to Game Store Zarzis!",
+        "ar": "مرحبًا بكم في Game Store Zarzis!"
+    },
+    "onboarding.client.subtitle": {
+        "fr": "Votre tableau de bord tout-en-un pour le centre de jeux.",
+        "en": "Your all-in-one gaming center dashboard.",
+        "ar": "لوحة تحكم مركز الألعاب الكل في واحد."
+    },
+    "onboarding.client.xp.title": {
+        "fr": "Suivez vos XP (Points)",
+        "en": "Track Your XP (Points)",
+        "ar": "تتبع نقاط الخبرة (XP)"
+    },
+    "onboarding.client.xp.desc": {
+        "fr": "Gagnez des points pour chaque heure jouée et chaque achat.",
+        "en": "Earn points for every hour played and every purchase you make.",
+        "ar": "اكسب نقاطًا مقابل كل ساعة لعب وكل عملية شراء."
+    },
+    "onboarding.client.rewards.title": {
+        "fr": "Débloquez des Récompenses Épiques",
+        "en": "Unlock Epic Rewards",
+        "ar": "افتح مكافآت ملحمية"
+    },
+    "onboarding.client.rewards.desc": {
+        "fr": "Échangez vos points contre du temps de jeu, des snacks ou des remises.",
+        "en": "Trade your points for free game time, snacks, or exclusive discounts.",
+        "ar": "استبدل نقاطك بوقت لعب مجاني أو وجبات خفيفة أو خصومات حصرية."
+    },
+    "onboarding.client.bonus.title": {
+        "fr": "Bonus de Niveau Supérieur",
+        "en": "Level Up Bonus",
+        "ar": "مكافأة المستوى التالي"
+    },
+    "onboarding.client.bonus.desc": {
+        "fr": "Jouez 5 sessions d'affilée pour débloquer automatiquement une partie GRATUITE !",
+        "en": "Play 5 sessions in a row to automatically unlock a FREE bonus game!",
+        "ar": "العب 5 جلسات متتالية لفتح لعبة مجانية تلقائيًا!"
+    },
+    "onboarding.client.getStarted": {
+        "fr": "Commencer",
+        "en": "Get Started",
+        "ar": "يبدأ"
+    }
+}

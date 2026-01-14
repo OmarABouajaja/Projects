@@ -1,0 +1,80 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { Order, OrderFormData } from "@/types";
+
+export const useCreateOrder = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (orderData: OrderFormData) => {
+            // 1. Calculate totals
+            const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            let deliveryCost = 0;
+
+            // Fetch delivery settings to get exact cost if needed, or trust frontend (should verify on backend in real app)
+            // For now, we will trust the passed values or calculate simple logic
+            if (orderData.delivery_method === 'rapid_post') deliveryCost = 10.000;
+            if (orderData.delivery_method === 'local_delivery') deliveryCost = 7.000;
+
+            const totalAmount = subtotal + deliveryCost;
+
+            // 2. Insert Order
+            const { data: order, error: orderError } = await supabase
+                .from("orders")
+                .insert({
+                    client_name: orderData.client_name,
+                    client_phone: orderData.client_phone,
+                    client_email: orderData.client_email,
+                    delivery_method: orderData.delivery_method,
+                    delivery_address: orderData.delivery_address,
+                    delivery_cost: deliveryCost,
+                    subtotal: subtotal,
+                    total_amount: totalAmount,
+                    items: orderData.items, // JSONB column
+                    payment_method: orderData.payment_method || 'cash',
+                    payment_reference: orderData.payment_reference || null,
+                    status: 'pending',
+                    notes: orderData.notes
+                })
+                .select()
+                .single();
+
+            if (orderError) throw orderError;
+            return order;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+        },
+    });
+};
+
+export const useOrders = () => {
+    return useQuery({
+        queryKey: ["orders"],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from("orders")
+                .select("*")
+                .order("created_at", { ascending: false });
+
+            if (error) throw error;
+            return data as Order[];
+        },
+    });
+};
+
+export const useUpdateOrderStatus = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async ({ id, status }: { id: string; status: string }) => {
+            const { error } = await supabase
+                .from("orders")
+                .update({ status })
+                .eq("id", id);
+
+            if (error) throw error;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["orders"] });
+        },
+    });
+};
