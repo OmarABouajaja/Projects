@@ -113,59 +113,7 @@ export default defineConfig({
     // Optimize chunk splitting - more aggressive for better caching
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Split vendors more aggressively for better caching
-          if (id.includes('node_modules')) {
-            // Core React - rarely changes, cache long-term
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-core';
-            }
-            // Router - separate chunk
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            // Radix UI components - split by usage pattern
-            if (id.includes('@radix-ui')) {
-              // Split frequently used components
-              if (id.includes('tooltip') || id.includes('dialog') || id.includes('popover')) {
-                return 'ui-core';
-              }
-              return 'ui-vendor';
-            }
-            // Icons - large library, separate chunk
-            if (id.includes('lucide-react')) {
-              return 'icons';
-            }
-            // Utils - small, cache together
-            if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
-              return 'utils';
-            }
-            // Large unused libraries - separate to avoid loading
-            if (id.includes('@tanstack/react-query') || id.includes('recharts') || id.includes('date-fns') ||
-              id.includes('react-hook-form') || id.includes('react-day-picker') || id.includes('embla-carousel') ||
-              id.includes('cmdk') || id.includes('vaul') || id.includes('input-otp') || id.includes('sonner') ||
-              id.includes('next-themes')) {
-              return 'unused-vendor'; // These won't be loaded if not used
-            }
-            // Other vendors
-            return 'vendor';
-          }
-        },
-        // Optimize chunk names for better caching
-        chunkFileNames: 'assets/[name]-[hash:8].js',
-        entryFileNames: 'assets/[name]-[hash:8].js',
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name?.split('.') || [];
-          const ext = info[info.length - 1];
-          // Use shorter hashes for better caching
-          if (/\.(png|jpe?g|svg|gif|webp|ico)$/.test(assetInfo.name || '')) {
-            return `assets/images/[name]-[hash:8].[ext]`;
-          }
-          if (/\.(woff2?|eot|ttf|otf)$/.test(assetInfo.name || '')) {
-            return `assets/fonts/[name]-[hash:8].[ext]`;
-          }
-          return `assets/[name]-[hash:8].[ext]`;
-        },
+        // Use standard Vite chunking for better reliability
       },
     },
     // Minification (using esbuild, faster than terser)
@@ -183,36 +131,11 @@ export default defineConfig({
     // Report compressed sizes
     reportCompressedSize: true,
   },
-  // Optimize dependencies - only pre-bundle what's needed
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'recharts', 'lodash'],
-    exclude: [
-      '@tanstack/react-query',
-      'date-fns',
-      'react-hook-form',
-      'react-day-picker',
-      'embla-carousel-react',
-      'cmdk',
-      'vaul',
-      'input-otp',
-      'sonner',
-      'next-themes'
-    ],
-    esbuildOptions: {
-      target: 'es2020',
-      // Tree shake more aggressively
-      treeShaking: true,
-    },
-  },
-  // Improve build performance and tree shaking
+  // Use default dependency optimization
   esbuild: {
     legalComments: 'none',
     treeShaking: true,
     // Drop console and debugger in production
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
-  },
-  // Define build timestamp for cache busting
-  define: {
-    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
 });
