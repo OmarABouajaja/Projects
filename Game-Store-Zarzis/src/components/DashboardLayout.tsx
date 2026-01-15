@@ -71,7 +71,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const isRTL = dir === 'rtl';
   const location = useLocation();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [renderKey, setRenderKey] = useState(0);
 
@@ -392,9 +392,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           <div className="flex items-center gap-4">
             {/* Optional: Add search or alerts here */}
-            <div className="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center">
+            <button
+              onClick={() => navigate("/dashboard/settings")}
+              className="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center hover:bg-secondary/40 transition-colors"
+              title={t("sidebar.store_settings")}
+            >
               <Settings className="w-4 h-4 opacity-70" />
-            </div>
+            </button>
           </div>
         </div>
 

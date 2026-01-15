@@ -292,8 +292,9 @@ const Navbar = () => {
       <nav
         className={`group/nav fixed left-2 sm:left-3 md:left-4 z-50 transition-all duration-300 ${isScrolled ? "top-2 sm:top-3" : "top-3 sm:top-5"
           }`}
+        onMouseEnter={() => window.innerWidth >= 1024 && setExpanded(true)}
+        onMouseLeave={() => window.innerWidth >= 1024 && setExpanded(false)}
         onClick={toggleExpanded}
-      // onFocus removed to prevent accidental expansion
       >
         <div
           className={`flex flex-col items-stretch gap-1 sm:gap-1.5 bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg sm:rounded-xl p-1.5 sm:p-2 shadow-[0_8px_24px_hsl(var(--primary)/0.15)] transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto ${isMobile
