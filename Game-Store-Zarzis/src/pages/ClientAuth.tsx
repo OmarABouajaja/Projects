@@ -5,12 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-// ... existing imports
-
-// ... inside component
-const [error, setError] = useState('');
-const [isLoading, setIsLoading] = useState(false);
-const [rememberMe, setRememberMe] = useState(true);
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
