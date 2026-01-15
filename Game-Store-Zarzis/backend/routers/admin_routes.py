@@ -118,13 +118,28 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
         
         try:
             # create_user is the admin method
-            user_response = supabase.auth.admin.create_user(attributes)
+            # Using keyword arguments is safer in newer SDK versions
+            user_response = supabase.auth.admin.create_user(
+                email=request_data.email,
+                password=request_data.password,
+                email_confirm=True,
+                user_metadata={"full_name": request_data.full_name}
+            )
             user_id = user_response.user.id
         except Exception as auth_error:
-            # Check if user already exists
-            if "already registered" in str(auth_error):
-                raise HTTPException(status_code=400, detail="User already exists")
-            raise auth_error
+            error_str = str(auth_error)
+            print(f"Auth Admin Error: {error_str}")
+            # Check for common errors
+            if "already registered" in error_str.lower() or "already exists" in error_str.lower():
+                raise HTTPException(status_code=400, detail="Ce membre du personnel est déjà enregistré.")
+            if "weak_password" in error_str.lower() or "password" in error_str.lower():
+                raise HTTPException(status_code=400, detail=f"Mot de passe invalide: {error_str}")
+            
+            # If it's already an HTTPException, re-raise it
+            if isinstance(auth_error, HTTPException):
+                raise auth_error
+                
+            raise HTTPException(status_code=400, detail=f"Erreur Supabase Auth: {error_str}")
 
         # 2. Assign Role
         try:
@@ -133,12 +148,13 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
                 "role": request_data.role
             }).execute()
         except Exception as role_error:
-            # Rollback (delete user) if role assignment fails? 
-            # ideally yes, but for now just logging
             print(f"Failed to assign role: {role_error}")
-            # Try to clean up user
-            supabase.auth.admin.delete_user(user_id)
-            raise HTTPException(status_code=500, detail="Failed to assign role")
+            # Clean up user if role assignment fails
+            try:
+                supabase.auth.admin.delete_user(user_id)
+            except:
+                pass
+            raise HTTPException(status_code=400, detail=f"Impossible d'assigner le rôle: {str(role_error)}")
 
         # 3. Create Profile
         try:
