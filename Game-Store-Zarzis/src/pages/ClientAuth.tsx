@@ -15,7 +15,7 @@ import { Client } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { isValidEmail, isValidPhone, isValidName } from '@/utils/validation';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
 
 const ClientAuth = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');

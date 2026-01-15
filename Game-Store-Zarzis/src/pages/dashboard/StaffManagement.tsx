@@ -160,9 +160,8 @@ const StaffManagement = () => {
         await fetchStaffMembers();
 
       } else {
-        // Create new staff member using BACKEND admin API
-        // This is more robust as it uses the service_role key on the server
         const tempPassword = generatePassword();
+        const API_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
         const { user_id, email_sent: apiEmailSent } = await createStaffMember({
           email: formData.email,
           password: tempPassword,

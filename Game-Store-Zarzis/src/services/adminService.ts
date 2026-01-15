@@ -3,7 +3,8 @@
  * Protected endpoints for admin operations
  */
 
-const API_BASE_URL = 'http://localhost:8000/api/admin';
+const API_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+const API_BASE_URL = `${API_URL}/api/admin`;
 const REQUEST_TIMEOUT = 30000; // 30 seconds
 
 export interface CreateStaffData {
