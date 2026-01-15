@@ -48,57 +48,74 @@ class CleanupRequest(BaseModel):
 @router.delete("/cleanup")
 @limiter.limit("5/hour")
 async def cleanup_data(request: Request, body: CleanupRequest):
-    request_data = body
     """
     Deletes data older than X days from specified tables to free up space.
     """
     try:
+        request_data = body
         cutoff_date = (datetime.datetime.now() - datetime.timedelta(days=request_data.days_to_keep)).isoformat()
         
         results = {}
-        
         # Hard warning: protecting critical tables not in list
-        allowed_tables = ["gaming_sessions", "sales", "expenses", "audit_logs"]
+        allowed_tables = ["gaming_sessions", "sales", "expenses", "audit_logs", "staff_sessions", "points_transactions"]
         
         for table in request_data.tables:
             if table not in allowed_tables:
+                results[table] = "Skipped: table not in allowed list"
                 continue
                 
-            # Perform deletion
-            # Note: Cascade delete should handle related rows (e.g. session_pricing) if configured in DB
-            # Otherwise we might need specific order.
-            
-            # Using Supabase/Postgrest filter
-            response = supabase.table(table).delete().lt("created_at", cutoff_date).execute()
-            # Count isn't always returned directly depending on headers, but we can assume success if no error
-            results[table] = "Cleanup executed"
+            try:
+                # Perform deletion
+                response = supabase.table(table).delete().lt("created_at", cutoff_date).execute()
+                
+                # Check for errors in response (Postgrest response format)
+                if hasattr(response, 'error') and response.error:
+                     results[table] = f"Error: {response.error}"
+                else:
+                     results[table] = f"Cleanup executed successfully (Cutoff: {cutoff_date})"
+            except Exception as table_err:
+                results[table] = f"Execution failed: {str(table_err)}"
 
-        return {"status": "success", "str(cutoff_date)": cutoff_date, "details": results}
+        return {
+            "status": "completed", 
+            "cutoff_date": cutoff_date, 
+            "details": results
+        }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Cleanup general error: {e}")
+        raise HTTPException(status_code=500, detail=f"Cleanup process failed: {str(e)}")
 
 @router.get("/export")
-@limiter.limit("5/hour")
+@limiter.limit("2/hour") # Lower limit for heavy operation
 async def export_data(request: Request):
     """
     Exports core data as JSON for backup.
-    LIMITATION: This is a simple implementation. For large datasets, 
-    streaming response or pagination is required.
     """
     try:
         backup = {}
-        tables = ["gaming_sessions", "sales", "expenses", "clients", "products", "services"]
+        # Aligning with actual table names and preventing huge dumps
+        tables = ["gaming_sessions", "sales", "expenses", "clients", "products", "services_catalog"]
         
         for table in tables:
-            # Fetch last 1000 records for now to prevent timeouts in this simple version
-            # Real backup needs full dump
-            response = supabase.table(table).select("*").order("created_at", desc=True).limit(1000).execute()
-            backup[table] = response.data
+            try:
+                # Fetch last 2000 records (increased from 1000)
+                response = supabase.table(table).select("*").order("created_at", desc=True).limit(2000).execute()
+                
+                if hasattr(response, 'error') and response.error:
+                    backup[table] = {"error": str(response.error)}
+                else:
+                    backup[table] = response.data
+            except Exception as table_err:
+                backup[table] = {"error": f"Table fetch failed: {str(table_err)}"}
             
-        return backup
+        return {
+            "timestamp": datetime.datetime.now().isoformat(),
+            "data": backup
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Export general error: {e}")
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
 

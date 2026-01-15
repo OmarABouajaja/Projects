@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '@/contexts/DataContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -6,10 +6,10 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, User, Phone, ArrowLeft, Key, CheckCircle, Smartphone, Mail, Gamepad2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Smartphone, Mail, Gamepad2, Star, Gift, History, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Client } from '@/types';
 import { toast } from '@/hooks/use-toast';
@@ -21,18 +21,15 @@ const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 const ClientAuth = () => {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [step, setStep] = useState<'phone' | 'verify'>('phone');
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
-  // Get settings from context
   const { clients, addClient, settings } = useData();
   const navigate = useNavigate();
 
-  // Check if SMS is enabled (default to true if not set)
   const smsEnabled = settings?.auth_config?.enable_sms_verification ?? true;
 
-  // Data State
   const [phone, setPhone] = useState('');
-  const [loginEmail, setLoginEmail] = useState(''); // New state for email login
+  const [loginEmail, setLoginEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [registerData, setRegisterData] = useState({
     name: '',
@@ -42,11 +39,9 @@ const ClientAuth = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Determine identifier based on mode
-  const getIdentifier = () => smsEnabled ? phone : loginEmail; // For login
-  const getRegisterIdentifier = () => smsEnabled ? phone : registerData.email; // For register (email is already in registerData)
+  const getIdentifier = () => smsEnabled ? phone : loginEmail;
+  const getRegisterIdentifier = () => smsEnabled ? phone : registerData.email;
 
-  // Helper to send OTP
   const sendOtp = async (identifier: string, type: 'sms' | 'email') => {
     const res = await fetch(`${API_URL}/verify/send`, {
       method: 'POST',
@@ -60,7 +55,6 @@ const ClientAuth = () => {
     return res.json();
   };
 
-  // Helper to verify OTP
   const verifyOtp = async (identifier: string, code: string) => {
     const res = await fetch(`${API_URL}/verify/check`, {
       method: 'POST',
@@ -72,7 +66,6 @@ const ClientAuth = () => {
     return data;
   };
 
-  // ----- Login Logic -----
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -85,7 +78,6 @@ const ClientAuth = () => {
       if (step === 'phone') {
         if (!identifier) throw new Error(`Please enter your ${smsEnabled ? 'phone number' : 'email'}`);
 
-        // STRICT VALIDATION
         if (smsEnabled) {
           if (!isValidPhone(identifier)) {
             throw new Error('Please enter a valid Tunisian phone number (8 digits, e.g., 22 333 444)');
@@ -96,11 +88,9 @@ const ClientAuth = () => {
           }
         }
 
-        // Check if client exists
         let client = clients.find(c => smsEnabled ? c.phone === identifier : c.email === identifier);
 
         if (!client) {
-          // Try direct lookup for clients outside the first 100 fetched
           const { data, error } = await supabase
             .from('clients')
             .select('*')
@@ -116,15 +106,12 @@ const ClientAuth = () => {
           throw new Error('Account not found. Please register.');
         }
 
-        // Send OTP
         await sendOtp(identifier, type);
         setStep('verify');
         toast({ title: "Code Sent", description: `Check your ${smsEnabled ? 'messages' : 'email'}` });
       } else {
-        // Verify OTP
         await verifyOtp(identifier, otpCode);
 
-        // Login
         let client = clients.find(c => smsEnabled ? c.phone === identifier : c.email === identifier);
 
         if (!client) {
@@ -148,7 +135,6 @@ const ClientAuth = () => {
     }
   };
 
-  // ----- Register Logic -----
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -159,7 +145,6 @@ const ClientAuth = () => {
 
     try {
       if (step === 'phone') {
-        // Basic Validation
         if (!registerData.name || !identifier) {
           throw new Error('Please fill in required fields');
         }
@@ -172,7 +157,6 @@ const ClientAuth = () => {
           if (!isValidPhone(identifier)) {
             throw new Error('Invalid phone number format');
           }
-          // Check email if provided
           if (registerData.email && !isValidEmail(registerData.email)) {
             throw new Error('Invalid email format');
           }
@@ -180,13 +164,11 @@ const ClientAuth = () => {
           if (!isValidEmail(identifier)) {
             throw new Error('Invalid email format');
           }
-          // Check phone if provided (and it is provided often)
           if (phone && !isValidPhone(phone)) {
             throw new Error('Invalid phone number format');
           }
         }
 
-        // Check existing via direct lookup 
         const { data: existingClient } = await supabase
           .from('clients')
           .select('email,phone')
@@ -202,15 +184,12 @@ const ClientAuth = () => {
           }
         }
 
-        // Send OTP
         await sendOtp(identifier, type);
         setStep('verify');
         toast({ title: "Code Sent", description: `Check your ${smsEnabled ? 'messages' : 'email'}` });
       } else {
-        // Verify OTP
         await verifyOtp(identifier, otpCode);
 
-        // Create Account
         const newClient: Omit<Client, 'id' | 'created_at' | 'updated_at'> = {
           name: registerData.name,
           email: registerData.email,
@@ -226,7 +205,6 @@ const ClientAuth = () => {
 
         addClient(newClient as any);
 
-        // Auto Login
         toast({ title: "Account Created", description: "Welcome to Game Store Zarzis!" });
         setActiveTab('login');
         setStep('phone');
@@ -248,222 +226,281 @@ const ClientAuth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/10 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-bl from-primary/5 to-transparent rounded-full blur-3xl" />
-        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-accent/5 to-transparent rounded-full blur-3xl" />
+    <div className="min-h-screen grid lg:grid-cols-2 bg-background relative overflow-hidden">
+      {/* Visual Side (Marketing/Branding) */}
+      <div className="hidden lg:flex flex-col items-center justify-center p-12 bg-gradient-to-br from-primary/20 via-background to-accent/20 relative border-r border-white/5 overflow-hidden">
+        {/* Animated background shapes */}
+        <div className="absolute top-1/4 -right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-1/4 -left-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+
+        <div className="max-w-md w-full relative z-10 space-y-8">
+          <div className="space-y-4 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase">
+              <Star className="w-3 h-3 fill-primary" />
+              Game Store Zarzis
+            </div>
+            <h1 className="text-5xl xl:text-6xl font-display font-bold leading-tight">
+              {t("client.join_loyalty")}
+            </h1>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              {t("client.loyalty_desc")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <div className="flex items-center gap-4 p-4 rounded-2xl glass-card border-white/5 hover:border-primary/20 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Gift className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold">{t("client.benefit_points")}</h3>
+                <p className="text-sm text-muted-foreground">Buy 5 games, get 1 free</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-2xl glass-card border-white/5 hover:border-accent/20 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                <History className="w-6 h-6 text-accent" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold">{t("client.benefit_history")}</h3>
+                <p className="text-sm text-muted-foreground">Track your sessions and spending</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 p-4 rounded-2xl glass-card border-white/5 hover:border-yellow-500/20 transition-all duration-300 group">
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center group-hover:bg-yellow-500/20 transition-colors">
+                <Smartphone className="w-6 h-6 text-yellow-500" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold">{t("client.benefit_booking")}</h3>
+                <p className="text-sm text-muted-foreground">Reserve your console via WhatsApp</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-white/5">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Check className="w-4 h-4 text-primary" />
+              <span>Join over 500+ active gamers</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <Card className="w-full max-w-md relative backdrop-blur-xl bg-card/80 border-border/50 shadow-2xl">
-        <CardHeader className="text-center pb-4">
-          {/* Logo */}
-          <Link to="/" className="mx-auto mb-4 block">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
-              <img
-                src="/gamestorelogocmp.png"
-                alt="Game Store Zarzis"
-                className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <Gamepad2 className="w-8 h-8 text-primary hidden" />
+      {/* Auth Form Side */}
+      <div className="flex flex-col items-center justify-center p-6 sm:p-12 lg:p-24 relative">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Mobile Header / Logo */}
+          <div className="flex flex-col items-center gap-4 text-center">
+            <Link to="/" className="lg:hidden">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20">
+                <img src="/gamestorelogocmp.png" alt="Logo" className="w-10 h-10 object-contain" />
+              </div>
+            </Link>
+
+            <div className="space-y-2">
+              <h2 className="text-3xl font-display font-bold tracking-tight">
+                {t("client.portal")}
+              </h2>
+              <p className="text-muted-foreground">
+                {activeTab === 'login' ? t("common.welcome_back") : t("client.create_account")}
+              </p>
             </div>
-          </Link>
-          <CardTitle className="text-2xl font-bold font-display bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            {t("client.portal")}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            {activeTab === 'login'
-              ? (smsEnabled ? t("client.sms_login") : t("client.email_login"))
-              : t("client.create_account")
-            }
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={activeTab} onValueChange={(v) => resetFlow(v as any)}>
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
+          </div>
 
-            <TabsContent value="login" className="space-y-4">
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
-                {step === 'phone' ? (
-                  <div className="space-y-2">
-                    <Label>{smsEnabled ? 'Phone Number' : 'Email Address'}</Label>
-                    <div className="relative">
-                      {smsEnabled ? (
-                        <>
-                          <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            type="tel"
-                            placeholder="+216..."
-                            className="pl-9"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            type="email"
-                            placeholder="you@example.com"
-                            className="pl-9"
-                            value={loginEmail}
-                            onChange={(e) => setLoginEmail(e.target.value)}
-                            required
-                          />
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2 text-center">
-                    <Label>Enter Verification Code</Label>
-                    <Input
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="123456"
-                      className="text-center text-xl tracking-widest font-mono"
-                      required
-                    />
-                    <Button type="button" variant="link" size="sm" onClick={() => setStep('phone')}>
-                      Change {smsEnabled ? 'Phone Number' : 'Email'}
-                    </Button>
-                  </div>
-                )}
+          <Card className="glass-card p-1 border-white/10 shadow-2xl">
+            <CardContent className="p-4 sm:p-6">
+              <Tabs value={activeTab} onValueChange={(v) => resetFlow(v as any)} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-8 p-1 bg-black/20 rounded-xl">
+                  <TabsTrigger value="login" className="rounded-lg py-2 data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+                    Login
+                  </TabsTrigger>
+                  <TabsTrigger value="register" className="rounded-lg py-2 data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+                    Register
+                  </TabsTrigger>
+                </TabsList>
 
-                {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (step === 'phone' ? 'Send Code' : 'Verify & Login')}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="register" className="space-y-4">
-              <form onSubmit={handleRegisterSubmit} className="space-y-4">
-                {step === 'phone' && (
-                  <>
-                    <div className="space-y-2">
-                      <Label>Full Name</Label>
-                      <Input
-                        value={registerData.name}
-                        onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-                        required
-                      />
-                    </div>
-
-                    {/* If SMS is disabled, Email comes first and is required */}
-                    {!smsEnabled ? (
-                      <>
-                        <div className="space-y-2">
-                          <Label>Email (Required for Verification)</Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              type="email"
-                              value={registerData.email}
-                              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                              placeholder="you@example.com"
-                              className="pl-9"
-                              required
-                            />
-                          </div>
+                {/* Login Form */}
+                <TabsContent value="login" className="space-y-6">
+                  <form onSubmit={handleLoginSubmit} className="space-y-5">
+                    {step === 'phone' ? (
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-white/70">{smsEnabled ? t("client.phone_number") : t("client.email_address")}</Label>
+                        <div className="relative">
+                          {smsEnabled ? (
+                            <>
+                              <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                type="tel"
+                                placeholder="29 290 065"
+                                className="pl-10 h-12 glass-card border-white/10 focus-visible:ring-primary/50"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                required
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                type="email"
+                                placeholder="gamer@email.com"
+                                className="pl-10 h-12 glass-card border-white/10 focus-visible:ring-primary/50"
+                                value={loginEmail}
+                                onChange={(e) => setLoginEmail(e.target.value)}
+                                required
+                              />
+                            </>
+                          )}
                         </div>
-
-                        <div className="space-y-2">
-                          <Label>Phone Number (Contact info)</Label>
-                          <div className="relative">
-                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              type="tel"
-                              placeholder="+216..."
-                              className="pl-9"
-                              value={phone}
-                              onChange={(e) => setPhone(e.target.value)}
-                              required={true} // DB still requires it for now
-                            />
-                          </div>
-                          <p className="text-[10px] text-muted-foreground">Verification code will be sent to your email.</p>
-                        </div>
-                      </>
+                      </div>
                     ) : (
-                      <>
-                        <div className="space-y-2">
-                          <Label>Phone Number (Required for SMS)</Label>
-                          <div className="relative">
-                            <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              type="tel"
-                              placeholder="+216..."
-                              className="pl-9"
-                              value={phone}
-                              onChange={(e) => setPhone(e.target.value)}
-                              required={true}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Email (Optional)</Label>
-                          <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              type="email"
-                              value={registerData.email}
-                              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                              placeholder="you@example.com"
-                              className="pl-9"
-                            />
-                          </div>
-                        </div>
-                      </>
+                      <div className="space-y-4 text-center">
+                        <Label className="text-xl font-display font-bold">{t("client.verification_code")}</Label>
+                        <p className="text-xs text-muted-foreground">Sent to {getIdentifier()}</p>
+                        <Input
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          className="text-center text-3xl tracking-[0.5em] font-mono h-16 glass-card border-primary/30 focus-visible:ring-primary/50"
+                          required
+                        />
+                        <Button type="button" variant="link" size="sm" onClick={() => setStep('phone')} className="text-primary hover:text-primary/80">
+                          {t("client.change_method", { method: smsEnabled ? t("client.phone_number") : t("client.email_address") })}
+                        </Button>
+                      </div>
                     )}
-                  </>
-                )}
 
-                {step === 'verify' && (
-                  <div className="space-y-2 text-center">
-                    <Label>Enter Verification Code</Label>
-                    <p className="text-xs text-muted-foreground mb-2">Sent to {smsEnabled ? phone : registerData.email}</p>
-                    <Input
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="123456"
-                      className="text-center text-xl tracking-widest font-mono"
-                      required
-                    />
-                    <Button type="button" variant="link" size="sm" onClick={() => setStep('phone')}>
-                      Back
+                    {error && (
+                      <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                        <AlertDescription className="text-xs">{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <Button type="submit" className="w-full h-12 text-lg font-bold neon-cyan-glow transition-all active:scale-95" disabled={isLoading}>
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (step === 'phone' ? t("client.send_code") : t("client.verify_login"))}
                     </Button>
-                  </div>
-                )}
+                  </form>
+                </TabsContent>
 
-                {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+                {/* Register Form */}
+                <TabsContent value="register" className="space-y-6">
+                  <form onSubmit={handleRegisterSubmit} className="space-y-5">
+                    {step === 'phone' ? (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-white/70">{t("client.full_name")}</Label>
+                          <Input
+                            value={registerData.name}
+                            onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
+                            placeholder="Ahmed Mansour"
+                            className="h-11 glass-card border-white/10 focus-visible:ring-primary/50"
+                            required
+                          />
+                        </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (step === 'phone' ? 'Send Verification Code' : 'Verify & Register')}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+                        {!smsEnabled ? (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-white/70">{t("client.email_address")}</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                  type="email"
+                                  value={registerData.email}
+                                  onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                                  placeholder="gamer@email.com"
+                                  className="pl-10 h-11 glass-card border-white/10 focus-visible:ring-primary/50"
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-white/70">{t("client.phone_number")}</Label>
+                              <div className="relative">
+                                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                  type="tel"
+                                  placeholder="23 290 065"
+                                  className="pl-10 h-11 glass-card border-white/10 focus-visible:ring-primary/50 font-mono"
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
+                                  required
+                                />
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-white/70">{t("client.phone_number")}</Label>
+                              <div className="relative">
+                                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                  type="tel"
+                                  placeholder="23 290 065"
+                                  className="pl-10 h-11 glass-card border-white/10 focus-visible:ring-primary/50 font-mono"
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium text-white/70">{t("client.email_address")} ({t("common.optional") || 'Optional'})</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                  type="email"
+                                  value={registerData.email}
+                                  onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                                  placeholder="gamer@email.com"
+                                  className="pl-10 h-11 glass-card border-white/10 focus-visible:ring-primary/50"
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-4 text-center">
+                        <Label className="text-xl font-display font-bold">{t("client.verification_code")}</Label>
+                        <p className="text-xs text-muted-foreground">Sent to {getRegisterIdentifier()}</p>
+                        <Input
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          className="text-center text-3xl tracking-[0.5em] font-mono h-16 glass-card border-primary/30 focus-visible:ring-primary/50"
+                          required
+                        />
+                        <Button type="button" variant="link" size="sm" onClick={() => setStep('phone')} className="text-primary hover:text-primary/80">
+                          {t("common.back") || "Back"}
+                        </Button>
+                      </div>
+                    )}
 
-          <div className="mt-6 text-center">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
+                    {error && (
+                      <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
+                        <AlertDescription className="text-xs">{error}</AlertDescription>
+                      </Alert>
+                    )}
+
+                    <Button type="submit" className="w-full h-12 text-lg font-bold neon-magenta-glow transition-all active:scale-95" disabled={isLoading}>
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (step === 'phone' ? t("client.send_code") : t("client.verify_register"))}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          <div className="text-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+              <ArrowLeft className="w-4 h-4" />
+              {t("client.back_to_shop")}
             </Link>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

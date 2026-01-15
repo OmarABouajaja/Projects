@@ -1,17 +1,39 @@
-import { useMemo, memo } from "react";
+import { useMemo, memo, useState, useEffect } from "react";
 import { Gamepad2, Wrench, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 
 const Hero = () => {
   const { t } = useLanguage();
 
+  const [consoleCount, setConsoleCount] = useState<string>("10");
+
+  useEffect(() => {
+    const fetchConsoleCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from('consoles')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_active', true);
+
+        if (count !== null && !error) {
+          setConsoleCount(count.toString().padStart(2, '0'));
+        }
+      } catch (e) {
+        console.error("Failed to fetch console count", e);
+      }
+    };
+
+    fetchConsoleCount();
+  }, []);
+
   // Memoize stats array to prevent recreation on each render
   const stats = useMemo(() => [
-    { value: t("hero.stat1.value"), label: t("hero.stat1.label"), color: "primary" },
+    { value: consoleCount, label: t("hero.stat1.label"), color: "primary" },
     { value: t("hero.stat2.value"), label: t("hero.stat2.label"), color: "foreground" },
     { value: t("hero.stat3.value"), label: t("hero.stat3.label"), color: "accent" },
-  ], [t]);
+  ], [t, consoleCount]);
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12" itemScope itemType="https://schema.org/WebPage">

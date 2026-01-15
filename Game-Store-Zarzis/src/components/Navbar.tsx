@@ -155,16 +155,8 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleMouseEnter = useCallback(() => {
-    if (window.innerWidth >= 1024) {
-      setExpanded(true);
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    if (window.innerWidth >= 1024) {
-      setExpanded(false);
-    }
+  const toggleExpanded = useCallback(() => {
+    setExpanded(prev => !prev);
   }, []);
 
   const handleFocus = useCallback(() => {
@@ -300,9 +292,8 @@ const Navbar = () => {
       <nav
         className={`group/nav fixed left-2 sm:left-3 md:left-4 z-50 transition-all duration-300 ${isScrolled ? "top-2 sm:top-3" : "top-3 sm:top-5"
           }`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
+        onClick={toggleExpanded}
+      // onFocus removed to prevent accidental expansion
       >
         <div
           className={`flex flex-col items-stretch gap-1 sm:gap-1.5 bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg sm:rounded-xl p-1.5 sm:p-2 shadow-[0_8px_24px_hsl(var(--primary)/0.15)] transition-all duration-300 max-h-[calc(100vh-2rem)] overflow-y-auto ${isMobile
@@ -320,7 +311,8 @@ const Navbar = () => {
         >
           <a
             href="#home"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (isMobile) setExpanded(false);
             }}
             className={`flex items-center gap-1.5 sm:gap-2 group rounded-lg sm:rounded-xl px-1.5 sm:px-2 py-1.5 sm:py-2 bg-card/60 border border-border/40 hover:border-primary/50 transition-all touch-manipulation min-h-[44px] sm:min-h-[48px] active:scale-[0.98] ${expanded ? "justify-start" : "justify-center"
@@ -354,7 +346,8 @@ const Navbar = () => {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     // Close mobile menu when link is clicked
                     if (isMobile) {
                       setExpanded(false);

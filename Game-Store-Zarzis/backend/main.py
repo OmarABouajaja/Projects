@@ -14,6 +14,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Environment Settings
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
 # Import routers
 from routers.email import router as email_router
 from routers.verification_routes import router as verification_router
@@ -26,8 +29,10 @@ from routers.admin_routes import router as admin_router, diag_router as diag_rou
 
 app = FastAPI(
     title="Game Store Zarzis API",
-    description="Secure Backend API for Game Store Zarzis management system",
-    version="2.0.0"
+    description="Backend for Game Store Zarzis Management System",
+    version="2.1.0",
+    docs_url="/docs" if DEBUG else None,
+    redoc_url="/redoc" if DEBUG else None,
 )
 
 # Add rate limiter
@@ -78,7 +83,8 @@ app.add_middleware(
 app.include_router(email_router)
 app.include_router(verification_router)
 app.include_router(expenses_router)
-app.include_router(diag_router)
+if DEBUG:
+    app.include_router(diag_router)
 app.include_router(admin_router)
 
 
@@ -88,8 +94,8 @@ async def root():
     return {
         "message": "Welcome to Game Store Zarzis API",
         "status": "online",
-        "version": "2.0.0",
-        "docs": "/docs"
+        "version": "2.1.0",
+        "docs": "/docs" if DEBUG else "Disabled"
     }
 
 
