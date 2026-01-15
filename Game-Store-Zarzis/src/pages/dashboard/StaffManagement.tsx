@@ -161,7 +161,8 @@ const StaffManagement = () => {
 
       } else {
         const tempPassword = generatePassword();
-        const API_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+        const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+        const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
         const { user_id, email_sent: apiEmailSent } = await createStaffMember({
           email: formData.email,
           password: tempPassword,
