@@ -33,6 +33,7 @@ const ClientsManagement = () => {
   const [notes, setNotes] = useState("");
   const [pointsToRedeem, setPointsToRedeem] = useState("");
   const [redeemDescription, setRedeemDescription] = useState("");
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'earned' | 'spent'>('all');
 
   // Points transactions for selected client
   const { data: transactions } = usePointsTransactions(selectedClient?.id);
@@ -109,103 +110,130 @@ const ClientsManagement = () => {
     <ProtectedRoute>
       <DashboardLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-3xl font-bold mb-2">Clients</h1>
+                <h1 className="font-display text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+                  {t("sidebar.client_management")}
+                </h1>
                 <HelpTooltip content={t('help.clients')} />
               </div>
-              <p className="text-muted-foreground">
-                Manage customer accounts and loyalty points
+              <p className="text-muted-foreground mt-1 text-lg">
+                {t("client.manage_desc")}
               </p>
             </div>
-            <Button variant="hero" onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="w-4 h-4" />
-              Add Client
+            <Button variant="hero" onClick={() => setIsCreateDialogOpen(true)} className="w-full sm:w-auto neon-cyan-glow group">
+              <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" />
+              {t("client.add")}
             </Button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="glass-card rounded-xl p-4 text-center">
-              <p className="text-3xl font-display font-bold text-primary">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-primary/20">
+              <div className="flex justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+              </div>
+              <p className="text-4xl font-display font-bold text-primary mb-1">
                 {clients?.length || 0}
               </p>
-              <p className="text-sm text-muted-foreground">Total Clients</p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total")}</p>
             </div>
-            <div className="glass-card rounded-xl p-4 text-center">
-              <p className="text-3xl font-display font-bold text-secondary">
-                {clients?.reduce((sum, c) => sum + c.points, 0) || 0}
+            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-secondary/20">
+              <div className="flex justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                  <Star className="w-6 h-6 text-secondary" />
+                </div>
+              </div>
+              <p className="text-4xl font-display font-bold text-secondary mb-1">
+                {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
               </p>
-              <p className="text-sm text-muted-foreground">Total Points</p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
             </div>
-            <div className="glass-card rounded-xl p-4 text-center">
-              <p className="text-3xl font-display font-bold text-accent">
-                {clients?.reduce((sum, c) => sum + c.total_games_played, 0) || 0}
+            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-accent/20">
+              <div className="flex justify-center mb-3">
+                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Gamepad2 className="w-6 h-6 text-accent" />
+                </div>
+              </div>
+              <p className="text-4xl font-display font-bold text-accent mb-1">
+                {clients?.reduce((sum, c) => sum + (c.total_games_played || 0), 0) || 0}
               </p>
-              <p className="text-sm text-muted-foreground">Total Games</p>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_games")}</p>
             </div>
           </div>
 
           {/* Search */}
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
-              placeholder="Search by name or phone..."
+              placeholder={t("client.search_placeholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-12 h-12 text-lg glass-card border-white/10"
             />
           </div>
 
           {/* Clients List */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredClients?.map((client) => (
-              <Card key={client.id} className="glass-card">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
+              <Card key={client.id} className="glass-card group hover:border-primary/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold">{client.name}</h3>
-                      <p className="text-sm text-muted-foreground">{client.phone}</p>
+                      <h3 className="font-display text-xl font-bold group-hover:text-primary transition-colors">{client.name}</h3>
+                      <p className="text-sm text-muted-foreground font-mono">{client.phone}</p>
                     </div>
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/20">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      <span className="font-display font-bold text-yellow-600">{client.points || 0}</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Gamepad2 className="w-4 h-4" />
-                      <span>{client.total_games_played || 0} games</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <DollarSign className="w-4 h-4" />
-                      <span>{Number(client.total_spent || 0).toFixed(3)} DT</span>
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <span className="font-display font-bold text-yellow-500 text-lg">{client.points || 0}</span>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Gamepad2 className="w-4 h-4" />
+                        <span>{client.total_games_played || 0} {t("client.games")}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <DollarSign className="w-4 h-4" />
+                        <span className="font-mono">{Number(client.total_spent || 0).toFixed(3)} DT</span>
+                      </div>
+                    </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary"
+                        style={{ width: `${Math.min((client.points / 50) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 glass-card hover:bg-white/5"
                       onClick={() => openHistoryDialog(client)}
                     >
-                      <History className="w-4 h-4 mr-1" />
-                      History
+                      <History className="w-4 h-4 mr-2" />
+                      {t("client.history")}
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="hero"
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 min-w-[100px]"
                       onClick={() => openRedeemDialog(client)}
                       disabled={(client.points || 0) <= 0}
                     >
-                      <Gift className="w-4 h-4 mr-1" />
-                      Redeem
+                      <Gift className="w-4 h-4 mr-2" />
+                      {t("client.redeem")}
                     </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Member since {new Date(client.created_at).toLocaleDateString()}
+                  <p className="text-xs text-muted-foreground/60 mt-4 italic">
+                    {t("client.member_since")} {new Date(client.created_at).toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>
@@ -213,61 +241,93 @@ const ClientsManagement = () => {
           </div>
 
           {(!filteredClients || filteredClients.length === 0) && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No clients found</p>
+            <div className="text-center py-20 glass-card rounded-3xl border-dashed border-2 border-white/10">
+              <Users className="w-16 h-16 mx-auto mb-4 opacity-20" />
+              <p className="text-xl text-muted-foreground font-medium">{t("common.no_clients") || "No clients found"}</p>
             </div>
           )}
         </div>
 
         {/* Create Client Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Name</Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Client name"
-                />
+          <DialogContent className="glass-card border-primary/30 max-w-md overflow-hidden p-0">
+            <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
+            <div className="p-6">
+              <DialogHeader className="mb-6">
+                <DialogTitle className="text-2xl font-display font-bold flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-primary" />
+                  </div>
+                  {t("client.add")}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white/70">{t("client.full_name")}</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Ahmed Mansour"
+                      className="glass-card pl-10 h-11 focus-visible:ring-primary/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white/70">{t("client.phone_number")} *</Label>
+                  <div className="relative">
+                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="23 290 065"
+                      className="glass-card pl-10 h-11 font-mono focus-visible:ring-primary/50"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white/70">{t("client.email_address")} ({t("common.optional") || "Optional"})</Label>
+                  <Input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="client@email.com"
+                    type="email"
+                    className="glass-card h-11 focus-visible:ring-primary/50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-white/70">Notes ({t("common.optional") || "Optional"})</Label>
+                  <Input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="e.g. Favorite game: FIFA"
+                    className="glass-card h-11 focus-visible:ring-primary/50"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <Button
+                    variant="hero"
+                    className="w-full h-12 text-lg font-bold neon-cyan-glow"
+                    onClick={handleCreateClient}
+                    disabled={createClient.isPending}
+                  >
+                    {createClient.isPending ? (
+                      <span className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        {t("common.processing") || "Processing..."}
+                      </span>
+                    ) : (
+                      t("client.add")
+                    )}
+                  </Button>
+                </div>
               </div>
-              <div>
-                <Label>Phone *</Label>
-                <Input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone number"
-                />
-              </div>
-              <div>
-                <Label>Email (Optional)</Label>
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="john@example.com"
-                  type="email"
-                />
-              </div>
-              <div>
-                <Label>Notes (Optional)</Label>
-                <Input
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="e.g. VIP, prefers PS5..."
-                />
-              </div>
-              <Button
-                variant="hero"
-                className="w-full"
-                onClick={handleCreateClient}
-                disabled={createClient.isPending}
-              >
-                Create Client
-              </Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -328,49 +388,101 @@ const ClientsManagement = () => {
             </DialogHeader>
             {selectedClient && (
               <div className="space-y-4">
-                <div className="glass-card rounded-lg p-4">
-                  <p className="text-sm text-muted-foreground">Client</p>
-                  <p className="font-semibold">{selectedClient.name}</p>
-                  <p className="text-sm text-muted-foreground">Current Balance: {selectedClient.points || 0} points</p>
+                <div className="glass-card rounded-lg p-4 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Client</p>
+                    <p className="font-semibold">{selectedClient.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Current Balance</p>
+                    <p className="font-bold text-xl text-primary">{selectedClient.points || 0} pts</p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  {transactions?.map((transaction) => (
-                    <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {transaction.transaction_type === 'earned' ? (
-                          <TrendingUp className="w-5 h-5 text-green-500" />
-                        ) : transaction.transaction_type === 'spent' ? (
-                          <TrendingDown className="w-5 h-5 text-red-500" />
-                        ) : (
-                          <Star className="w-5 h-5 text-blue-500" />
-                        )}
-                        <div>
-                          <p className="font-medium capitalize">{transaction.transaction_type}</p>
-                          <p className="text-sm text-muted-foreground">{transaction.description}</p>
+                {/* Points Switcher (Filter Tabs) */}
+                <div className="flex p-1 bg-muted/20 rounded-lg">
+                  <button
+                    onClick={() => setHistoryFilter('all')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${historyFilter === 'all'
+                      ? 'bg-primary/20 text-primary shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setHistoryFilter('earned')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${historyFilter === 'earned'
+                      ? 'bg-green-500/20 text-green-500 shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    Earned
+                  </button>
+                  <button
+                    onClick={() => setHistoryFilter('spent')}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${historyFilter === 'spent'
+                      ? 'bg-red-500/20 text-red-500 shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                  >
+                    Redeemed
+                  </button>
+                </div>
+
+                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                  {transactions
+                    ?.filter(t => {
+                      if (historyFilter === 'all') return true;
+                      if (historyFilter === 'earned') return t.amount > 0;
+                      if (historyFilter === 'spent') return t.amount < 0;
+                      return true;
+                    })
+                    .map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-white/5 transition-colors">
+                        <div className="flex items-center gap-3">
+                          {transaction.transaction_type === 'earned' ? (
+                            <TrendingUp className="w-5 h-5 text-green-500" />
+                          ) : transaction.transaction_type === 'spent' ? (
+                            <TrendingDown className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <Star className="w-5 h-5 text-blue-500" />
+                          )}
+                          <div>
+                            <p className="font-medium capitalize">{transaction.transaction_type}</p>
+                            <p className="text-sm text-muted-foreground">{transaction.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(transaction.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
+                            }`}>
+                            {transaction.amount > 0 ? '+' : ''}{transaction.amount}
+                          </p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(transaction.created_at).toLocaleString()}
+                            Balance: {transaction.balance_after}
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-bold ${transaction.amount > 0 ? 'text-green-500' : 'text-red-500'
-                          }`}>
-                          {transaction.amount > 0 ? '+' : ''}{transaction.amount}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Balance: {transaction.balance_after}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
 
-                  {(!transactions || transactions.length === 0) && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No transactions found</p>
-                    </div>
-                  )}
+
+
+                  {(!transactions || transactions.length === 0 ||
+                    transactions.filter(t => {
+                      if (historyFilter === 'all') return true;
+                      if (historyFilter === 'earned') return t.amount > 0;
+                      if (historyFilter === 'spent') return t.amount < 0;
+                      return true;
+                    }).length === 0
+                  ) && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No transactions found for &quot;{historyFilter}&quot;</p>
+                      </div>
+                    )}
                 </div>
               </div>
             )}
