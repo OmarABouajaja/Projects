@@ -120,7 +120,7 @@ interface DataContextType {
   addService: (service: Omit<ServiceCatalog, 'id' | 'created_at' | 'updated_at'>) => void;
   updateService: (id: string, service: Partial<ServiceCatalog>) => void;
   deleteService: (id: string) => void;
-  addClient: (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => void;
+  addClient: (client: Omit<Client, 'id' | 'created_at' | 'updated_at'>) => Promise<Client | undefined>;
   updateClient: (id: string, client: Partial<Client>) => void;
   addSession: (session: Omit<GameSession, 'id'>) => void;
   updateSession: (id: string, session: Partial<GameSession>) => void;
@@ -397,8 +397,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       const newClient = mapClientFromDB(data);
       setClients(prev => [newClient, ...prev]);
+      return newClient;
     } catch (error) {
       console.error('Error adding client:', error);
+      throw error;
     }
   };
 

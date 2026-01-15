@@ -1,4 +1,5 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, useState, lazy } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,16 +19,16 @@ import PSBackground from "@/components/PSBackground";
 import OfflineIndicator from "@/components/OfflineIndicator";
 
 // Lazy load pages for better performance
-const Index = lazy(() => import("./pages/Index"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const StaffAuth = lazy(() => import("./pages/StaffAuth"));
-const ClientAuth = lazy(() => import("./pages/ClientAuth"));
-const AuthCallback = lazy(() => import("./pages/AuthCallback"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const Checkout = lazy(() => import("./pages/Checkout"));
+const Index = lazyWithRetry(() => import("./pages/Index"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const StaffAuth = lazyWithRetry(() => import("./pages/StaffAuth"));
+const ClientAuth = lazyWithRetry(() => import("./pages/ClientAuth"));
+const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
+const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
+const Checkout = lazyWithRetry(() => import("./pages/Checkout"));
 
 // Import Simple Dashboard lazy
-const SimpleDashboard = lazy(() => import("./pages/dashboard/DashboardOverview"));
+const SimpleDashboard = lazyWithRetry(() => import("./pages/dashboard/DashboardOverview"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,23 +52,23 @@ const TestComponent = () => (
   </div>
 );
 
-const SessionsManagement = lazy(() => import("./pages/dashboard/SessionsManagement"));
-const ServicesManagement = lazy(() => import("./pages/dashboard/ServicesManagement"));
-const SalesManagement = lazy(() => import("./pages/dashboard/SalesManagement"));
-const ClientsManagement = lazy(() => import("./pages/dashboard/ClientsManagement"));
+const SessionsManagement = lazyWithRetry(() => import("./pages/dashboard/SessionsManagement"));
+const ServicesManagement = lazyWithRetry(() => import("./pages/dashboard/ServicesManagement"));
+const SalesManagement = lazyWithRetry(() => import("./pages/dashboard/SalesManagement"));
+const ClientsManagement = lazyWithRetry(() => import("./pages/dashboard/ClientsManagement"));
 
 // Owner-only pages
-const ProductsManagement = lazy(() => import("./pages/dashboard/ProductsManagement"));
-const TransactionsHistory = lazy(() => import("./pages/dashboard/TransactionsHistory"));
-const PricingManagement = lazy(() => import("./pages/dashboard/PricingManagement"));
-const ConsoleManagement = lazy(() => import("./pages/dashboard/ConsoleManagement"));
-const StaffManagement = lazy(() => import("./pages/dashboard/StaffManagement"));
-const BlogManagement = lazy(() => import("./pages/dashboard/BlogManagement"));
-const ExpensesManagement = lazy(() => import("./pages/dashboard/ExpensesManagement"));
-const OrdersManagement = lazy(() => import("./pages/dashboard/OrdersManagement"));
-const StoreSettings = lazy(() => import("./pages/dashboard/StoreSettings"));
-const GameSettings = lazy(() => import("./pages/dashboard/GameSettings"));
-const StaffAttendance = lazy(() => import("./pages/dashboard/StaffAttendance"));
+const ProductsManagement = lazyWithRetry(() => import("./pages/dashboard/ProductsManagement"));
+const TransactionsHistory = lazyWithRetry(() => import("./pages/dashboard/TransactionsHistory"));
+const PricingManagement = lazyWithRetry(() => import("./pages/dashboard/PricingManagement"));
+const ConsoleManagement = lazyWithRetry(() => import("./pages/dashboard/ConsoleManagement"));
+const StaffManagement = lazyWithRetry(() => import("./pages/dashboard/StaffManagement"));
+const BlogManagement = lazyWithRetry(() => import("./pages/dashboard/BlogManagement"));
+const ExpensesManagement = lazyWithRetry(() => import("./pages/dashboard/ExpensesManagement"));
+const OrdersManagement = lazyWithRetry(() => import("./pages/dashboard/OrdersManagement"));
+const StoreSettings = lazyWithRetry(() => import("./pages/dashboard/StoreSettings"));
+const GameSettings = lazyWithRetry(() => import("./pages/dashboard/GameSettings"));
+const StaffAttendance = lazyWithRetry(() => import("./pages/dashboard/StaffAttendance"));
 
 // React Router future flags to suppress warnings
 const routerFutureFlags = {
