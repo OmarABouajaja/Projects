@@ -8,21 +8,17 @@ import json
 from utils.security import require_admin
 from utils.limiter import limiter
 
-# Protect all routes in this router
-router = APIRouter(
-    prefix="/api/admin", 
-    tags=["admin"],
-    dependencies=[Depends(require_admin)]
-)
-
 # Initialize Supabase client
 url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_SERVICE_KEY")
 supabase: Client = create_client(url, key)
 
-@router.get("/status")
+# Move status to a public diagnostic router or define it before the protected one
+diag_router = APIRouter(prefix="/api/diag", tags=["Diagnostics"])
+
+@diag_router.get("/status")
 async def get_admin_status():
-    """Diagnostic endpoint to verify Supabase service role connectivity"""
+    """Diagnostic endpoint to verify Supabase service role connectivity (Public)"""
     try:
         # Try to read from a restricted table to verify service role permissions
         res = supabase.table("user_roles").select("count").limit(1).execute()
@@ -37,6 +33,13 @@ async def get_admin_status():
             "supabase_connectivity": "failed",
             "error": str(e)
         }
+
+# Protect remaining routes in this router
+router = APIRouter(
+    prefix="/api/admin", 
+    tags=["admin"],
+    dependencies=[Depends(require_admin)]
+)
 
 class CleanupRequest(BaseModel):
     days_to_keep: int

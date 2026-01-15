@@ -18,7 +18,7 @@ load_dotenv()
 from routers.email import router as email_router
 from routers.verification_routes import router as verification_router
 from routers.expenses_routes import router as expenses_router
-from routers.admin_routes import router as admin_router
+from routers.admin_routes import router as admin_router, diag_router as diag_router
 
 # Rate limiter - Already initialized in utils/limiter.py
 # If re-initialization is needed:
@@ -42,6 +42,7 @@ origins = [
     "http://localhost:5173",  # Vite default
     "https://www.gamestorezarzis.com.tn",  # Live site
     "https://gamestorezarzis.com.tn",
+    "https://bck.gamestorezarzis.com.tn",
 ]
 
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -62,7 +63,14 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Trusted Host Middleware - Prevent Host Header Attacks
 app.add_middleware(
     TrustedHostMiddleware, 
-    allowed_hosts=["localhost", "127.0.0.1", "gamestorezarzis.com.tn", "www.gamestorezarzis.com.tn"]
+    allowed_hosts=[
+        "localhost", 
+        "127.0.0.1", 
+        "gamestorezarzis.com.tn", 
+        "www.gamestorezarzis.com.tn", 
+        "bck.gamestorezarzis.com.tn",
+        "*.onrender.com"
+    ]
 )
 
 app.add_middleware(
@@ -77,6 +85,7 @@ app.add_middleware(
 app.include_router(email_router)
 app.include_router(verification_router)
 app.include_router(expenses_router)
+app.include_router(diag_router)
 app.include_router(admin_router)
 
 
