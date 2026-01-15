@@ -337,31 +337,33 @@ const ClientAuth = () => {
 
             <CardContent className="p-4 sm:p-6">
               {/* Refined Tab Switcher */}
-              <div className="relative flex p-1 bg-black/40 rounded-xl mb-8">
+              <div className="relative flex p-1 bg-black/40 rounded-xl mb-8 border border-white/5">
                 <div
                   className={cn(
                     "absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg shadow-sm transition-all duration-300 ease-out",
-                    activeTab === 'login' ? "left-1 bg-primary text-primary-foreground" : "left-[calc(50%)] bg-accent text-accent-foreground"
+                    activeTab === 'login' ? "left-1 bg-primary text-primary-foreground shadow-primary/20" : "left-[calc(50%)] bg-accent text-accent-foreground shadow-accent/20"
                   )}
                 />
                 <button
+                  type="button"
                   onClick={() => resetFlow('login')}
                   className={cn(
-                    "flex-1 relative z-10 py-2.5 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2",
-                    activeTab === 'login' ? "text-white" : "text-muted-foreground hover:text-white"
+                    "flex-1 relative z-10 py-2.5 text-sm font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2",
+                    activeTab === 'login' ? "text-white" : "text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg"
                   )}
                 >
-                  <LogIn className="w-4 h-4" />
+                  <LogIn className={cn("w-4 h-4 transition-transform duration-300", activeTab === 'login' && "scale-110")} />
                   Login
                 </button>
                 <button
+                  type="button"
                   onClick={() => resetFlow('register')}
                   className={cn(
-                    "flex-1 relative z-10 py-2.5 text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2",
-                    activeTab === 'register' ? "text-white" : "text-muted-foreground hover:text-white"
+                    "flex-1 relative z-10 py-2.5 text-sm font-bold tracking-wide transition-all duration-200 flex items-center justify-center gap-2",
+                    activeTab === 'register' ? "text-white" : "text-muted-foreground hover:text-white hover:bg-white/5 rounded-lg"
                   )}
                 >
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus className={cn("w-4 h-4 transition-transform duration-300", activeTab === 'register' && "scale-110")} />
                   Register
                 </button>
               </div>
