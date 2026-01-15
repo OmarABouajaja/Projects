@@ -15,6 +15,9 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
+# Initialize Supabase client
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_SERVICE_KEY")
 supabase: Client = create_client(url, key)
 
 @router.get("/status")
