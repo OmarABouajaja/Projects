@@ -15,10 +15,25 @@ router = APIRouter(
     dependencies=[Depends(require_admin)]
 )
 
-# Initialize Supabase client
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_SERVICE_KEY")
 supabase: Client = create_client(url, key)
+
+@router.get("/status")
+async def get_admin_status():
+    """Diagnostic endpoint to verify Supabase service role connectivity"""
+    try:
+        # Try to read from a restricted table to verify service role permissions
+        res = supabase.table("user_roles").select("count").limit(1).execute()
+        return {
+            "status": "online",
+            "supabase_connectivity": "ok",
+            "service_role_authorized": True
+        }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "supabase_connectivity": "failed",
+            "error": str(e)
+        }
 
 class CleanupRequest(BaseModel):
     days_to_keep: int
@@ -156,17 +171,20 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
                 pass
             raise HTTPException(status_code=400, detail=f"Impossible d'assigner le rôle: {str(role_error)}")
 
-        # 3. Create Profile
+        # 3. Create or Update Profile
+        # We use upsert because a database trigger might have already created a partial profile
         try:
-            supabase.table("profiles").insert({
+            supabase.table("profiles").upsert({
                 "id": user_id,
                 "full_name": request_data.full_name,
                 "phone": request_data.phone,
-                "is_active": True
+                "is_active": True,
+                "updated_at": datetime.datetime.now().isoformat()
             }).execute()
         except Exception as profile_error:
-            print(f"Failed to create profile: {profile_error}")
-            # Non-critical, but good to have
+            print(f"Profile upsert error: {profile_error}")
+            # Non-critical, but logged
+            pass
             
         # 4. Send Invitation Email
         # We import here to avoid circular dependencies if simple structure
