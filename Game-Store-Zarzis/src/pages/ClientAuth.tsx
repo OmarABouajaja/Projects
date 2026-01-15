@@ -4,7 +4,13 @@ import { useData } from '@/contexts/DataContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+// ... existing imports
+
+// ... inside component
+const [error, setError] = useState('');
+const [isLoading, setIsLoading] = useState(false);
+const [rememberMe, setRememberMe] = useState(true);
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -132,7 +138,8 @@ const ClientAuth = () => {
         }
 
         if (client) {
-          localStorage.setItem('client_user', JSON.stringify(client));
+          const storage = rememberMe ? localStorage : sessionStorage;
+          storage.setItem('client_user', JSON.stringify(client));
           toast({ title: "Welcome Back!", description: "Logged in successfully" });
           navigate('/');
         } else {
@@ -275,7 +282,11 @@ const ClientAuth = () => {
               </div>
               <div>
                 <h3 className="font-display font-bold">{t("client.benefit_points")}</h3>
-                <p className="text-sm text-muted-foreground">Buy 5 games, get 1 free</p>
+                <p className="text-sm text-muted-foreground">
+                  {settings?.loyalty_program?.games_required_for_free
+                    ? `Buy ${settings.loyalty_program.games_required_for_free} games, get 1 free`
+                    : "Buy 10 games, get 1 free"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4 p-4 rounded-2xl glass-card border-white/5 hover:border-accent/20 transition-all duration-300 group">
@@ -405,10 +416,18 @@ const ClientAuth = () => {
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 rounded border border-primary/50 bg-primary/20 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-primary" />
-                        </div>
-                        <span className="text-xs text-muted-foreground">Stay logged in</span>
+                        <Checkbox
+                          id="remember_me"
+                          checked={rememberMe}
+                          onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                          className="border-white/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        />
+                        <Label
+                          htmlFor="remember_me"
+                          className="text-xs text-muted-foreground cursor-pointer select-none"
+                        >
+                          {t("client.stay_logged_in") || "Stay logged in"}
+                        </Label>
                       </div>
                     </div>
                   ) : (
@@ -458,7 +477,7 @@ const ClientAuth = () => {
                         <Input
                           value={registerData.name}
                           onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-                          placeholder="Ahmed Mansour"
+                          placeholder="Ahmed Ben Ali"
                           className="h-11 glass-card border-white/10 focus-visible:ring-accent/50 transition-all"
                           required
                         />
@@ -474,7 +493,7 @@ const ClientAuth = () => {
                                 type="email"
                                 value={registerData.email}
                                 onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                placeholder="gamer@email.com"
+                                placeholder="ahmed.benali@gmail.com"
                                 className="pl-10 h-11 glass-card border-white/10 focus-visible:ring-accent/50 transition-all"
                                 required
                               />
@@ -570,7 +589,7 @@ const ClientAuth = () => {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
