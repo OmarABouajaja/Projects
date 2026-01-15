@@ -63,14 +63,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 # Trusted Host Middleware - Prevent Host Header Attacks
 app.add_middleware(
     TrustedHostMiddleware, 
-    allowed_hosts=[
-        "localhost", 
-        "127.0.0.1", 
-        "gamestorezarzis.com.tn", 
-        "www.gamestorezarzis.com.tn", 
-        "bck.gamestorezarzis.com.tn",
-        "*.onrender.com"
-    ]
+    allowed_hosts=["*"]
 )
 
 app.add_middleware(
