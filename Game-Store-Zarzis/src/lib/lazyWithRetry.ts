@@ -24,6 +24,16 @@ export const lazyWithRetry = <T extends ComponentType<any>>(
                 // we force a page refresh to get the new files.
                 console.log('Chunk load error detected, forcing refresh...');
                 window.sessionStorage.setItem('page-has-been-force-refreshed', 'true');
+
+                // Nuclear option: Unregister SW to ensure fresh index.html
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                        for (const registration of registrations) {
+                            registration.unregister();
+                        }
+                    });
+                }
+
                 window.location.reload();
 
                 // Return a never-resolving promise or a dummy component to prevent React form crashing

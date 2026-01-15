@@ -30,7 +30,19 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined });
   };
 
-  private handleReload = () => {
+  private handleReload = async () => {
+    // Aggressive cache clearing for stuck clients
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+      } catch (e) {
+        console.error('SW unregister failed:', e);
+      }
+    }
+    // Hard reload attempt (deprecated in some browsers but good intent)
     window.location.reload();
   };
 
