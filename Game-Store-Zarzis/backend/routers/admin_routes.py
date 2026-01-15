@@ -139,13 +139,8 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
         
         try:
             # create_user is the admin method
-            # Using keyword arguments is safer in newer SDK versions
-            user_response = supabase.auth.admin.create_user(
-                email=request_data.email,
-                password=request_data.password,
-                email_confirm=True,
-                user_metadata={"full_name": request_data.full_name}
-            )
+            # Reverting to dictionary attributes for better compatibility with this SDK version
+            user_response = supabase.auth.admin.create_user(attributes)
             user_id = user_response.user.id
         except Exception as auth_error:
             error_str = str(auth_error)
