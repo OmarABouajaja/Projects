@@ -15,7 +15,7 @@ const Hero = () => {
         const { count, error } = await supabase
           .from('consoles')
           .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
+          .select('*', { count: 'exact', head: true });
 
         if (count !== null && !error) {
           setConsoleCount(count.toString().padStart(2, '0'));

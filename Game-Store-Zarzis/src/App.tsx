@@ -25,6 +25,7 @@ const StaffAuth = lazyWithRetry(() => import("./pages/StaffAuth"));
 const ClientAuth = lazyWithRetry(() => import("./pages/ClientAuth"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const Checkout = lazyWithRetry(() => import("./pages/Checkout"));
 
 // Import Simple Dashboard lazy
@@ -133,6 +134,7 @@ const App = () => {
                             {/* Keep legacy for internal ease but hidden from UI */}
                             <Route path="/staff-login" element={<StaffAuth />} />
                             <Route path="/forgot-password" element={<ForgotPassword />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
 
                             {/* Staff Dashboard Routes */}
                             <Route
