@@ -32,7 +32,7 @@ interface StaffMember {
 }
 
 const StaffManagement = () => {
-  const { user, isOwner } = useAuth();
+  const { user, isOwner, session } = useAuth();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<StaffMember | null>(null);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
@@ -73,7 +73,7 @@ const StaffManagement = () => {
         // Get profile data
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("full_name, created_at, is_active, phone, email, last_sign_in_at")
+          .select("full_name, created_at, is_active, phone")
           .eq("id", role.user_id)
           .single();
 
@@ -160,136 +160,20 @@ const StaffManagement = () => {
         await fetchStaffMembers();
 
       } else {
-        // Create new staff member using client-side method
-        // Backend admin API requires service_role key, so we use direct signup
+        // Create new staff member using BACKEND admin API
+        // This is more robust as it uses the service_role key on the server
         const tempPassword = generatePassword();
-
-        // console.log("🔄 Creating staff member:", formData.email);
-
-        // Create user via Supabase Auth
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        const { user_id, email_sent: apiEmailSent } = await createStaffMember({
           email: formData.email,
           password: tempPassword,
-          options: {
-            data: {
-              full_name: formData.full_name || "Nouveau Staff",
-              phone: formData.phone
-            },
-            emailRedirectTo: `${window.location.origin}/auth/callback`
-          }
-        });
-
-        if (signUpError) {
-          console.error("❌ Signup error:", signUpError);
-          let userMessage = signUpError.message;
-
-          if (signUpError.message.includes("already registered")) {
-            userMessage = "Cet email est déjà utilisé par un autre membre du personnel.";
-          } else if (signUpError.message.includes("Database error")) {
-            userMessage = "Erreur de base de données. Vérifiez vos permissions RLS.";
-          }
-
-          throw new Error(userMessage);
-        }
-
-        if (!signUpData.user) {
-          throw new Error("La création du compte a échoué");
-        }
-
-        // console.log("✅ User created:", signUpData.user.id);
-
-        // IMPORTANT: Wait for the database trigger to create the default role
-        // console.log("⏳ Waiting for trigger to assign default role...");
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        // Let's verify if the role exists (trigger might be missing or slow)
-        const { data: existingRole, error: checkError } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", signUpData.user.id)
-          .maybeSingle();
-
-        if (checkError) {
-          console.warn("⚠️ Error checking role status:", checkError);
-        }
-
-        if (!existingRole) {
-          // console.log("🛠️ Trigger didn't run, creating role manually...");
-          const { error: insertError } = await supabase
-            .from("user_roles")
-            .insert({
-              user_id: signUpData.user.id,
-              role: formData.role
-            });
-
-          if (insertError) {
-            console.error("❌ Manual role insert failed:", insertError);
-            throw new Error(`Le compte a été créé mais impossible d'assigner le rôle: ${insertError.message}`);
-          }
-          // console.log("✅ Role created manually");
-        } else if (existingRole.role !== formData.role) {
-          // Update role if it's different from what the trigger created
-          // console.log("🔄 Updating role from", existingRole.role, "to", formData.role);
-          const { error: roleError } = await supabase
-            .from("user_roles")
-            .update({ role: formData.role })
-            .eq("user_id", signUpData.user.id);
-
-          if (roleError) {
-            console.error("❌ Role update error:", roleError);
-          } else {
-            // console.log("✅ Role updated successfully");
-          }
-        }
-
-        // Update profile with additional info
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .update({
-            full_name: formData.full_name || "Nouveau Staff",
-            phone: formData.phone
-          })
-          .eq("id", signUpData.user.id);
-
-        if (profileError) {
-          console.warn("⚠️ Profile update:", profileError);
-        }
-
-        // 🚀 Send invitation email via backend MailerSend API
-        let apiEmailSent = false;
-
-        if (!skipEmail) {
-          // console.log("📨 Triggering MailerSend API...");
-          try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            const emailResponse = await fetch(`${API_URL}/api/email/staff-invite`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: formData.email,
-                role: formData.role,
-                password: tempPassword
-              })
-            });
-
-            if (emailResponse.ok) {
-              // console.log("✅ MailerSend API invitation sent");
-              apiEmailSent = true;
-            } else {
-              const errorData = await emailResponse.json().catch(() => ({}));
-              console.warn("⚠️ MailerSend API failed:", errorData.detail || "Unknown error");
-            }
-          } catch (apiError) {
-            console.error("❌ Failed to call MailerSend API:", apiError);
-          }
-        } else {
-          // console.log("⏭️ Skipping email as requested");
-        }
+          role: formData.role,
+          full_name: formData.full_name || "Staff Member",
+          phone: formData.phone
+        }, session?.access_token || "");
 
         // Copy password to clipboard
         try {
           await navigator.clipboard.writeText(tempPassword);
-          // console.log("📋 Password copied to clipboard");
         } catch (err) {
           console.warn("Failed to copy to clipboard:", err);
         }
