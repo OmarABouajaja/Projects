@@ -264,6 +264,44 @@ const SessionsManagement = () => {
     setOverdueSessions(newOverdue);
   }, [activeSessions]);
 
+  // Live Points Calculation for End Dialog
+  const [estimatedPoints, setEstimatedPoints] = useState(0);
+
+  useEffect(() => {
+    if (!selectedSession || storeSettingsData?.points_system_enabled === false) {
+      setEstimatedPoints(0);
+      return;
+    }
+
+    const calculate = () => {
+      const pricingInfo = selectedSession.pricing;
+      if (!pricingInfo) return 0;
+
+      if (selectedSession.session_type === 'hourly') {
+        const startTime = new Date(selectedSession.start_time);
+        const now = new Date();
+        const diffMs = now.getTime() - startTime.getTime();
+        const hoursPlayed = Math.ceil(diffMs / (1000 * 60 * 60)); // Match handleEndSession logic
+        const totalAmount = hoursPlayed * Number(pricingInfo.price);
+        const pointsPerDT = storeSettingsData?.points_config?.points_per_dt || 1;
+        return Math.floor(totalAmount * pointsPerDT);
+      } else {
+        // Per game
+        const totalGames = gamesInSession;
+        let freeGames = 0;
+        if (storeSettingsData?.free_games_enabled !== false) {
+          if (totalGames >= freeGameThreshold + 1) {
+            freeGames = Math.floor(totalGames / (freeGameThreshold + 1));
+          }
+        }
+        const actualPaidGames = totalGames - freeGames;
+        return actualPaidGames * Number(pricingInfo.points_earned || 1);
+      }
+    };
+
+    setEstimatedPoints(calculate());
+  }, [selectedSession, gamesInSession, storeSettingsData]);
+
   const handleMuteSession = (sessionId: string) => {
     // Note: Global muting is handled by DashboardLayout
     toast({ title: "Mute feature moved", description: "Alarms are now global. Check layout for muting." });
@@ -1036,9 +1074,9 @@ const SessionsManagement = () => {
                       </div>
                     </div>
                   )}
-                  {selectedClientForSession && (
+                  {selectedClientForSession && storeSettingsData?.points_system_enabled !== false && (
                     <p className="text-xs text-green-500 font-medium">
-                      Points to be earned: {pointsEarned} pts
+                      Points to be earned: {estimatedPoints} pts
                     </p>
                   )}
                 </div>

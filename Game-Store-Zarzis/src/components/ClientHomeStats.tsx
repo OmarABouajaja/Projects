@@ -281,16 +281,20 @@ export const ClientHomeStats = () => {
                 {/* Action Tabs - Integrated Dashboard Content */}
                 <motion.div variants={itemVariants}>
                     <Tabs defaultValue="overview" className="space-y-4">
-                        <TabsList className="grid w-full grid-cols-3 bg-secondary/10 h-10 p-1 border border-white/10 rounded-2xl shadow-inner shadow-black/20">
+                        <TabsList className={`grid w-full ${pointsEnabled ? 'grid-cols-3' : 'grid-cols-1'} bg-secondary/10 h-10 p-1 border border-white/10 rounded-2xl shadow-inner shadow-black/20`}>
                             <TabsTrigger value="overview" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black text-[9px] uppercase tracking-[0.1em] transition-all duration-300">
                                 {t('client.dashboard.overview')}
                             </TabsTrigger>
-                            <TabsTrigger value="rewards" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black text-[9px] uppercase tracking-[0.1em] transition-all duration-300">
-                                {t('client.dashboard.shop')}
-                            </TabsTrigger>
-                            <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black text-[9px] uppercase tracking-[0.1em] transition-all duration-300">
-                                {t('client.dashboard.activity')}
-                            </TabsTrigger>
+                            {pointsEnabled && (
+                                <>
+                                    <TabsTrigger value="rewards" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black text-[9px] uppercase tracking-[0.1em] transition-all duration-300">
+                                        {t('client.dashboard.shop')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="history" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-black text-[9px] uppercase tracking-[0.1em] transition-all duration-300">
+                                        {t('client.dashboard.activity')}
+                                    </TabsTrigger>
+                                </>
+                            )}
                         </TabsList>
 
                         <TabsContent value="overview" className="space-y-4 animate-in fade-in zoom-in-95 duration-500">
