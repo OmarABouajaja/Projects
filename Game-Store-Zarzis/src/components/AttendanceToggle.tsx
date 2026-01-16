@@ -24,8 +24,9 @@ export const AttendanceToggle: React.FC = () => {
                 await clockIn();
                 toast.success(t("attendance.success_in"));
             }
-        } catch (error) {
-            toast.error("Attendance update failed");
+        } catch (error: any) {
+            console.error("Attendance Toggle Error:", error);
+            toast.error(error.message || "Attendance update failed. Please check your connection or database permissions.");
         } finally {
             setPending(false);
         }

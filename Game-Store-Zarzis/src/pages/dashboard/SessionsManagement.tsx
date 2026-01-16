@@ -81,146 +81,142 @@ const SessionsManagement = () => {
 
       const pressedKey = e.key.toUpperCase();
 
-      // 1. Check for Console Shortcuts (Instant Start)
+      // 0. Global Actions
+      if (pressedKey === 'K') {
+        e.preventDefault();
+        setIsManagerOpen(true);
+        return;
+      }
+      if (pressedKey === 'C') {
+        e.preventDefault();
+        setIsCafeMenuOpen(true);
+        return;
+      }
+
+      // 1. Console Shortcuts (Instant Start / Context Action)
       if (consoles && pricing) {
         const targetConsole = consoles.find(c => c.shortcut_key === pressedKey);
 
         if (targetConsole) {
-          e.preventDefault(); // Prevent default browser action
+          e.preventDefault();
 
-          if (targetConsole.status !== 'available') {
-            toast({
-              title: "Console Busy",
-              description: `${targetConsole.name} is currently ${targetConsole.status}.`,
-              variant: "destructive"
-            });
+          // Determine Action based on status
+          const isActive = targetConsole.status === 'in_use' || activeSessions?.some(s => s.console_id === targetConsole.id);
+          const session = activeSessions?.find(s => s.console_id === targetConsole.id);
+
+          if (targetConsole.status === 'maintenance') {
+            toast({ title: "Maintenance", description: `${targetConsole.name} is in maintenance mode.`, variant: "destructive" });
             return;
           }
 
-
-          // Auto-start logic
-
-          // Check Opening Hours (Warning Only)
-          if (storeSettingsData?.weekly_schedule) {
-            const now = new Date();
-            const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const dayName = days[now.getDay()];
-            const todaySchedule = storeSettingsData.weekly_schedule[dayName];
-
-            if (todaySchedule && !todaySchedule.isOpen) {
-              toast({
-                title: "Store Closed",
-                description: `Warning: The store is set to Closed on ${dayName}.`,
-                variant: "destructive" // Or warning if available, destructive stands out
-              });
-            } else if (todaySchedule && todaySchedule.isOpen) {
-              // Check time range
-              const currentMinutes = now.getHours() * 60 + now.getMinutes();
-              const [openH, openM] = todaySchedule.open.split(':').map(Number);
-              const [closeH, closeM] = todaySchedule.close.split(':').map(Number);
-              let startMinutes = openH * 60 + openM;
-              let endMinutes = closeH * 60 + closeM;
-
-              // Handle overnight (e.g. 02:00 end)
-              if (endMinutes < startMinutes) endMinutes += 24 * 60;
-              // Adjust current time if it's early morning and we're in "overnight" mode from previous day?
-              // Simplified: Just check if we are strictly outside the range if it's a standard day. 
-              // For overnight, it's tricky without full context. 
-              // Let's stick to "If it's closed day" as primary warning.
-              // Detailed time check is bonus.
-            }
+          if (isActive && session) {
+            // Already active? Open extension dialog
+            openExtendDialog(session);
+            return;
           }
 
+          // Auto-start logic (Available)
           // Find applicable pricing
-          // 1. Try console-specific defined default
           let applicablePricing = targetConsole.default_pricing_id
             ? pricing.find(p => p.id === targetConsole.default_pricing_id)
             : null;
 
-          // 2. Fallback to Global Defaults per Type (from Store Settings)
           if (!applicablePricing && storeSettingsData) {
             const consoleType = (targetConsole.console_type || '').toUpperCase();
             const globalDefaultKey = consoleType === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
             const globalDefaultId = (storeSettingsData as any)[globalDefaultKey];
 
             if (globalDefaultId && globalDefaultId !== 'none') {
-              // console.log(`🌍 Using global default for ${consoleType}:`, globalDefaultId);
               applicablePricing = pricing.find(p => p.id === globalDefaultId);
             }
           }
 
-          // 3. Fallback to first hourly or first available of that type (Case-Insensitive)
           if (!applicablePricing) {
             const targetType = (targetConsole.console_type || '').toUpperCase();
-            applicablePricing = pricing.find(p => {
-              const pType = p.console_type.toUpperCase();
-              return pType === targetType && p.price_type === 'hourly';
-            }) || pricing.find(p => p.console_type.toUpperCase() === targetType);
+            applicablePricing = pricing.find(p => p.console_type.toUpperCase() === targetType && p.price_type === 'hourly')
+              || pricing.find(p => p.console_type.toUpperCase() === targetType);
           }
 
           if (!applicablePricing) {
-            toast({
-              title: "Configuration Error",
-              description: `Aucun tarif trouvé pour ${targetConsole.name}.`,
-              variant: "destructive"
-            });
-            // Fallback to manual open if auto-start fails
+            toast({ title: "Configuration Error", description: `Aucun tarif trouvé pour ${targetConsole.name}.`, variant: "destructive" });
             openStartDialog(targetConsole.id);
             return;
           }
 
           try {
             toast({ title: "Starting Session...", description: `Launching ${targetConsole.name}` });
-
             await startSession.mutateAsync({
               console_id: targetConsole.id,
               pricing_id: applicablePricing.id,
               session_type: applicablePricing.price_type,
               staff_id: user?.id || '',
-              // No client by default for instant start, or could use "Walk-in" logic if implemented
               notes: "Quick Start via Shortcut"
             });
-
-            // Success toast is handled by mutation or query invalidation usually, but we can add one
-            // toast({ title: "Session Started", description: `${targetConsole.name} is now active.` });
           } catch (err: any) {
             toast({ title: "Start Failed", description: err.message, variant: "destructive" });
           }
-          return;
         }
       }
-
-      // 2. Fallback: Game Shortcuts (Only if Start Dialog is Open - wait, we returned early if dialog open!)
-      // actually the previous logic allowed Game Shortcuts ONLY when Start Dialog WAS open.
-      // Re-reading previous code: "if (!isStartDialogOpen || !gameShortcuts) return;"
-      // So Game Shortcuts were for FILLING the form.
-
-      // We need to split the logic:
-      // - Global (No Dialog): Console Shortcuts -> Start Session
-      // - Inside Dialog: Game Shortcuts -> Fill Form
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isStartDialogOpen, isEndDialogOpen, isExtendDialogOpen, isShortcutsDialogOpen, consoles, pricing, user, startSession]);
+  }, [isStartDialogOpen, isEndDialogOpen, isExtendDialogOpen, isShortcutsDialogOpen, consoles, pricing, user, startSession, activeSessions, storeSettingsData]);
 
-  // Separate Effect for Dialog-specific Game Shortcuts
+  // ⌨️ Dialog-specific Keyboard Listeners
   useEffect(() => {
-    if (!isStartDialogOpen || !gameShortcuts) return;
+    if (!isStartDialogOpen && !isEndDialogOpen && !isExtendDialogOpen) return;
 
     const handleDialogKeys = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const pressedKey = e.key.toUpperCase();
-      const matched = gameShortcuts.find(s => s.shortcut_key === pressedKey);
-      if (matched) {
-        setGameNotes(matched.name);
-        toast({ title: "Game Selected", description: matched.name });
+      // Don't trigger if typing in input FIELDS
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        // Exception: Handle 'Enter' to submit if in Start Dialog
+        if (e.key === 'Enter' && isStartDialogOpen) {
+          handleStartSession();
+        }
+        return;
+      }
+
+      const key = e.key;
+
+      if (isStartDialogOpen && gameShortcuts) {
+        const pressedKey = key.toUpperCase();
+        const matched = gameShortcuts.find(s => s.shortcut_key === pressedKey);
+        if (matched) {
+          setGameNotes(matched.name);
+          toast({ title: "Game Selected", description: matched.name });
+        }
+      }
+
+      if (isExtendDialogOpen) {
+        if (key === '+' || key === 'Enter') {
+          e.preventDefault();
+          handleExtendSession();
+        }
+      }
+
+      if (isEndDialogOpen) {
+        if (key === '+') {
+          e.preventDefault();
+          setGamesInSession(prev => prev + 1);
+        } else if (key === '-') {
+          e.preventDefault();
+          const startTime = new Date(selectedSession?.start_time || 0).getTime();
+          const now = new Date().getTime();
+          const elapsedMinutes = (now - startTime) / 60000;
+          const tarifDuration = selectedSession?.pricing?.game_duration_minutes || 0;
+          const minGames = (tarifDuration > 0 && elapsedMinutes < tarifDuration) ? 0 : 1;
+          setGamesInSession(prev => Math.max(minGames, prev - 1));
+        } else if (key === 'Enter') {
+          e.preventDefault();
+          handleEndSession();
+        }
       }
     };
 
     window.addEventListener('keydown', handleDialogKeys);
     return () => window.removeEventListener('keydown', handleDialogKeys);
-  }, [isStartDialogOpen, gameShortcuts]);
+  }, [isStartDialogOpen, isEndDialogOpen, isExtendDialogOpen, gameShortcuts, selectedSession, gamesInSession]);
 
 
 
@@ -531,9 +527,28 @@ const SessionsManagement = () => {
 
   const openEndDialog = (session: any) => {
     setSelectedSession(session);
-    setGamesInSession(session.games_played || 1);
+
+    let initialGames = session.games_played || 1;
+
+    // 🧮 Pre-count logic with average time
+    if (session.session_type === 'per_game') {
+      const startTime = new Date(session.start_time).getTime();
+      const now = new Date().getTime();
+      const elapsedMinutes = (now - startTime) / 60000;
+      const tarifDuration = session.pricing?.game_duration_minutes || 0;
+
+      if (tarifDuration > 0) {
+        // Use Math.ceil to count "started" games (e.g. 35 mins / 30 mins = 2 games)
+        const estimatedByTime = Math.ceil(elapsedMinutes / tarifDuration);
+        const currentDbValue = session.games_played || 1;
+        initialGames = Math.max(currentDbValue, estimatedByTime);
+      }
+    }
+
+    setGamesInSession(initialGames);
     setIsEndDialogOpen(true);
   };
+
 
   const openExtendDialog = (session: any) => {
     setSelectedSession(session);
@@ -893,10 +908,11 @@ const SessionsManagement = () => {
                       <button
                         key={p.id}
                         type="button"
+                        disabled={startSession.isPending}
                         className={`p-3 border rounded-xl transition-all flex flex-col items-center justify-center gap-1 group relative overflow-hidden ${selectedPricing === p.id
                           ? 'border-primary bg-primary/20 ring-2 ring-primary/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]'
                           : 'bg-black/20 border-white/5 hover:border-primary/50 hover:bg-black/40'
-                          }`}
+                          } ${startSession.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={() => setSelectedPricing(p.id)}
                       >
                         {selectedPricing === p.id && (
@@ -972,13 +988,24 @@ const SessionsManagement = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-3">
-                <Button className="w-full" size="lg" onClick={handleExtendSession}>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={handleExtendSession}
+                  disabled={addGameToSession.isPending}
+                >
                   <Plus className="w-5 h-5 mr-2" />
                   {selectedSession?.session_type === 'per_game' ? "Add Another Match" : "Confirm Extension"}
                 </Button>
 
                 {selectedSession?.session_type === 'per_game' && (
-                  <Button className="w-full bg-primary/20 text-primary border-primary/30 hover:bg-primary/30" variant="outline" size="lg" onClick={handleExtendProlongation}>
+                  <Button
+                    className="w-full bg-primary/20 text-primary border-primary/30 hover:bg-primary/30"
+                    variant="outline"
+                    size="lg"
+                    onClick={handleExtendProlongation}
+                    disabled={addGameToSession.isPending}
+                  >
                     <Timer className="w-5 h-5 mr-2" />
                     Add Prolongation (+{selectedSession.pricing?.extra_time_price?.toFixed(3) || '0.000'} DT)
                   </Button>
@@ -1111,10 +1138,10 @@ const SessionsManagement = () => {
                   variant="destructive"
                   className="w-full"
                   onClick={handleEndSession}
-                  disabled={endSession.isPending}
+                  disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone))}
                 >
                   <Square className="w-4 h-4 mr-2" />
-                  Stop & Calculate Payment
+                  {endSession.isPending ? "Ending..." : "Stop & Calculate Payment"}
                 </Button>
               </div>
             )}

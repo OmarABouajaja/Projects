@@ -68,6 +68,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // 🚀 Profile Sync Logic (Ensures visibility in dashboard)
+  const syncProfile = async (targetUser: User) => {
+    try {
+      // console.log("AuthContext: Syncing profile for", targetUser.email);
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: targetUser.id,
+          email: targetUser.email,
+          full_name: targetUser.user_metadata?.full_name || "Staff Member",
+          last_sign_in_at: new Date().toISOString(),
+          is_active: true,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) console.error("AuthContext: Profile sync failed", error);
+    } catch (err) {
+      console.error("AuthContext: Profile sync exception", err);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -81,6 +102,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Sync profile on every login event or initial session discovery
+          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            await syncProfile(session.user);
+          }
+
           try {
             const userRole = await fetchUserRole(session.user.id);
             if (isMounted) {
@@ -108,10 +134,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setRole(null);
           setIsLoading(false);
         }
-      }, 5000); // Increased timeout to 5s to avoid premature timeouts
+      }, 5000);
 
       try {
-        // console.log("AuthContext: Checking for existing session...");
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -126,8 +151,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        // console.log("AuthContext: Existing session found:", !!session?.user);
-
         if (!isMounted) {
           clearTimeout(timeoutId);
           return;
@@ -137,11 +160,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Robust Profile Sync on Initial Load
+          await syncProfile(session.user);
+
           try {
             const userRole = await fetchUserRole(session.user.id);
             if (isMounted) {
               setRole(userRole);
-              // console.log("AuthContext: Role loaded:", userRole);
             }
           } catch (error) {
             console.error('AuthContext: Error fetching user role:', error);
@@ -151,7 +176,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setRole(null);
-          // console.log("AuthContext: No session, role set to null");
         }
       } catch (error) {
         console.error('AuthContext: Error initializing auth:', error);
@@ -162,7 +186,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearTimeout(timeoutId);
         if (isMounted) {
           setIsLoading(false);
-          // console.log("AuthContext: Initialization complete, isLoading = false");
         }
       }
     };
