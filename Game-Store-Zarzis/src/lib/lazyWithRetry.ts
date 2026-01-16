@@ -34,7 +34,9 @@ export const lazyWithRetry = <T extends ComponentType<any>>(
                     });
                 }
 
-                window.location.reload();
+                const url = new URL(window.location.href);
+                url.searchParams.set('v', Date.now().toString());
+                window.location.href = url.toString();
 
                 // Return a never-resolving promise or a dummy component to prevent React form crashing
                 // before the reload happens.
