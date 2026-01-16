@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsClockedIn(!!sessionId);
   }, []);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = async (userId: string): Promise<AppRole | null> => {
     try {
       // console.log("AuthContext: Fetching role for user:", userId);
 
@@ -52,21 +52,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         console.error("AuthContext: Database error fetching role:", error);
-        // console.log("AuthContext: Assuming owner role for authenticated user as fallback");
-        return "owner" as AppRole;
+        return null;
       }
 
       if (!data) {
-        console.warn("AuthContext: No role found for user, using fallback 'owner'");
-        return "owner" as AppRole;
+        console.warn("AuthContext: No role found for user");
+        return null;
       }
 
       // console.log("AuthContext: Role found:", data.role);
       return data.role as AppRole;
     } catch (err: any) {
       console.error("AuthContext: Exception fetching role:", err.message || err);
-      // console.log("AuthContext: Using fallback - assuming owner role");
-      return "owner" as AppRole;
+      return null;
     }
   };
 
@@ -87,7 +85,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const userRole = await fetchUserRole(session.user.id);
             if (isMounted) {
               setRole(userRole);
-              // console.log("AuthContext: Role set to:", userRole);
             }
           } catch (error) {
             console.error('AuthContext: Error fetching user role:', error);
@@ -97,10 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setRole(null);
-          // console.log("AuthContext: No session, role set to null");
         }
         setIsLoading(false);
-        // console.log("AuthContext: isLoading set to false");
       }
     );
 
@@ -109,12 +104,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Add shorter timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
         if (isMounted) {
-          // console.log("AuthContext: Forcing loading completion due to timeout");
-          // Force role to 'owner' for authenticated users as fallback
-          setRole("owner");
+          console.warn("AuthContext: Role fetch timed out. Defaulting to safe state (Access Denied).");
+          setRole(null);
           setIsLoading(false);
         }
-      }, 2000); // 2 second timeout
+      }, 5000); // Increased timeout to 5s to avoid premature timeouts
 
       try {
         // console.log("AuthContext: Checking for existing session...");

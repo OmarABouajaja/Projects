@@ -45,6 +45,11 @@ export const useCreatePointsTransaction = () => {
       const currentBalance = transactions?.reduce((sum, t) => sum + t.amount, 0) || 0;
       const newBalance = currentBalance + transaction.amount;
 
+      // Prevent negative balance
+      if (newBalance < 0) {
+        throw new Error("Insufficient points balance. Transaction would result in negative points.");
+      }
+
       const { data, error } = await supabase
         .from("points_transactions")
         .insert({
