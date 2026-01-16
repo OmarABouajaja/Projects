@@ -109,3 +109,29 @@ async def health_check(request: Request):
             "email": "configured" if os.getenv("MAILERSEND_API_KEY") else "not_configured"
         }
     }
+
+@app.post("/cleanup")
+@limiter.limit("5/hour")
+async def cleanup_temp_data(request: Request):
+    """
+    Cleans up temporary data like expired verification codes.
+    Should be called periodically (e.g., daily cron job).
+    """
+    try:
+        from routers.verification_routes import supabase
+        from datetime import datetime
+        
+        # Delete expired verification codes
+        res = supabase.table("verification_codes")\
+            .delete()\
+            .lt("expires_at", datetime.utcnow().isoformat())\
+            .execute()
+            
+        return {
+            "success": True, 
+            "message": "Cleanup completed", 
+            "deleted_codes": len(res.data) if res.data else 0
+        }
+    except Exception as e:
+        print(f"Cleanup error: {e}")
+        return {"success": False, "message": str(e)}
