@@ -1079,7 +1079,7 @@ const SessionsManagement = () => {
                       <div className="flex justify-between items-center text-green-700 dark:text-green-400">
                         <span>Current Balance:</span>
                         <span className="font-bold">
-                          {(clients?.find(c => c.id === selectedClientForSession.id)?.points ?? selectedClientForSession.points) || 0} pts
+                          {(Array.isArray(clients) ? clients.find(c => c.id === selectedClientForSession.id)?.points : selectedClientForSession.points) ?? 0} pts
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-green-600 dark:text-green-500 font-medium border-t border-green-500/20 pt-1 mt-1">
