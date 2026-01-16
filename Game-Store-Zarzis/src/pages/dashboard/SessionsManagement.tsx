@@ -59,7 +59,7 @@ const SessionsManagement = () => {
   const { data: pricing } = usePricing();
   const { data: activeSessions } = useActiveSessions();
   const { data: storeSettingsData } = useStoreSettings();
-  const { gameShortcuts, deleteGameShortcut, isLoading: isDataLoading } = useData();
+  const { gameShortcuts, deleteGameShortcut, isLoading: isDataLoading, clients } = useData();
 
   // Mutations
   const startSession = useStartSession();
