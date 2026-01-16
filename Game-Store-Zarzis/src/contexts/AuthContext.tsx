@@ -183,35 +183,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const clockIn = async () => {
     if (!user) return;
-    try {
-      const { data: sessionData, error: sessionError } = await supabase
-        .from('staff_shifts')
-        .insert({ staff_id: user.id })
-        .select()
-        .single();
 
-      if (sessionData) {
-        localStorage.setItem('current_staff_session_id', sessionData.id);
-        setIsClockedIn(true);
-      }
-    } catch (err) {
-      console.error("Manual clock-in failed", err);
+    // Throw error to let UI handle it
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('staff_shifts')
+      .insert({ staff_id: user.id })
+      .select()
+      .single();
+
+    if (sessionError) throw sessionError;
+
+    if (sessionData) {
+      localStorage.setItem('current_staff_session_id', sessionData.id);
+      setIsClockedIn(true);
     }
   };
 
   const clockOut = async () => {
     const sessionId = localStorage.getItem('current_staff_session_id');
     if (sessionId) {
-      try {
-        await supabase
-          .from('staff_shifts')
-          .update({ check_out: new Date().toISOString() })
-          .eq('id', sessionId);
-        localStorage.removeItem('current_staff_session_id');
-        setIsClockedIn(false);
-      } catch (err) {
-        console.error("Manual clock-out failed", err);
-      }
+      // Throw error to let UI handle it
+      const { error } = await supabase
+        .from('staff_shifts')
+        .update({ check_out: new Date().toISOString() })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+
+      localStorage.removeItem('current_staff_session_id');
+      setIsClockedIn(false);
     }
   };
 
@@ -222,7 +222,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (!error && data.user) {
-      // Auto-clock in for all staff (removed work-station restriction as requested by user feedback)
+      // 1. Sync public profile for visibility (Owner needs to see this)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          email: data.user.email,
+          last_sign_in_at: new Date().toISOString()
+        });
+
+      if (profileError) {
+        console.error("AuthContext: Profile sync failed", profileError);
+      }
+
+      // 2. Auto-clock in for all staff
       try {
         const { data: sessionData } = await supabase
           .from('staff_shifts')

@@ -43,9 +43,22 @@ const ClientAuth = () => {
 
   // Auto-login check (ensure persistence)
   useEffect(() => {
-    const savedClient = localStorage.getItem('client_user');
+    // Check both storages
+    const savedClient = localStorage.getItem('client_user') || sessionStorage.getItem('client_user');
+
     if (savedClient) {
-      navigate('/');
+      try {
+        const parsed = JSON.parse(savedClient);
+        if (parsed && parsed.id) {
+          // Valid session found, redirect to home
+          // Use replace to prevent back-button loops
+          navigate('/', { replace: true });
+        }
+      } catch (e) {
+        // Invalid json, clear it
+        localStorage.removeItem('client_user');
+        sessionStorage.removeItem('client_user');
+      }
     }
   }, [navigate]);
 
@@ -134,10 +147,15 @@ const ClientAuth = () => {
         }
 
         if (client) {
+          // Clear any existing session first
+          localStorage.removeItem('client_user');
+          sessionStorage.removeItem('client_user');
+
           const storage = rememberMe ? localStorage : sessionStorage;
           storage.setItem('client_user', JSON.stringify(client));
+
           toast({ title: "Welcome Back!", description: "Logged in successfully" });
-          navigate('/');
+          navigate('/', { replace: true });
         } else {
           throw new Error('Failed to retrieve account details');
         }
@@ -149,6 +167,7 @@ const ClientAuth = () => {
       setIsLoading(false);
     }
   };
+
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -420,9 +439,9 @@ const ClientAuth = () => {
                         />
                         <Label
                           htmlFor="remember_me"
-                          className="text-xs text-muted-foreground cursor-pointer select-none"
+                          className="text-xs text-muted-foreground cursor-pointer select-none hover:text-white transition-colors"
                         >
-                          {t("client.stay_logged_in") || "Stay logged in"}
+                          {t("client.stay_logged_in")}
                         </Label>
                       </div>
                     </div>

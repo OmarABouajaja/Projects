@@ -56,6 +56,7 @@ export const translations: Translations = {
   "client.back_home": { fr: "Retour à l'Accueil", en: "Back to Home", ar: "العودة للرئيسية" },
   "client.change_phone": { fr: "Changer le numéro", en: "Change Phone Number", ar: "تغيير رقم الهاتف" },
   "client.change_email": { fr: "Changer l'email", en: "Change Email", ar: "تغيير البريد الإلكتروني" },
+  "client.stay_logged_in": { fr: "Rester connecté", en: "Stay logged in", ar: "البقاء مسجلاً" },
 
   // 404 / Error Pages
   "error.404.title": { fr: "Page Non Trouvée", en: "Page Not Found", ar: "الصفحة غير موجودة" },

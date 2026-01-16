@@ -28,21 +28,21 @@ const StaffAttendance = () => {
             if (!dateRange?.from) return [];
 
             let query = supabase
-                .from('staff_sessions')
+                .from('staff_shifts')
                 .select(`
                     *,
-                    user:user_id (email)
+                    profile:staff_id (full_name, email)
                 `)
-                .gte('created_at', dateRange.from.toISOString());
+                .gte('check_in', dateRange.from.toISOString());
 
             if (dateRange.to) {
                 // Set end date to end of day to include sessions on that day
                 const endDate = new Date(dateRange.to);
                 endDate.setHours(23, 59, 59, 999);
-                query = query.lte('created_at', endDate.toISOString());
+                query = query.lte('check_in', endDate.toISOString());
             }
 
-            const { data, error } = await query.order('created_at', { ascending: false });
+            const { data, error } = await query.order('check_in', { ascending: false });
 
             if (error) throw error;
             return data;
@@ -52,21 +52,28 @@ const StaffAttendance = () => {
 
     // Calculate Period Stats
     const stats = sessions?.reduce((acc: any, session: any) => {
-        if (!session.duration_minutes && !session.clock_out) return acc; // Skip active or invalid
+        if (!session.check_in) return acc; // Skip invalid
 
         // Use calculated duration from DB or calculate manually if missing
         const duration = session.duration_minutes ||
-            (session.clock_out ? differenceInMinutes(new Date(session.clock_out), new Date(session.clock_in)) : 0);
+            (session.check_out ? differenceInMinutes(new Date(session.check_out), new Date(session.check_in)) : 0);
 
         acc.totalMinutes += duration;
         acc.shifts += 1;
 
         // Group by day for average
-        const day = new Date(session.created_at).toDateString();
+        const day = new Date(session.check_in).toDateString();
         if (!acc.days.includes(day)) acc.days.push(day);
 
         return acc;
     }, { totalMinutes: 0, shifts: 0, days: [] }) || { totalMinutes: 0, shifts: 0, days: [] };
+
+    // ... [Rendering Logic Updates] ...
+    // Note: I will need to update the JSX mapping too. 
+    // Instead of doing multiple small replacements, I will do a larger replace for the JSX map section.
+
+    // Actually, I can target the JSX separately.
+
 
     const totalHours = (stats.totalMinutes / 60).toFixed(1);
     const avgHoursPerDay = stats.days.length > 0 ? (stats.totalMinutes / 60 / stats.days.length).toFixed(1) : "0.0";
@@ -172,29 +179,29 @@ const StaffAttendance = () => {
                                                         </div>
                                                         <div>
                                                             <div className="flex items-center gap-2">
-                                                                <p className="font-bold text-foreground">{format(new Date(session.created_at), 'EEEE, MMM d')}</p>
-                                                                <Badge variant="outline" className="text-[10px] h-5 bg-background/50">
+                                                                <p className="font-bold text-foreground">{format(new Date(session.check_in), 'EEEE, MMM d')}</p>
+                                                                {/* <Badge variant="outline" className="text-[10px] h-5 bg-background/50">
                                                                     {session.work_station_id || 'Device Unknown'}
-                                                                </Badge>
+                                                                </Badge> */}
                                                             </div>
                                                             <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
                                                                 <span className="flex items-center gap-1">
                                                                     <Clock className="w-3 h-3" />
-                                                                    {format(new Date(session.clock_in), 'HH:mm')}
+                                                                    {format(new Date(session.check_in), 'HH:mm')}
                                                                     {' → '}
-                                                                    {session.clock_out ? format(new Date(session.clock_out), 'HH:mm') : 'Now'}
+                                                                    {session.check_out ? format(new Date(session.check_out), 'HH:mm') : 'Now'}
                                                                 </span>
                                                                 <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                                                                <span>{session.user?.email}</span>
+                                                                <span>{session.profile?.email || session.profile?.full_name || 'Unknown Staff'}</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <div className="text-right">
-                                                        {session.duration_minutes ? (
+                                                        {session.check_out ? (
                                                             <div className="flex flex-col items-end">
                                                                 <span className="font-bold text-lg text-primary leading-none">
-                                                                    {Math.floor(session.duration_minutes / 60)}h {Math.round(session.duration_minutes % 60)}m
+                                                                    {Math.floor((differenceInMinutes(new Date(session.check_out), new Date(session.check_in))) / 60)}h {Math.round((differenceInMinutes(new Date(session.check_out), new Date(session.check_in))) % 60)}m
                                                                 </span>
                                                                 <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Duration</span>
                                                             </div>

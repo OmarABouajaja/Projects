@@ -602,15 +602,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       // Update Client Balance Automatically
       if (transaction.client_id) {
-        // Determine the actual point change (handle redemptions vs earnings)
-        // If type is 'redeemed', ensure we subtract. If 'earned', we add.
-        // We use Math.abs to ensure 'redeemed' always subtracts regardless of input sign.
-        let pointsChange = transaction.points;
-        if (transaction.type === 'redeemed') {
-          pointsChange = -Math.abs(transaction.points);
-        } else if (transaction.type === 'earned') {
-          pointsChange = Math.abs(transaction.points);
-        }
+        // Use declared amount (which is signed by convention in PointsTransaction)
+        const pointsChange = transaction.amount;
+        // Logic simplified: amount should already be negative for redemptions if using standard hooks.
+        // But if we want to be extra safe against 'transaction.type' vs 'amount' mismatch:
+
+        // Actually, let's just trust amount. useRedeemPoints sets amount = -points.
+        // transaction.type comes from DB column 'transaction_type'. 
+        // Note: The argument is Omit<PointsTransaction...>, so it matches DB schema.
+        // DB schema has 'transaction_type', not 'type'. Standardize on 'amount'.
 
         // Fetch current points to ensure atomicity/freshness (or closest to it)
         const { data: clientData } = await supabase
