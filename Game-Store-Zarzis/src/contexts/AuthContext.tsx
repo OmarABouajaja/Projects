@@ -23,7 +23,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
+  const [role, setRole] = useState<AppRole | null>(() => {
+    return localStorage.getItem('user_role') as AppRole | null;
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isClockedIn, setIsClockedIn] = useState(false);
 
@@ -60,8 +62,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return null;
       }
 
-      // console.log("AuthContext: Role found:", data.role);
-      return data.role as AppRole;
+      const foundRole = data.role as AppRole;
+      localStorage.setItem('user_role', foundRole); // Persist role
+      return foundRole;
     } catch (err: any) {
       console.error("AuthContext: Exception fetching role:", err.message || err);
       return null;
@@ -101,6 +104,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
 
+        if (event === 'SIGNED_OUT') {
+          setRole(null);
+          localStorage.removeItem('user_role');
+          setIsLoading(false);
+          return;
+        }
+
+        // Optimization: If just a token refresh and we have a role, SKIP db call
+        // This prevents "crash" on minor network glitches during auto-refresh
+        if (event === 'TOKEN_REFRESHED' && role) {
+          return;
+        }
+
         if (session?.user) {
           // Sync profile on every login event or initial session discovery
           if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
@@ -108,18 +124,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
 
           try {
+            // Only fetch if we don't have a role, or if we want to be strict about checking updates on login
+            // For robustness, we re-fetch on login/initial, but we have a fallback now
             const userRole = await fetchUserRole(session.user.id);
             if (isMounted) {
-              setRole(userRole);
+              if (userRole) {
+                setRole(userRole);
+              } else if (!role) {
+                // Only clear if we didn't have one cached. 
+                // If network fails (returns null) but we are "SIGNED_IN", keep cached role?
+                // No, `fetchUserRole` returns null on error. 
+                // If we strictly null it, we crash.
+                // Strategy: Trust cache if fetch fails but session is valid?
+                // Better: logic above "fetchUserRole" already handles caching inside it? No, explicit setItem.
+
+                // If userRole is null (error or not found) and we have no cached role, set null.
+                setRole(null);
+              }
             }
           } catch (error) {
             console.error('AuthContext: Error fetching user role:', error);
-            if (isMounted) {
-              setRole(null);
-            }
+            // FAIL-SAFE: Do NOT setRole(null) here if we already have one.
           }
         } else {
+          // No user (should be covered by SIGNED_OUT, but just in case)
           setRole(null);
+          localStorage.removeItem('user_role');
         }
         setIsLoading(false);
       }
@@ -130,8 +160,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Add shorter timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
         if (isMounted) {
-          console.warn("AuthContext: Role fetch timed out. Defaulting to safe state (Access Denied).");
-          setRole(null);
+          console.warn("AuthContext: Role fetch timed out. Defaulting to safe state.");
+          // Don't kill app if we have a role in cache!
+          if (!role) {
+            setRole(null);
+          }
           setIsLoading(false);
         }
       }, 5000);
@@ -145,6 +178,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setSession(null);
             setUser(null);
             setRole(null);
+            localStorage.removeItem('user_role');
             setIsLoading(false);
           }
           clearTimeout(timeoutId);
