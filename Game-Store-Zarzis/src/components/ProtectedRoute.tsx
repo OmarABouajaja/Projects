@@ -7,6 +7,7 @@ interface ProtectedRouteProps {
   requireOwner?: boolean;
 }
 
+// ProtectedRoute only guards /dashboard routes - does NOT interfere with public auth routes
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner = false }) => {
   const { user, role, isLoading, isOwner } = useAuth();
 
@@ -23,12 +24,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner 
     </div>;
   }
 
+  // Redirect to primary staff login route if not authenticated
   if (!user) {
-    return <Navigate to="/staff-login" replace />;
+    return <Navigate to="/management-gs-zarzis" replace />;
   }
 
   if (role !== 'owner' && role !== 'worker') {
-    return <Navigate to="/staff-login" replace />;
+    return <Navigate to="/management-gs-zarzis" replace />;
   }
 
   if (requireOwner && !isOwner) {

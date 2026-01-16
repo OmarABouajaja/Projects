@@ -12,6 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    storageKey: 'gs-zarzis-staff-auth', // Namespace isolation to prevent conflicts with client auth
   }
 })
 
