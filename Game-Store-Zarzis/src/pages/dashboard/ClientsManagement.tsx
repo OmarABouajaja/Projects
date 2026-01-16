@@ -4,6 +4,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClients, useCreateClient, useClientByPhone } from "@/hooks/useClients";
 import { usePointsTransactions, useCreatePointsTransaction, useRedeemPoints } from "@/hooks/usePointsTransactions";
+import { useStoreSettings } from "@/hooks/useStoreSettings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,11 @@ const ClientsManagement = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { data: clients, isLoading } = useClients();
+  const { data: storeSettings } = useStoreSettings();
   const createClient = useCreateClient();
+
+  // Check if points system is enabled
+  const pointsSystemEnabled = storeSettings?.points_system_enabled !== false;
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
@@ -141,17 +146,19 @@ const ClientsManagement = () => {
               </p>
               <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total")}</p>
             </div>
-            <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-secondary/20">
-              <div className="flex justify-center mb-2 sm:mb-3">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                  <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />
+            {pointsSystemEnabled && (
+              <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-secondary/20">
+                <div className="flex justify-center mb-2 sm:mb-3">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                    <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />
+                  </div>
                 </div>
+                <p className="text-3xl sm:text-4xl font-display font-bold text-secondary mb-1">
+                  {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
+                </p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
               </div>
-              <p className="text-3xl sm:text-4xl font-display font-bold text-secondary mb-1">
-                {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
-              </p>
-              <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
-            </div>
+            )}
             <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-accent/20">
               <div className="flex justify-center mb-2 sm:mb-3">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
@@ -186,10 +193,12 @@ const ClientsManagement = () => {
                       <h3 className="font-display text-xl font-bold group-hover:text-primary transition-colors">{client.name}</h3>
                       <p className="text-sm text-muted-foreground font-mono">{client.phone}</p>
                     </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20">
-                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                      <span className="font-display font-bold text-yellow-500 text-lg">{client.points || 0}</span>
-                    </div>
+                    {pointsSystemEnabled && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/10 border border-yellow-500/20">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="font-display font-bold text-yellow-500 text-lg">{client.points || 0}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-3 mb-6">
@@ -203,34 +212,40 @@ const ClientsManagement = () => {
                         <span className="font-mono">{Number(client.total_spent || 0).toFixed(3)} DT</span>
                       </div>
                     </div>
-                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-primary"
-                        style={{ width: `${Math.min((client.points / 50) * 100, 100)}%` }}
-                      />
-                    </div>
+                    {pointsSystemEnabled && (
+                      <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary"
+                          style={{ width: `${Math.min((client.points / 50) * 100, 100)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 glass-card hover:bg-white/5"
-                      onClick={() => openHistoryDialog(client)}
-                    >
-                      <History className="w-4 h-4 mr-2" />
-                      {t("client.history")}
-                    </Button>
-                    <Button
-                      variant="hero"
-                      size="sm"
-                      className="flex-1 min-w-[100px]"
-                      onClick={() => openRedeemDialog(client)}
-                      disabled={(client.points || 0) <= 0}
-                    >
-                      <Gift className="w-4 h-4 mr-2" />
-                      {t("client.redeem")}
-                    </Button>
+                    {pointsSystemEnabled && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 glass-card hover:bg-white/5"
+                        onClick={() => openHistoryDialog(client)}
+                      >
+                        <History className="w-4 h-4 mr-2" />
+                        {t("client.history")}
+                      </Button>
+                    )}
+                    {pointsSystemEnabled && (
+                      <Button
+                        variant="hero"
+                        size="sm"
+                        className="flex-1 min-w-[100px]"
+                        onClick={() => openRedeemDialog(client)}
+                        disabled={(client.points || 0) <= 0}
+                      >
+                        <Gift className="w-4 h-4 mr-2" />
+                        {t("client.redeem")}
+                      </Button>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground/60 mt-4 italic">
                     {t("client.member_since")} {new Date(client.created_at).toLocaleDateString()}
