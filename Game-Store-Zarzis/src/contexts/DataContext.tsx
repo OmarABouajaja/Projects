@@ -30,6 +30,8 @@ const mapServiceCatalogFromDB = (dbService: any): ServiceCatalog => ({
 
 const mapClientFromDB = (dbClient: any): Client => ({
   ...dbClient,
+  // Map points_balance (DB column) to points (UI property) if needed
+  points: dbClient.points ?? dbClient.points_balance ?? 0,
   created_at: dbClient.created_at,
   updated_at: dbClient.updated_at
 });
