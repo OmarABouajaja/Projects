@@ -497,7 +497,7 @@ export const ClientHomeStats = () => {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-black text-white/90 uppercase tracking-widest leading-none mb-0.5">
-                                    {t('client.dashboard.connected')}
+                                    {t('common.welcome_back')}
                                 </span>
                                 <span className="text-[9px] font-bold text-primary italic leading-none truncate max-w-[120px]">
                                     {client.name}

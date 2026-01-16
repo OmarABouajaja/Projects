@@ -339,6 +339,7 @@ export const translations: Translations = {
   "common.nextDayAbbr": { fr: "j+1", en: "next day", ar: "اليوم التالي" },
   "common.info": { fr: "Info", en: "Info", ar: "معلومات" },
   "common.online": { fr: "En ligne", en: "Online", ar: "متصل" },
+  "common.welcome_back": { fr: "Heureux de vous revoir", en: "Welcome back", ar: "مرحباً بعودتك" },
   "common.weekend": { fr: "Weekend", en: "Weekend", ar: "عطلة نهاية الأسبوع" },
   "common.weekday": { fr: "Semaine", en: "Weekday", ar: "أيام الأسبوع" },
   "common.night": { fr: "Nocturne", en: "Night", ar: "ليليل" },

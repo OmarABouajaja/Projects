@@ -189,11 +189,10 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
                 pass
             raise HTTPException(status_code=400, detail=f"Impossible d'assigner le rôle: {str(role_error)}")
 
-        # 3. Create or Update Profile
-        # We use upsert because a database trigger might have already created a partial profile
         try:
             supabase.table("profiles").upsert({
                 "id": user_id,
+                "email": request_data.email,
                 "full_name": request_data.full_name,
                 "phone": request_data.phone,
                 "is_active": True,
