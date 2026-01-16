@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Users, Plus, Edit, Trash2, Crown, User, Mail, Shield,
   Clock, AlertTriangle, CheckCircle, Loader2, Phone,
-  Zap, ShieldCheck, Send
+  Zap, ShieldCheck, Send, RefreshCw
 } from "lucide-react";
 import { UserPlus, Key } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -325,209 +325,246 @@ const StaffManagement = () => {
                 Gérez les comptes employés et leurs permissions d'accès
               </p>
             </div>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => {
-                  setEditingUser(null);
-                  setFormData({ email: "", full_name: "", phone: "", role: "worker" });
-                }}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Inviter du Personnel
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none bg-transparent">
-                <div className="relative p-6 sm:p-8 glass-card border-white/20 dark:border-white/10 overflow-hidden">
-                  {/* Decorative Background Elements */}
-                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-                  <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/20 blur-[100px] rounded-full pointer-events-none" />
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  try {
+                    setIsLoading(true);
+                    const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+                    const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
+                    const token = session?.access_token;
 
-                  <DialogHeader className="relative mb-6">
-                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                      {editingUser ? "Modifier le Rôle" : "Nouvel Invité"}
-                    </DialogTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {editingUser ? "Ajustez les accès de votre collaborateur" : "Ajoutez un membre à votre équipe de choc"}
-                    </p>
-                  </DialogHeader>
+                    const res = await fetch(`${API_URL}/api/admin/sync-profiles`, {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      }
+                    });
 
-                  <form onSubmit={handleSubmit} className="relative space-y-6">
-                    {/* Basic Info Section */}
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adresse Email Professionnelle</Label>
-                        <div className="relative group/field">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
-                          <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="employe@exemple.com"
-                            required
-                            disabled={!!editingUser}
-                            className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
-                          />
-                        </div>
-                      </div>
+                    if (!res.ok) throw new Error("Sync failed");
+                    const data = await res.json();
 
-                      {!editingUser && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="full_name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nom Complet</Label>
-                            <div className="relative group/field">
-                              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
-                              <Input
-                                id="full_name"
-                                value={formData.full_name}
-                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                placeholder="John Doe"
-                                className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
-                              />
-                            </div>
+                    toast({
+                      title: "Synchronisation réussie",
+                      description: `${data.synced_count} profils mis à jour.`
+                    });
+                    await fetchStaffMembers();
+                  } catch (e) {
+                    toast({ title: "Erreur", description: "Échec de la synchronisation", variant: "destructive" });
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Sync Data
+              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => {
+                    setEditingUser(null);
+                    setFormData({ email: "", full_name: "", phone: "", role: "worker" });
+                  }}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Inviter du Personnel
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none bg-transparent">
+                  <div className="relative p-6 sm:p-8 glass-card border-white/20 dark:border-white/10 overflow-hidden">
+                    {/* Decorative Background Elements */}
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-secondary/20 blur-[100px] rounded-full pointer-events-none" />
+
+                    <DialogHeader className="relative mb-6">
+                      <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                        {editingUser ? "Modifier le Rôle" : "Nouvel Invité"}
+                      </DialogTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {editingUser ? "Ajustez les accès de votre collaborateur" : "Ajoutez un membre à votre équipe de choc"}
+                      </p>
+                    </DialogHeader>
+
+                    <form onSubmit={handleSubmit} className="relative space-y-6">
+                      {/* Basic Info Section */}
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adresse Email Professionnelle</Label>
+                          <div className="relative group/field">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
+                            <Input
+                              id="email"
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              placeholder="employe@exemple.com"
+                              required
+                              disabled={!!editingUser}
+                              className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
+                            />
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Téléphone</Label>
-                            <div className="relative group/field">
-                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-secondary transition-all duration-300" />
-                              <Input
-                                id="phone"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                placeholder="23 456 789"
-                                className="pl-10 h-12 bg-white/5 border-white/10 focus:border-secondary/50 focus:ring-secondary/20 transition-all rounded-xl placeholder:text-white/20"
-                              />
-                            </div>
-                          </div>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Role Selection Section */}
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sélection du Rôle</Label>
-                        <Select
-                          value={formData.role}
-                          onValueChange={(value: "owner" | "worker") =>
-                            setFormData({ ...formData, role: value })
-                          }
-                        >
-                          <SelectTrigger className="h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-slate-900/95 border-white/10 backdrop-blur-xl">
-                            <SelectItem value="worker" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
-                              <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4 opacity-50" />
-                                <span>Employé (Caissier)</span>
+                        {!editingUser && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="full_name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nom Complet</Label>
+                              <div className="relative group/field">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
+                                <Input
+                                  id="full_name"
+                                  value={formData.full_name}
+                                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                  placeholder="John Doe"
+                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
+                                />
                               </div>
-                            </SelectItem>
-                            <SelectItem value="owner" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
-                              <div className="flex items-center gap-2">
-                                <Crown className="w-4 h-4 opacity-50" />
-                                <span>Propriétaire (Admin)</span>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Téléphone</Label>
+                              <div className="relative group/field">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-secondary transition-all duration-300" />
+                                <Input
+                                  id="phone"
+                                  value={formData.phone}
+                                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                  placeholder="23 456 789"
+                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-secondary/50 focus:ring-secondary/20 transition-all rounded-xl placeholder:text-white/20"
+                                />
                               </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Permission Infographic */}
-                      <div className="grid grid-cols-1 gap-3">
-                        <div className={`p-4 rounded-xl border transition-all duration-500 overflow-hidden relative ${formData.role === 'worker'
-                          ? 'bg-secondary/10 border-secondary/30 scale-100 shadow-[0_0_20px_rgba(var(--secondary),0.1)]'
-                          : 'bg-white/5 border-white/5 scale-[0.98] opacity-40'
-                          }`}>
-                          <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-lg ${formData.role === 'worker' ? 'bg-secondary/20' : 'bg-white/10'}`}>
-                              <Zap className="w-4 h-4 text-secondary" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm mb-1">Employé (Standard)</p>
-                              <p className="text-xs text-muted-foreground leading-relaxed">
-                                Accès aux opérations quotidiennes : sessions, ventes, clients et pointage.
-                              </p>
                             </div>
                           </div>
-                        </div>
-
-                        <div className={`p-4 rounded-xl border transition-all duration-500 overflow-hidden relative ${formData.role === 'owner'
-                          ? 'bg-primary/10 border-primary/30 scale-100 shadow-[0_0_20px_rgba(var(--primary),0.1)]'
-                          : 'bg-white/5 border-white/5 scale-[0.98] opacity-40'
-                          }`}>
-                          <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-lg ${formData.role === 'owner' ? 'bg-primary/20' : 'bg-white/10'}`}>
-                              <ShieldCheck className="w-4 h-4 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm mb-1">Propriétaire (Total)</p>
-                              <p className="text-xs text-muted-foreground leading-relaxed">
-                                Contrôle absolu : configuration du magasin, finances et gestion d'équipe.
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {!editingUser && (
-                        <div className="flex items-center space-x-2 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl my-4">
-                          <input
-                            type="checkbox"
-                            id="skipEmail"
-                            checked={skipEmail}
-                            onChange={(e) => setSkipEmail(e.target.checked)}
-                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary bg-black/50"
-                          />
-                          <label htmlFor="skipEmail" className="text-xs text-yellow-500 cursor-pointer select-none">
-                            Créer sans envoyer d'email (Urgence / Test)
-                          </label>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-white/10">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setIsDialogOpen(false)}
-                        disabled={isSubmitting}
-                        className="hover:bg-white/10 rounded-xl px-6"
-                      >
-                        Annuler
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={`rounded-xl px-8 h-11 transition-all duration-300 shadow-lg ${formData.role === 'owner'
-                          ? 'bg-primary hover:bg-primary/90 shadow-primary/20'
-                          : 'bg-secondary hover:bg-secondary/90 shadow-secondary/20'
-                          }`}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            <span>Traitement...</span>
-                          </>
-                        ) : (
-                          <>
-                            {editingUser ? (
-                              <>
-                                <Edit className="w-4 h-4 mr-2" />
-                                <span>Mettre à jour</span>
-                              </>
-                            ) : (
-                              <>
-                                <Send className="w-4 h-4 mr-2" />
-                                <span>Envoyer l'Explosion !</span>
-                              </>
-                            )}
-                          </>
                         )}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              </DialogContent>
-            </Dialog>
+                      </div>
+
+                      {/* Role Selection Section */}
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sélection du Rôle</Label>
+                          <Select
+                            value={formData.role}
+                            onValueChange={(value: "owner" | "worker") =>
+                              setFormData({ ...formData, role: value })
+                            }
+                          >
+                            <SelectTrigger className="h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-900/95 border-white/10 backdrop-blur-xl">
+                              <SelectItem value="worker" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
+                                <div className="flex items-center gap-2">
+                                  <Shield className="w-4 h-4 opacity-50" />
+                                  <span>Employé (Caissier)</span>
+                                </div>
+                              </SelectItem>
+                              <SelectItem value="owner" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
+                                <div className="flex items-center gap-2">
+                                  <Crown className="w-4 h-4 opacity-50" />
+                                  <span>Propriétaire (Admin)</span>
+                                </div>
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Permission Infographic */}
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className={`p-4 rounded-xl border transition-all duration-500 overflow-hidden relative ${formData.role === 'worker'
+                            ? 'bg-secondary/10 border-secondary/30 scale-100 shadow-[0_0_20px_rgba(var(--secondary),0.1)]'
+                            : 'bg-white/5 border-white/5 scale-[0.98] opacity-40'
+                            }`}>
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-lg ${formData.role === 'worker' ? 'bg-secondary/20' : 'bg-white/10'}`}>
+                                <Zap className="w-4 h-4 text-secondary" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-sm mb-1">Employé (Standard)</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  Accès aux opérations quotidiennes : sessions, ventes, clients et pointage.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className={`p-4 rounded-xl border transition-all duration-500 overflow-hidden relative ${formData.role === 'owner'
+                            ? 'bg-primary/10 border-primary/30 scale-100 shadow-[0_0_20px_rgba(var(--primary),0.1)]'
+                            : 'bg-white/5 border-white/5 scale-[0.98] opacity-40'
+                            }`}>
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-lg ${formData.role === 'owner' ? 'bg-primary/20' : 'bg-white/10'}`}>
+                                <ShieldCheck className="w-4 h-4 text-primary" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-sm mb-1">Propriétaire (Total)</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  Contrôle absolu : configuration du magasin, finances et gestion d'équipe.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {!editingUser && (
+                          <div className="flex items-center space-x-2 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-xl my-4">
+                            <input
+                              type="checkbox"
+                              id="skipEmail"
+                              checked={skipEmail}
+                              onChange={(e) => setSkipEmail(e.target.checked)}
+                              className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary bg-black/50"
+                            />
+                            <label htmlFor="skipEmail" className="text-xs text-yellow-500 cursor-pointer select-none">
+                              Créer sans envoyer d'email (Urgence / Test)
+                            </label>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-white/10">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setIsDialogOpen(false)}
+                          disabled={isSubmitting}
+                          className="hover:bg-white/10 rounded-xl px-6"
+                        >
+                          Annuler
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className={`rounded-xl px-8 h-11 transition-all duration-300 shadow-lg ${formData.role === 'owner'
+                            ? 'bg-primary hover:bg-primary/90 shadow-primary/20'
+                            : 'bg-secondary hover:bg-secondary/90 shadow-secondary/20'
+                            }`}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              <span>Traitement...</span>
+                            </>
+                          ) : (
+                            <>
+                              {editingUser ? (
+                                <>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  <span>Mettre à jour</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Send className="w-4 h-4 mr-2" />
+                                  <span>Envoyer l'Explosion !</span>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           {/* Staff Stats */}

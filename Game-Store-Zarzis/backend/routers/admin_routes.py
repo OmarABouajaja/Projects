@@ -225,3 +225,47 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
     except Exception as e:
         print(f"Create staff error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+@router.post("/sync-profiles")
+@limiter.limit("5/minute")
+async def sync_profiles(request: Request):
+    """
+    Force-syncs auth.users data to public.profiles.
+    Fixes 'Email non disponible' issues.
+    """
+    try:
+        # 1. Fetch all users from Auth (using admin client)
+        # Note: list_users returns a UserList object with .users prop
+        all_users = supabase.auth.admin.list_users()
+        
+        synced_count = 0
+        errors = []
+
+        for user in all_users:
+            try:
+                # Extract metadata
+                user_meta = user.user_metadata or {}
+                full_name = user_meta.get("full_name", "Staff Member")
+                
+                # Upsert to profiles
+                supabase.table("profiles").upsert({
+                    "id": user.id,
+                    "email": user.email,
+                    "full_name": full_name,
+                    "last_sign_in_at": user.last_sign_in_at,
+                    "is_active": True, # Assume active if present in auth
+                    "updated_at": datetime.datetime.now().isoformat()
+                }).execute()
+                synced_count += 1
+            except Exception as u_err:
+                errors.append(f"Failed to sync {user.email}: {u_err}")
+        
+        return {
+            "status": "success",
+            "synced_count": synced_count,
+            "total_found": len(all_users),
+            "errors": errors
+        }
+
+    except Exception as e:
+        print(f"Sync profiles error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
