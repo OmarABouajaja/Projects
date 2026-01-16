@@ -59,7 +59,7 @@ const StaffAuth = () => {
       <PSBackground />
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="glass-card rounded-2xl p-8 neon-border">
+        <div className="glass-card rounded-2xl p-6 sm:p-8 neon-border">
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/20 mb-4">
