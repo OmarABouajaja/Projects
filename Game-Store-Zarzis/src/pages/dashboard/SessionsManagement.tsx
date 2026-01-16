@@ -544,19 +544,19 @@ const SessionsManagement = () => {
           <SchemaStatus />
 
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-3xl font-bold mb-2">Gaming Sessions</h1>
+                <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">Gaming Sessions</h1>
                 <HelpTooltip content={t('help.sessions')} />
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Manage PS4/PS5 sessions.
               </p>
             </div>
 
             {/* Global Actions */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="icon"
@@ -570,8 +570,8 @@ const SessionsManagement = () => {
               <Sheet open={isCafeMenuOpen} onOpenChange={setIsCafeMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10">
-                    <Coffee className="w-4 h-4 mr-2" />
-                    Café Menu
+                    <Coffee className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Café Menu</span>
                   </Button>
                 </SheetTrigger>
               </Sheet>
@@ -579,11 +579,11 @@ const SessionsManagement = () => {
               <Sheet open={isQuickRefOpen} onOpenChange={setIsQuickRefOpen}>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="border-secondary/30 text-secondary hover:bg-secondary/10">
-                    <Zap className="w-4 h-4 mr-2" />
-                    Tarifs & Raccourcis
+                    <Zap className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Tarifs & Raccourcis</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="glass-modal border-white/10 w-[400px] sm:w-[540px] overflow-y-auto">
+                <SheetContent className="glass-modal border-white/10 w-full sm:max-w-[540px] overflow-y-auto">
                   <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2 text-2xl">
                       <Zap className="w-6 h-6 text-secondary fill-secondary" />
@@ -703,7 +703,7 @@ const SessionsManagement = () => {
           </div>
 
           {/* Console Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
             {consoles?.map((console) => {
               const session = getConsoleSession(console.id);
               const isMaintenance = console.status === "maintenance";
@@ -714,7 +714,7 @@ const SessionsManagement = () => {
               return (
                 <div key={console.id} className="relative group">
                   <div
-                    className={`glass-card rounded-xl p-4 transition-all h-full flex flex-col items-center justify-center relative ${isOverdue
+                    className={`glass-card rounded-xl p-2 sm:p-3 md:p-4 transition-all h-full flex flex-col items-center justify-center relative ${isOverdue
                       ? "border-red-600 bg-red-600/20 animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]"
                       : isMaintenance
                         ? "border-muted bg-muted/10 opacity-60 grayscale cursor-not-allowed"
@@ -725,19 +725,19 @@ const SessionsManagement = () => {
                     onClick={() => !isActive && !isMaintenance && openStartDialog(console.id)}
                   >
                     {/* Status Icon */}
-                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 ${isOverdue ? "bg-red-600 animate-bounce" : isMaintenance ? "bg-muted/20" : isActive ? "bg-red-500/20" : "bg-green-500/20"
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-2 sm:mb-3 ${isOverdue ? "bg-red-600 animate-bounce" : isMaintenance ? "bg-muted/20" : isActive ? "bg-red-500/20" : "bg-green-500/20"
                       }`}>
                       {isOverdue ? (
-                        <AlertTriangle className="w-7 h-7 text-white" />
+                        <AlertTriangle className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                       ) : isMaintenance ? (
-                        <Wrench className="w-7 h-7 text-muted-foreground" />
+                        <Wrench className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
                       ) : (
-                        <Gamepad2 className={`w-7 h-7 ${isActive ? "text-red-500" : "text-green-500"}`} />
+                        <Gamepad2 className={`w-6 h-6 sm:w-7 sm:h-7 ${isActive ? "text-red-500" : "text-green-500"}`} />
                       )}
                     </div>
 
-                    <h3 className="font-display font-bold text-lg mb-1">#{console.station_number}</h3>
-                    <Badge variant="outline" className="mb-2 text-[10px] uppercase">{console.console_type}</Badge>
+                    <h3 className="font-display font-bold text-base sm:text-lg mb-1">#{console.station_number}</h3>
+                    <Badge variant="outline" className="mb-1 sm:mb-2 text-[10px] uppercase">{console.console_type}</Badge>
 
                     {isActive && session ? (
                       <div className="text-center space-y-1 w-full">
@@ -773,26 +773,26 @@ const SessionsManagement = () => {
                     )}
                   </div>
 
-                  {/* Session Actions - Direct Access */}
+                  {/* Session Actions - Always Visible on Mobile, Hover on Desktop */}
                   {isActive && session && (
-                    <div className="absolute -bottom-2 left-0 right-0 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity pb-2">
+                    <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 flex justify-center gap-2 sm:gap-3 pb-2 z-20">
                       <Button
                         size="sm"
                         variant="hero"
-                        className="h-8 w-8 rounded-full shadow-lg border-primary/50"
+                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-primary/50 bg-background/90 backdrop-blur-sm hover:scale-110 transition-transform touch-manipulation"
                         onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
                         aria-label="Extend session"
                       >
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
-                        className="h-8 w-8 rounded-full shadow-lg border-red-500/50"
+                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-red-500/50 bg-background/90 backdrop-blur-sm hover:scale-110 transition-transform touch-manipulation"
                         onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
                         aria-label="End session"
                       >
-                        <Square className="w-4 h-4" />
+                        <Square className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                       </Button>
                     </div>
                   )}

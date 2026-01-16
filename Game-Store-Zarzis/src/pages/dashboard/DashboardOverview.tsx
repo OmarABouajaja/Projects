@@ -164,37 +164,38 @@ Game Store Zarzis - Intelligence Business
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <h1 className="font-display text-3xl font-bold mb-2">
+              <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
                 {isOwner ? t("dashboard.financial_overview") : t("dashboard.operational_dashboard")}
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 {isOwner
                   ? t("dashboard.financial_analysis_desc")
                   : `${t("dashboard.welcome")} ${user?.email?.split('@')[0]} ! ${t("dashboard.manage_daily")}`
                 }
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {!isOwner && <AttendanceToggle />}
               {isOwner && (
                 <Button variant="outline" size="sm" className="glass-card gap-2 neon-purple-glow" onClick={handleShareRecap}>
                   <Activity className="w-4 h-4 text-purple-400" />
-                  {t("dashboard.share_recap")}
+                  <span className="hidden sm:inline">{t("dashboard.share_recap")}</span>
                 </Button>
               )}
-              <Badge variant="outline" className="px-3 py-1">
-                <Activity className="w-4 h-4 mr-2" />
-                {t("dashboard.real_time")}
+              <Badge variant="outline" className="px-2 sm:px-3 py-1 text-xs sm:text-sm">
+                <Activity className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{t("dashboard.real_time")}</span>
+                <span className="sm:hidden">Live</span>
               </Badge>
             </div>
           </div>
 
           {/* KPI Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {isOwner ? (
               <>
                 <motion.div
@@ -203,24 +204,24 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.1 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-green-500 neon-cyan-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
                             {timeRange === 'today' ? t("dashboard.chart.net_profit_today") :
                               timeRange === 'weekly' ? t("dashboard.chart.net_profit_weekly") :
                                 timeRange === 'monthly' ? t("dashboard.chart.net_profit_monthly") : t("dashboard.chart.net_profit_yearly")}
                           </p>
-                          <p className={`text-2xl font-bold ${summary.profit.net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                          <p className={`text-xl sm:text-2xl font-bold ${summary.profit.net >= 0 ? "text-green-600" : "text-red-600"}`}>
                             {summary.profit.net.toFixed(3)} DT
                           </p>
-                          <div className="flex items-center mt-1">
-                            <span className="text-xs text-muted-foreground mr-1">{t("dashboard.gross")}: {summary.revenue.total.toFixed(2)}</span>
-                            <span className="text-xs text-red-400">{t("dashboard.exp")}: {summary.expenses.total.toFixed(2)}</span>
+                          <div className="flex items-center mt-1 text-[10px] sm:text-xs">
+                            <span className="text-muted-foreground mr-1 truncate">{t("dashboard.gross")}: {summary.revenue.total.toFixed(2)}</span>
+                            <span className="text-red-400 truncate">{t("dashboard.exp")}: {summary.expenses.total.toFixed(2)}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-green-100 dark:bg-green-500/20 rounded-full">
-                          <DollarSign className="w-6 h-6 text-green-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-500/20 rounded-full flex-shrink-0">
+                          <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -233,20 +234,20 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.2 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-blue-500 neon-magenta-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.profit_margin")}</p>
-                          <p className="text-2xl font-bold text-blue-600">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.profit_margin")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-blue-600">
                             {summary.profit.margin.toFixed(1)}%
                           </p>
                           <div className="flex items-center mt-1">
-                            <TrendingUp className="w-4 h-4 text-blue-500 mr-1" />
-                            <span className="text-xs text-blue-500">{summary.profit.margin > 15 ? t("dashboard.healthy") : t("dashboard.low_margin")}</span>
+                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-blue-500 truncate">{summary.profit.margin > 15 ? t("dashboard.healthy") : t("dashboard.low_margin")}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-full">
-                          <Percent className="w-6 h-6 text-blue-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-blue-100 dark:bg-blue-500/20 rounded-full flex-shrink-0">
+                          <Percent className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -259,18 +260,18 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.3 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-purple-500 neon-purple-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.active_clients")}</p>
-                          <p className="text-2xl font-bold text-purple-600">{clients?.length || 0}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.active_clients")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-purple-600">{clients?.length || 0}</p>
                           <div className="flex items-center mt-1">
-                            <Users className="w-4 h-4 text-purple-500 mr-1" />
-                            <span className="text-xs text-purple-500">{t("dashboard.total_registered")}</span>
+                            <Users className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-purple-500 truncate">{t("dashboard.total_registered")}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-purple-100 dark:bg-purple-500/20 rounded-full">
-                          <Users className="w-6 h-6 text-purple-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-500/20 rounded-full flex-shrink-0">
+                          <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -283,20 +284,20 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.4 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-orange-500 neon-magenta-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.top_product")}</p>
-                          <p className="text-2xl font-bold text-orange-600 truncate max-w-[150px]">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.top_product")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-orange-600 truncate">
                             {topProducts[0]?.name || t("common.cancel")}
                           </p>
                           <div className="flex items-center mt-1">
-                            <TrendingUp className="w-4 h-4 text-orange-500 mr-1" />
-                            <span className="text-xs text-orange-500">{topProducts[0]?.count || 0} {t("sales.quantity")}</span>
+                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-orange-500 truncate">{topProducts[0]?.count || 0} {t("sales.quantity")}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-orange-100 dark:bg-orange-500/20 rounded-full">
-                          <Star className="w-6 h-6 text-orange-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-500/20 rounded-full flex-shrink-0">
+                          <Star className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -311,20 +312,20 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.1 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-green-500 neon-cyan-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.today_revenue")}</p>
-                          <p className="text-2xl font-bold text-green-600">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.today_revenue")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-green-600">
                             {(todayStats?.total_revenue || 0).toFixed(3)} DT
                           </p>
                           <div className="flex items-center mt-1">
-                            <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-                            <span className="text-xs text-green-500">+8.2%</span>
+                            <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-green-500">+8.2%</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-green-100 dark:bg-green-500/20 rounded-full">
-                          <DollarSign className="w-6 h-6 text-green-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-500/20 rounded-full flex-shrink-0">
+                          <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -337,20 +338,20 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.2 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-blue-500 neon-magenta-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.gaming_revenue")}</p>
-                          <p className="text-2xl font-bold text-blue-600">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.gaming_revenue")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-blue-600">
                             {(todayStats?.gaming_revenue || 0).toFixed(3)} DT
                           </p>
                           <div className="flex items-center mt-1">
-                            <Gamepad2 className="w-4 h-4 text-blue-500 mr-1" />
-                            <span className="text-xs text-blue-500">{activeSessions?.length || 0} {t("dashboard.active_sessions")}</span>
+                            <Gamepad2 className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-blue-500 truncate">{activeSessions?.length || 0} {t("dashboard.active_sessions")}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-full">
-                          <Gamepad2 className="w-6 h-6 text-blue-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-blue-100 dark:bg-blue-500/20 rounded-full flex-shrink-0">
+                          <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -363,22 +364,22 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.3 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-purple-500 neon-purple-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.available_consoles")}</p>
-                          <p className="text-2xl font-bold text-purple-600">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.available_consoles")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-purple-600">
                             {availableConsoles}/{totalConsoles}
                           </p>
                           <div className="flex items-center mt-1">
-                            <CheckCircle2 className="w-4 h-4 text-purple-500 mr-1" />
-                            <span className="text-xs text-purple-500">
+                            <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-purple-500 truncate">
                               {totalConsoles > 0 ? Math.round((availableConsoles / totalConsoles) * 100) : 0}% {t("dashboard.available")}
                             </span>
                           </div>
                         </div>
-                        <div className="p-3 bg-purple-100 dark:bg-purple-500/20 rounded-full">
-                          <CheckCircle2 className="w-6 h-6 text-purple-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-purple-100 dark:bg-purple-500/20 rounded-full flex-shrink-0">
+                          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -391,20 +392,20 @@ Game Store Zarzis - Intelligence Business
                   transition={{ delay: 0.4 }}
                 >
                   <Card className="glass-card glossy-reflection border-l-4 border-l-orange-500 neon-magenta-glow">
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{t("dashboard.pending_services")}</p>
-                          <p className="text-2xl font-bold text-orange-600">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.pending_services")}</p>
+                          <p className="text-xl sm:text-2xl font-bold text-orange-600">
                             {pendingServices}
                           </p>
                           <div className="flex items-center mt-1">
-                            <Wrench className="w-4 h-4 text-orange-500 mr-1" />
-                            <span className="text-xs text-orange-500">{t("dashboard.to_process")}</span>
+                            <Wrench className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 mr-1" />
+                            <span className="text-[10px] sm:text-xs text-orange-500 truncate">{t("dashboard.to_process")}</span>
                           </div>
                         </div>
-                        <div className="p-3 bg-orange-100 dark:bg-orange-500/20 rounded-full">
-                          <Wrench className="w-6 h-6 text-orange-600 neon-icon" />
+                        <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-500/20 rounded-full flex-shrink-0">
+                          <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 neon-icon" />
                         </div>
                       </div>
                     </CardContent>
@@ -436,7 +437,7 @@ Game Store Zarzis - Intelligence Business
                 )}
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] w-full">
+                <div className="h-[250px] sm:h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueData}>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.2} stroke="hsl(var(--border))" />
@@ -487,7 +488,7 @@ Game Store Zarzis - Intelligence Business
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                   {sales && sales.length > 0 ? (
                     sales.slice(0, 10).map((sale) => (
                       <div key={sale.id} className="flex items-center justify-between p-3 rounded-lg bg-black/20 border border-white/5 hover:bg-black/40 transition-colors">
@@ -613,13 +614,13 @@ Game Store Zarzis - Intelligence Business
                 <Settings className="w-5 h-5 text-primary" />
                 {t("dashboard.management_overview")}
               </h2>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <motion.div whileHover={{ y: -5, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="glass-card glossy-reflection border-none neon-magenta-glow cursor-pointer"
                     onClick={() => window.location.href = '/dashboard/products'}>
-                    <CardContent className="p-4 text-center">
-                      <Zap className="w-8 h-8 mx-auto mb-2 text-secondary neon-icon" />
-                      <span className="font-medium">{t("dashboard.products")}</span>
+                    <CardContent className="p-3 sm:p-4 text-center">
+                      <Zap className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-secondary neon-icon" />
+                      <span className="font-medium text-sm sm:text-base">{t("dashboard.products")}</span>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -627,9 +628,9 @@ Game Store Zarzis - Intelligence Business
                 <motion.div whileHover={{ y: -5, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="glass-card glossy-reflection border-none neon-cyan-glow cursor-pointer"
                     onClick={() => window.location.href = '/dashboard/pricing'}>
-                    <CardContent className="p-4 text-center">
-                      <DollarSign className="w-8 h-8 mx-auto mb-2 text-accent neon-icon" />
-                      <span className="font-medium">{t("dashboard.pricing")}</span>
+                    <CardContent className="p-3 sm:p-4 text-center">
+                      <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-accent neon-icon" />
+                      <span className="font-medium text-sm sm:text-base">{t("dashboard.pricing")}</span>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -637,9 +638,9 @@ Game Store Zarzis - Intelligence Business
                 <motion.div whileHover={{ y: -5, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="glass-card glossy-reflection border-none neon-purple-glow cursor-pointer"
                     onClick={() => window.location.href = '/dashboard/staff'}>
-                    <CardContent className="p-4 text-center">
-                      <Users className="w-8 h-8 mx-auto mb-2 text-primary neon-icon" />
-                      <span className="font-medium">{t("dashboard.staff")}</span>
+                    <CardContent className="p-3 sm:p-4 text-center">
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-primary neon-icon" />
+                      <span className="font-medium text-sm sm:text-base">{t("dashboard.staff")}</span>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -647,9 +648,9 @@ Game Store Zarzis - Intelligence Business
                 <motion.div whileHover={{ y: -5, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="glass-card glossy-reflection border-none neon-magenta-glow cursor-pointer"
                     onClick={() => window.location.href = '/dashboard/expenses'}>
-                    <CardContent className="p-4 text-center">
-                      <Receipt className="w-8 h-8 mx-auto mb-2 text-red-500 neon-icon" />
-                      <span className="font-medium">{t("dashboard.expenses")}</span>
+                    <CardContent className="p-3 sm:p-4 text-center">
+                      <Receipt className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-red-500 neon-icon" />
+                      <span className="font-medium text-sm sm:text-base">{t("dashboard.expenses")}</span>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -657,9 +658,9 @@ Game Store Zarzis - Intelligence Business
                 <motion.div whileHover={{ y: -5, scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Card className="glass-card glossy-reflection border-none neon-purple-glow cursor-pointer"
                     onClick={() => window.location.href = '/dashboard/blog'}>
-                    <CardContent className="p-4 text-center">
-                      <BarChart3 className="w-8 h-8 mx-auto mb-2 text-purple-500 neon-icon" />
-                      <span className="font-medium">{t("dashboard.blog")}</span>
+                    <CardContent className="p-3 sm:p-4 text-center">
+                      <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-purple-500 neon-icon" />
+                      <span className="font-medium text-sm sm:text-base">{t("dashboard.blog")}</span>
                     </CardContent>
                   </Card>
                 </motion.div>

@@ -110,15 +110,15 @@ const ClientsManagement = () => {
     <ProtectedRoute>
       <DashboardLayout>
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
+                <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
                   {t("sidebar.client_management")}
                 </h1>
                 <HelpTooltip content={t('help.clients')} />
               </div>
-              <p className="text-muted-foreground mt-1 text-lg">
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base lg:text-lg">
                 {t("client.manage_desc")}
               </p>
             </div>
@@ -129,39 +129,39 @@ const ClientsManagement = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-primary/20">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <Users className="w-6 h-6 text-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-primary/20">
+              <div className="flex justify-center mb-2 sm:mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
               </div>
-              <p className="text-4xl font-display font-bold text-primary mb-1">
+              <p className="text-3xl sm:text-4xl font-display font-bold text-primary mb-1">
                 {clients?.length || 0}
               </p>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total")}</p>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total")}</p>
             </div>
-            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-secondary/20">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                  <Star className="w-6 h-6 text-secondary" />
+            <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-secondary/20">
+              <div className="flex justify-center mb-2 sm:mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
+                  <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />
                 </div>
               </div>
-              <p className="text-4xl font-display font-bold text-secondary mb-1">
+              <p className="text-3xl sm:text-4xl font-display font-bold text-secondary mb-1">
                 {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
               </p>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
             </div>
-            <div className="glass-card rounded-2xl p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-accent/20">
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                  <Gamepad2 className="w-6 h-6 text-accent" />
+            <div className="glass-card rounded-2xl p-4 sm:p-6 text-center group hover:scale-[1.02] transition-all duration-300 border-accent/20">
+              <div className="flex justify-center mb-2 sm:mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                 </div>
               </div>
-              <p className="text-4xl font-display font-bold text-accent mb-1">
+              <p className="text-3xl sm:text-4xl font-display font-bold text-accent mb-1">
                 {clients?.reduce((sum, c) => sum + (c.total_games_played || 0), 0) || 0}
               </p>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_games")}</p>
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_games")}</p>
             </div>
           </div>
 
@@ -177,7 +177,7 @@ const ClientsManagement = () => {
           </div>
 
           {/* Clients List */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredClients?.map((client) => (
               <Card key={client.id} className="glass-card group hover:border-primary/50 transition-all duration-300">
                 <CardContent className="p-6">
@@ -250,7 +250,7 @@ const ClientsManagement = () => {
 
         {/* Create Client Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent className="glass-card border-primary/30 max-w-md overflow-hidden p-0">
+          <DialogContent className="glass-card border-primary/30 max-w-[95vw] sm:max-w-md overflow-hidden p-0">
             <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
             <div className="p-6">
               <DialogHeader className="mb-6">
@@ -271,7 +271,7 @@ const ClientsManagement = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ahmed Mansour"
-                      className="glass-card pl-10 h-11 focus-visible:ring-primary/50"
+                      className="glass-card pl-10 h-10 sm:h-11 focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -284,7 +284,7 @@ const ClientsManagement = () => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="23 290 065"
-                      className="glass-card pl-10 h-11 font-mono focus-visible:ring-primary/50"
+                      className="glass-card pl-10 h-10 sm:h-11 font-mono focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -296,7 +296,7 @@ const ClientsManagement = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="client@email.com"
                     type="email"
-                    className="glass-card h-11 focus-visible:ring-primary/50"
+                    className="glass-card h-10 sm:h-11 focus-visible:ring-primary/50"
                   />
                 </div>
 
@@ -306,7 +306,7 @@ const ClientsManagement = () => {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="e.g. Favorite game: FIFA"
-                    className="glass-card h-11 focus-visible:ring-primary/50"
+                    className="glass-card h-10 sm:h-11 focus-visible:ring-primary/50"
                   />
                 </div>
 
