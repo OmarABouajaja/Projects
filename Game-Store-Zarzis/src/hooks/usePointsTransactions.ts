@@ -61,7 +61,7 @@ export const useCreatePointsTransaction = () => {
       // Update client points balance
       await supabase
         .from("clients")
-        .update({ points_balance: newBalance })
+        .update({ points: newBalance })
         .eq("id", transaction.client_id);
 
       return data;
@@ -91,13 +91,16 @@ export const useRedeemPoints = () => {
       // Check current balance
       const { data: client } = await supabase
         .from("clients")
-        .select("points_balance")
+        .select("points")
         .eq("id", client_id)
         .single();
 
-      if (!client || client.points_balance < points_to_redeem) {
+      if (!client || (client.points || 0) < points_to_redeem) {
         throw new Error("Insufficient points balance");
       }
+
+      const currentPoints = client.points || 0;
+      const newPoints = currentPoints - points_to_redeem;
 
       const { data, error } = await supabase
         .from("points_transactions")
@@ -105,7 +108,7 @@ export const useRedeemPoints = () => {
           client_id,
           transaction_type: "spent",
           amount: -points_to_redeem,
-          balance_after: client.points_balance - points_to_redeem,
+          balance_after: newPoints,
           description,
           confirmed_by_staff: true,
           confirmed_by_client: false,
@@ -119,7 +122,7 @@ export const useRedeemPoints = () => {
       // Update client points balance
       await supabase
         .from("clients")
-        .update({ points_balance: client.points_balance - points_to_redeem })
+        .update({ points: newPoints })
         .eq("id", client_id);
 
       return data;
