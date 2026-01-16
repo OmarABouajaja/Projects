@@ -1011,12 +1011,29 @@ const SessionsManagement = () => {
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => setGamesInSession(Math.max(1, gamesInSession - 1))}
+                          onClick={() => {
+                            // Calculate elapsed time in minutes
+                            const startTime = new Date(selectedSession.start_time).getTime();
+                            const now = new Date().getTime();
+                            const elapsedMinutes = (now - startTime) / 60000;
+
+                            // Check "avg tarif time" (game duration from pricing)
+                            // Default to 0 if not set (which means no threshold, so maybe strict? or loose? 
+                            // User said: "put 0 only if the avg tarif time isn't passed". 
+                            // If duration is missing, we assume we can't verify, so enforce 1 to be safe? 
+                            // Or maybe pricing.game_duration_minutes is standard 30?
+                            const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
+
+                            // Allow 0 only if elapsed time is LESS than the tariff duration
+                            const minGames = (tarifDuration > 0 && elapsedMinutes < tarifDuration) ? 0 : 1;
+
+                            setGamesInSession(Math.max(minGames, gamesInSession - 1));
+                          }}
                           aria-label="Decrease games"
                         >
                           -
                         </Button>
-                        <span className="font-display text-2xl font-bold w-12 text-center">
+                        <span className={`font-display text-2xl font-bold w-12 text-center ${gamesInSession === 0 ? 'text-muted-foreground' : ''}`}>
                           {gamesInSession}
                         </span>
                         <Button
