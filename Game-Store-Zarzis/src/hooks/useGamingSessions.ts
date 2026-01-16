@@ -24,11 +24,12 @@ export interface GamingSession {
   notes: string | null;
 }
 
-export const useActiveSessions = () => {
+export const useSessionsSubscription = () => {
   const queryClient = useQueryClient();
 
-  // Set up realtime subscription
   useEffect(() => {
+    let debounceTimer: NodeJS.Timeout;
+
     const channel = supabase
       .channel("sessions-realtime")
       .on(
@@ -39,17 +40,24 @@ export const useActiveSessions = () => {
           table: "gaming_sessions",
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
-          queryClient.invalidateQueries({ queryKey: ["consoles"] });
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
+            queryClient.invalidateQueries({ queryKey: ["consoles"] });
+            queryClient.invalidateQueries({ queryKey: ["today-sessions"] });
+          }, 1000);
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      clearTimeout(debounceTimer);
     };
   }, [queryClient]);
+};
 
+export const useActiveSessions = () => {
   return useQuery({
     queryKey: ["active-sessions"],
     queryFn: async () => {
