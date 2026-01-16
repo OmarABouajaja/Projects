@@ -597,6 +597,46 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       const newTransaction = mapPointsTransactionFromDB(data);
       setPointsTransactions(prev => [newTransaction, ...prev]);
+
+      // Update Client Balance Automatically
+      if (transaction.client_id) {
+        // Determine the actual point change (handle redemptions vs earnings)
+        // If type is 'redeemed', ensure we subtract. If 'earned', we add.
+        // We use Math.abs to ensure 'redeemed' always subtracts regardless of input sign.
+        let pointsChange = transaction.points;
+        if (transaction.type === 'redeemed') {
+          pointsChange = -Math.abs(transaction.points);
+        } else if (transaction.type === 'earned') {
+          pointsChange = Math.abs(transaction.points);
+        }
+
+        // Fetch current points to ensure atomicity/freshness (or closest to it)
+        const { data: clientData } = await supabase
+          .from(TABLES.CLIENTS)
+          .select('points')
+          .eq('id', transaction.client_id)
+          .single();
+
+        const currentPoints = clientData?.points || 0;
+        const newTotal = currentPoints + pointsChange;
+
+        // Update DB
+        const { error: updateError } = await supabase
+          .from(TABLES.CLIENTS)
+          .update({
+            points: newTotal,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', transaction.client_id);
+
+        if (!updateError) {
+          // Update Local State
+          setClients(prev => prev.map(c =>
+            c.id === transaction.client_id ? { ...c, points: newTotal } : c
+          ));
+        }
+      }
+
     } catch (error) {
       console.error('Error adding points transaction:', error);
     }
