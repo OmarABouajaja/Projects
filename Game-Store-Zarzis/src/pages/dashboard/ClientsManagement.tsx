@@ -395,7 +395,10 @@ const ClientsManagement = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">Current Balance</p>
-                    <p className="font-bold text-xl text-primary">{selectedClient.points || 0} pts</p>
+                    {/* Find fresh client data from the list to show live balance */}
+                    <p className="font-bold text-xl text-primary">
+                      {(clients?.find(c => c.id === selectedClient.id)?.points ?? selectedClient.points) || 0} pts
+                    </p>
                   </div>
                 </div>
 

@@ -314,7 +314,7 @@ const ClientAuth = () => {
       </div>
 
       {/* Auth Form Side */}
-      <div className="flex flex-col items-center justify-center p-6 sm:p-12 lg:p-24 relative">
+      <div className="flex flex-col items-center justify-center p-4 sm:p-12 lg:p-24 relative">
         <div className="w-full max-w-sm space-y-8">
           {/* Mobile Header / Logo */}
           <div className="flex flex-col items-center gap-4 text-center">

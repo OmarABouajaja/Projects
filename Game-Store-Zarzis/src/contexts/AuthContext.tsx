@@ -185,8 +185,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return;
     try {
       const { data: sessionData, error: sessionError } = await supabase
-        .from('staff_sessions')
-        .insert({ user_id: user.id })
+        .from('staff_shifts')
+        .insert({ staff_id: user.id })
         .select()
         .single();
 
@@ -204,8 +204,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (sessionId) {
       try {
         await supabase
-          .from('staff_sessions')
-          .update({ clock_out: new Date().toISOString() })
+          .from('staff_shifts')
+          .update({ check_out: new Date().toISOString() })
           .eq('id', sessionId);
         localStorage.removeItem('current_staff_session_id');
         setIsClockedIn(false);
@@ -225,8 +225,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Auto-clock in for all staff (removed work-station restriction as requested by user feedback)
       try {
         const { data: sessionData } = await supabase
-          .from('staff_sessions')
-          .insert({ user_id: data.user.id })
+          .from('staff_shifts')
+          .insert({ staff_id: data.user.id })
           .select()
           .single();
 

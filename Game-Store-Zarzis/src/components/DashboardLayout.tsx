@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { useActiveSessions } from "@/hooks/useGamingSessions";
+import { useActiveSessions, useSessionsSubscription } from "@/hooks/useGamingSessions";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { UserGuide } from "@/components/onboarding/UserGuide";
 import Interactive3DBackground from "@/components/Interactive3DBackground";
@@ -74,6 +74,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [renderKey, setRenderKey] = useState(0);
+
+  // Activate Realtime Subscription (Debounced)
+  useSessionsSubscription();
 
   // High-level alarm state
   const { data: activeSessions } = useActiveSessions();
@@ -235,12 +238,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           // Glassmorphism + Border
           "bg-card/80 backdrop-blur-xl border-r border-border/50 shadow-2xl",
           isRTL ? "right-0 border-l" : "left-0 border-r",
-          // Desktop behavior
-          "hidden md:flex",
-          collapsed ? "md:w-20" : "md:w-64", // Adjusted width for cleaner look
-          // Mobile behavior
-          mobileOpen && "translate-x-0 w-72",
-          !mobileOpen && "md:translate-x-0 transition-transform"
+
+          // Layout behavior
+          "flex", // Always flex, manage visibility via transform
+          collapsed ? "md:w-20" : "md:w-64", // Desktop width
+          // Mobile state
+          !mobileOpen && "-translate-x-full md:translate-x-0",
+          mobileOpen && "translate-x-0 w-72 shadow-2xl"
         )}
       >
         {/* Header Logo Area */}
