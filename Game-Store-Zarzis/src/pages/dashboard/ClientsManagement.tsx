@@ -201,7 +201,7 @@ const ClientsManagement = () => {
                     )}
                   </div>
 
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-3 mb-6 select-none">
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Gamepad2 className="w-4 h-4" />

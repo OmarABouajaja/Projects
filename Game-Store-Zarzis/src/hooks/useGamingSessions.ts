@@ -204,11 +204,39 @@ export const useEndSession = () => {
         .eq("id", console_id);
 
       if (consoleError) throw consoleError;
+
+      // Update Client Stats (Total Spent & Games Played)
+      if (client_id) {
+        const { data: clientData } = await supabase
+          .from("clients")
+          .select("total_spent, total_games_played")
+          .eq("id", client_id)
+          .single();
+
+        if (clientData) {
+          const currentSpent = clientData.total_spent || 0;
+          const currentGames = clientData.total_games_played || 0;
+
+          // For 'games_played', we use the value from the session (if Per Game) or 1 (if Hourly/Time based)
+          // Adjust logic as needed. Assuming 1 session = 1 game play event if games_played is 0.
+          const gamesToAdd = (games_played && games_played > 0) ? games_played : 1;
+
+          await supabase
+            .from("clients")
+            .update({
+              total_spent: currentSpent + total_amount,
+              total_games_played: currentGames + gamesToAdd,
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", client_id);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["active-sessions"] });
       queryClient.invalidateQueries({ queryKey: ["consoles"] });
       queryClient.invalidateQueries({ queryKey: ["today-sessions"] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] }); // Refresh clients list
     },
   });
 };
