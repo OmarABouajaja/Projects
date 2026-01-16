@@ -327,6 +327,7 @@ const ClientsManagement = () => {
 
                 <div className="pt-2">
                   <Button
+                    type="button"
                     variant="hero"
                     className="w-full h-12 text-lg font-bold neon-cyan-glow"
                     onClick={handleCreateClient}
