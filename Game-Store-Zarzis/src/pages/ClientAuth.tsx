@@ -39,6 +39,7 @@ const ClientAuth = () => {
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true); // Default to persistent login
 
   // Auto-login check (ensure persistence)
   useEffect(() => {
