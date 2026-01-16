@@ -73,7 +73,7 @@ const StaffManagement = () => {
         // Get profile data
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("full_name, created_at, is_active, phone")
+          .select("full_name, created_at, is_active, phone, email, last_sign_in_at")
           .eq("id", role.user_id)
           .single();
 
