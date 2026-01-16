@@ -27,11 +27,14 @@ export const lazyWithRetry = <T extends ComponentType<any>>(
 
                 // Nuclear option: Unregister SW to ensure fresh index.html
                 if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then((registrations) => {
-                        for (const registration of registrations) {
-                            registration.unregister();
+                    try {
+                        const validations = await navigator.serviceWorker.getRegistrations();
+                        for (const registration of validations) {
+                            await registration.unregister();
                         }
-                    });
+                    } catch (e) {
+                        console.error('SW unregister failed:', e);
+                    }
                 }
 
                 const url = new URL(window.location.href);
