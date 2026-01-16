@@ -1075,9 +1075,18 @@ const SessionsManagement = () => {
                     </div>
                   )}
                   {selectedClientForSession && storeSettingsData?.points_system_enabled !== false && (
-                    <p className="text-xs text-green-500 font-medium">
-                      Points to be earned: {estimatedPoints} pts
-                    </p>
+                    <div className="bg-green-500/10 p-3 rounded-lg border border-green-500/20 text-xs space-y-1">
+                      <div className="flex justify-between items-center text-green-700 dark:text-green-400">
+                        <span>Current Balance:</span>
+                        <span className="font-bold">
+                          {(clients?.find(c => c.id === selectedClientForSession.id)?.points ?? selectedClientForSession.points) || 0} pts
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-green-600 dark:text-green-500 font-medium border-t border-green-500/20 pt-1 mt-1">
+                        <span>Points to be earned:</span>
+                        <span>+{estimatedPoints} pts</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
