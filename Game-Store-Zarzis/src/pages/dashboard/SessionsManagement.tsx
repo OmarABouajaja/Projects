@@ -469,7 +469,7 @@ const SessionsManagement = () => {
             total_amount: item.unit_price * item.quantity,
             payment_method: "cash",
             points_used: 0,
-            points_earned: item.product?.points_earned ? (item.product.points_earned * item.quantity) : 0,
+            points_earned: (item.product as any)?.points_earned ? ((item.product as any).points_earned * item.quantity) : 0,
             client_id: clientId || null,
             staff_id: user?.id || '',
             notes: `Session Consumption #${session.id}`,
@@ -644,14 +644,15 @@ const SessionsManagement = () => {
           <SchemaStatus />
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-secondary/10 to-transparent p-4 sm:p-5 rounded-2xl border border-border/30">
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-display text-2xl sm:text-3xl font-bold mb-1">Gaming Sessions</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 mb-1">
+                <Gamepad2 className="w-6 h-6 text-primary" />
+                Gaming Sessions
                 <HelpTooltip content={t('help.sessions')} />
-              </div>
+              </h1>
               <p className="text-muted-foreground text-sm">
-                Manage PS4/PS5 sessions.
+                Manage PS4/PS5 sessions real-time.
               </p>
             </div>
 
@@ -661,7 +662,7 @@ const SessionsManagement = () => {
                 variant="outline"
                 size="icon"
                 onClick={toggleSound}
-                className={isSoundMuted ? "text-muted-foreground" : "text-primary border-primary/20 bg-primary/10"}
+                className={isSoundMuted ? "text-muted-foreground bg-background/50" : "text-primary border-primary/20 bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]"}
                 title={isSoundMuted ? "Unmute Alarms" : "Mute Alarms"}
               >
                 {isSoundMuted ? <BellOff className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
@@ -773,26 +774,30 @@ const SessionsManagement = () => {
               const defaultPricing = pricing?.find(p => p.id === defaultId);
 
               return (
-                <Card key={type} className="glass-card border-none bg-gradient-to-br from-primary/5 to-secondary/5">
-                  <CardContent className="p-4 flex items-center justify-between">
+                <Card key={type} className="glass-card border-none bg-gradient-to-br from-primary/5 to-secondary/5 overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-8 bg-primary/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-primary/20 transition-all duration-700" />
+                  <CardContent className="p-4 flex items-center justify-between relative z-10">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Zap className="w-6 h-6 text-primary fill-primary" />
+                      <div className="w-12 h-12 rounded-xl bg-background/40 backdrop-blur-md border border-white/10 flex items-center justify-center shadow-lg">
+                        <Zap className="w-6 h-6 text-primary fill-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-sm text-muted-foreground">Raccourci {type} (1-9)</h3>
+                        <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-1">Quick Launch {type}</h3>
                         {defaultPricing ? (
-                          <p className="font-bold text-lg">{defaultPricing.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-black text-lg group-hover:text-primary transition-colors">{defaultPricing.name}</p>
+                            <Badge variant="outline" className="text-[9px] h-4 px-1 bg-background/30">Auto</Badge>
+                          </div>
                         ) : (
-                          <p className="text-sm italic text-muted-foreground">Non configuré</p>
+                          <p className="text-sm italic text-muted-foreground">Not configured</p>
                         )}
                       </div>
                     </div>
                     <div className="text-right">
                       {defaultPricing && (
                         <>
-                          <p className="font-bold text-xl text-primary">{defaultPricing.price.toFixed(3)} <span className="text-sm">DT</span></p>
-                          <p className="text-[10px] uppercase text-muted-foreground">{defaultPricing.price_type === 'hourly' ? '/ Heure' : '/ Partie'}</p>
+                          <p className="font-black text-2xl text-primary drop-shadow-sm">{defaultPricing.price.toFixed(3)} <span className="text-sm font-bold text-muted-foreground">DT</span></p>
+                          <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground/60">{defaultPricing.price_type === 'hourly' ? 'PER HOUR' : 'PER GAME'}</p>
                         </>
                       )}
                     </div>
