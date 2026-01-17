@@ -14,6 +14,7 @@ export interface CreateStaffData {
     role: 'owner' | 'worker';
     full_name: string;
     phone?: string;
+    skip_email?: boolean;
 }
 
 /**

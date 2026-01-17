@@ -129,6 +129,7 @@ class CreateStaffRequest(BaseModel):
     role: str # 'owner' or 'worker'
     phone: Optional[str] = None
     full_name: Optional[str] = "Staff Member"
+    skip_email: bool = False
 
 
 @router.post("/staff")
@@ -213,11 +214,13 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
         # We import here to avoid circular dependencies if simple structure
         from email_service import send_staff_invitation
         
-        email_sent = send_staff_invitation(
-            email=request_data.email,
-            role=request_data.role,
-            password=request_data.password
-        )
+        email_sent = False
+        if not request_data.skip_email:
+            email_sent = send_staff_invitation(
+                email=request_data.email,
+                role=request_data.role,
+                password=request_data.password
+            )
         
         return {
             "status": "success", 

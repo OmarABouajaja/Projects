@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee, Utensils } from "lucide-react";
+import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee, Utensils, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useData } from "@/contexts/DataContext";
@@ -64,7 +64,7 @@ const SessionsManagement = () => {
   const { gameShortcuts, deleteGameShortcut, isLoading: isDataLoading, clients } = useData();
 
   // Consumption Data for Selected Session
-  const { data: sessionConsumptions } = useSessionConsumptions(selectedSession?.id);
+  const { data: sessionConsumptions, isLoading: isConsumptionsLoading } = useSessionConsumptions(selectedSession?.id);
   const deleteSessionConsumption = useDeleteSessionConsumption();
   const createSale = useCreateSale();
 
@@ -1079,12 +1079,16 @@ const SessionsManagement = () => {
                       <Utensils className="w-4 h-4 text-secondary" /> Consommations (Tabs)
                     </h4>
                     <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                      {sessionConsumptions.map((item: any) => (
-                        <div key={item.id} className="flex justify-between text-xs sm:text-sm">
-                          <span>{item.quantity}x {item.product?.name || 'Item'}</span>
-                          <span className="font-mono">{((item.unit_price * item.quantity).toFixed(3))}</span>
-                        </div>
-                      ))}
+                      {isConsumptionsLoading ? (
+                        <div className="flex justify-center py-2"><Loader2 className="animate-spin w-5 h-5 text-primary" /></div>
+                      ) : (
+                        sessionConsumptions?.map((item: any) => (
+                          <div key={item.id} className="flex justify-between text-xs sm:text-sm">
+                            <span>{item.quantity}x {item.product?.name || 'Item'}</span>
+                            <span className="font-mono">{((item.unit_price * item.quantity).toFixed(3))}</span>
+                          </div>
+                        ))
+                      )}
                     </div>
                     <div className="border-t border-white/10 mt-2 pt-2 flex justify-between font-bold text-sm">
                       <span>Subtotal Consumables:</span>
@@ -1203,10 +1207,10 @@ const SessionsManagement = () => {
                   variant="destructive"
                   className="w-full"
                   onClick={handleEndSession}
-                  disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone))}
+                  disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone)) || isConsumptionsLoading}
                 >
-                  <Square className="w-4 h-4 mr-2" />
-                  {endSession.isPending ? "Ending..." : "Stop & Calculate Payment"}
+                  {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Square className="w-4 h-4 mr-2" />}
+                  {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading Data..." : "Stop & Calculate Payment"}
                 </Button>
               </div>
             )}

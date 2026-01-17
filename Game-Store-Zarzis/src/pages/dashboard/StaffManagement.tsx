@@ -60,40 +60,45 @@ const StaffManagement = () => {
   const fetchStaffMembers = async () => {
     try {
       setIsLoading(true);
+      // Bulk fetch roles
       const { data: userRoles, error: rolesError } = await supabase
         .from("user_roles")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (rolesError) throw rolesError;
+      if (!userRoles || userRoles.length === 0) {
+        setStaffMembers([]);
+        return;
+      }
 
-      const staffData: StaffMember[] = [];
+      // Bulk fetch profiles
+      const userIds = userRoles.map(r => r.user_id);
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select("id, full_name, created_at, is_active, phone, email, last_sign_in_at, last_active_at")
+        .in("id", userIds);
 
-      // Get user details for each role
-      for (const role of userRoles || []) {
-        // Get profile data
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("full_name, created_at, is_active, phone, email, last_sign_in_at, last_active_at")
-          .eq("id", role.user_id)
-          .single();
+      if (profilesError) console.error("Error fetching profiles:", profilesError);
+
+      const profilesMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+      const staffData: StaffMember[] = userRoles.map(role => {
+        const profileData = profilesMap.get(role.user_id);
 
         let userEmail = "Email non disponible";
         let userFullName = "Nom non disponible";
 
         // Get actual email
         if (role.user_id === user?.id) {
-          // Current logged-in user
           userEmail = user.email || userEmail;
         } else if (profileData?.email) {
-          // Email stored in profile
           userEmail = profileData.email;
         } else if (profileData?.full_name) {
-          // Use full name as fallback
           userFullName = profileData.full_name;
         }
 
-        staffData.push({
+        return {
           id: role.user_id,
           email: userEmail,
           role: role.role as "owner" | "worker",
@@ -101,10 +106,10 @@ const StaffManagement = () => {
           phone: profileData?.phone,
           created_at: profileData?.created_at || role.created_at || new Date().toISOString(),
           last_sign_in: role.user_id === user?.id ? user.last_sign_in_at : profileData?.last_sign_in_at,
-          last_active_at: profileData?.last_active_at, // 🟢 Online status
+          last_active_at: profileData?.last_active_at,
           is_invited: (!profileData || !profileData.full_name) && role.user_id !== user?.id
-        });
-      }
+        };
+      });
 
       setStaffMembers(staffData);
     } catch (error: any) {
@@ -170,7 +175,8 @@ const StaffManagement = () => {
           password: tempPassword,
           role: formData.role,
           full_name: formData.full_name || "Staff Member",
-          phone: formData.phone
+          phone: formData.phone,
+          skip_email: skipEmail
         }, session?.access_token || "");
 
         // Copy password to clipboard
