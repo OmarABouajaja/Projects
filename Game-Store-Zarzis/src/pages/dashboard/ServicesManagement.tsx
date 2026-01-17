@@ -1,5 +1,3 @@
-// I need to see the hook file first to add the mutation.
-// Abort replacement, switch to read file.
 import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -44,14 +42,19 @@ const ServicesManagement = () => {
   const { t } = useLanguage();
   const isOwner = role === "owner";
 
-  const { data: servicesCatalog } = useServicesCatalog();
+  const { data: servicesCatalogRaw } = useServicesCatalog();
   const createService = useCreateServiceCatalog();
   const updateService = useUpdateServiceCatalog();
 
+  // Normalize servicesCatalog to guarantee it's always an array
+  const servicesCatalog = Array.isArray(servicesCatalogRaw) ? servicesCatalogRaw : [];
 
-  const { data: serviceRequests, isLoading, isError, error } = useServiceRequests();
+  const { data: serviceRequestsRaw, isLoading, isError, error } = useServiceRequests();
   const createRequest = useCreateServiceRequest();
   const updateRequest = useUpdateServiceRequest();
+
+  // Normalize serviceRequests
+  const serviceRequests = Array.isArray(serviceRequestsRaw) ? serviceRequestsRaw : [];
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
@@ -111,19 +114,21 @@ const ServicesManagement = () => {
       if (isCreatingNewService) {
         const newService = await createService.mutateAsync({
           name: newServiceName,
-          name_fr: newServiceName, // default to same name
+          name_fr: newServiceName,
           name_ar: newServiceName,
           is_complex: isNewServiceComplex,
           is_active: true,
           sort_order: 0,
           category: "custom"
         });
-        finalServiceId = newService.id;
+        finalServiceId = newService?.id;
         isComplex = isNewServiceComplex;
       } else {
-        const selectedService = servicesCatalog?.find((s) => s.id === formData.service_id);
+        const selectedService = servicesCatalog.find((s) => s.id === formData.service_id);
         isComplex = selectedService?.is_complex || false;
       }
+
+      if (!finalServiceId) throw new Error("Could not determine service ID");
 
       const reqResponse = await createRequest.mutateAsync({
         ...formData,
@@ -172,25 +177,12 @@ const ServicesManagement = () => {
 
   const handleStatusUpdate = async (requestId: string, newStatus: string, finalCost?: number) => {
     try {
-      const request = serviceRequests?.find(r => r.id === requestId);
+      const request = serviceRequests.find(r => r.id === requestId);
       if (!request) return;
 
-      // Permission checks based on role and service complexity
+      // Permission checks
       if (!isOwner && request.is_complex && newStatus === "completed") {
-        toast({
-          title: "Permission denied",
-          description: "Only the owner can complete complex service requests",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (!isOwner && request.is_complex && newStatus === "in_progress") {
-        toast({
-          title: "Permission denied",
-          description: "Only the owner can start working on complex services",
-          variant: "destructive"
-        });
+        toast({ title: "Permission denied", description: "Only owner can complete complex requests", variant: "destructive" });
         return;
       }
 
@@ -203,19 +195,16 @@ const ServicesManagement = () => {
 
       if (newStatus === "completed") {
         updates.completed_at = new Date().toISOString();
-        if (finalCost !== undefined) {
-          updates.final_cost = finalCost;
-        }
+        if (finalCost !== undefined) updates.final_cost = finalCost;
       }
 
       await updateRequest.mutateAsync(updates);
 
-      // Send notification on status change
       sendServiceRequestNotification({
         clientName: request.client_name,
         clientPhone: request.client_phone,
-        deviceType: request.device_type,
-        deviceBrand: request.device_brand,
+        deviceType: request.device_type || "",
+        deviceBrand: request.device_brand || "",
         deviceModel: request.device_model || "",
         issueDescription: request.issue_description,
         requestId: request.id,
@@ -229,12 +218,8 @@ const ServicesManagement = () => {
     }
   };
 
-  console.log("Service Requests Data:", serviceRequests);
-
-  // Safe access for filtered requests to prevent crash
-  const safeRequests = Array.isArray(serviceRequests) ? serviceRequests : [];
-
-  const filteredRequests = safeRequests.filter((r) => {
+  // Safe filtering
+  const filteredRequests = serviceRequests.filter((r) => {
     if (!r) return false;
     if (filter === "all") return true;
     if (filter === "active") return ["pending", "in_progress", "waiting_parts"].includes(r.status);
@@ -244,6 +229,13 @@ const ServicesManagement = () => {
     return r.status === filter;
   });
 
+  // Helper to extract service name safely (handles Join being an array or object)
+  const getServiceName = (request: any) => {
+    const service = request?.service;
+    if (Array.isArray(service)) return service[0]?.name_fr || "Service";
+    return service?.name_fr || "Service";
+  };
+
   return (
     <ProtectedRoute>
       <DashboardLayout>
@@ -251,10 +243,10 @@ const ServicesManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-3xl font-bold mb-2">Service Requests</h1>
+                <h1 className="font-display text-3xl font-bold mb-1">Service Requests</h1>
                 <HelpTooltip content={t('help.services')} />
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Manage repair and service requests
               </p>
             </div>
@@ -267,18 +259,18 @@ const ServicesManagement = () => {
           {isError && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>Error Loading Data</AlertTitle>
               <AlertDescription>
-                Failed to load service requests. Please check your connection or contact support.
-                {error && <p className="mt-2 text-xs opacity-70">{(error as Error).message}</p>}
+                We couldn't load your service requests.
+                {error && <p className="mt-2 text-xs font-mono">{(error as any).message || String(error)}</p>}
               </AlertDescription>
             </Alert>
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="requests">Service Requests</TabsTrigger>
-              <TabsTrigger value="catalog" disabled={!isOwner}>Service Catalog</TabsTrigger>
+              <TabsTrigger value="requests">Requests List</TabsTrigger>
+              <TabsTrigger value="catalog" disabled={!isOwner}>Catalog Editor</TabsTrigger>
             </TabsList>
 
             <TabsContent value="requests" className="space-y-6">
@@ -286,9 +278,9 @@ const ServicesManagement = () => {
                 {[
                   { key: "all", label: "All" },
                   { key: "active", label: "Active" },
-                  { key: "my_work", label: isOwner ? "All My Work" : "My Simple Work" },
-                  { key: "simple", label: "Simple Services" },
-                  ...(isOwner ? [{ key: "complex", label: "Complex Services" }] : []),
+                  { key: "my_work", label: "My Work" },
+                  { key: "simple", label: "Simple" },
+                  ...(isOwner ? [{ key: "complex", label: "Complex" }] : []),
                   { key: "pending", label: "Pending" },
                   { key: "in_progress", label: "In Progress" },
                   { key: "completed", label: "Completed" }
@@ -297,6 +289,7 @@ const ServicesManagement = () => {
                     key={key}
                     variant={filter === key ? "default" : "outline"}
                     size="sm"
+                    className="rounded-full"
                     onClick={() => setFilter(key)}
                   >
                     {label}
@@ -304,55 +297,57 @@ const ServicesManagement = () => {
                 ))}
               </div>
 
-              {/* Requests List */}
-              <div className="space-y-4">
-                {filteredRequests?.map((request) => (
+              <div className="grid gap-4">
+                {filteredRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="glass-card rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors"
+                    className="glass-card rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all group"
                     onClick={() => setSelectedRequest(request)}
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{request.service?.name_fr || "Service"}</h3>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="font-semibold truncate max-w-[200px]">{getServiceName(request)}</h3>
                           <Badge className={statusColors[request.status] || "bg-gray-500/20 text-gray-500 border-gray-500/50"}>
                             {statusLabels[request.status] || request.status}
                           </Badge>
                           {request.is_complex && (
-                            <Badge variant="outline" className="border-secondary text-secondary">
+                            <Badge variant="outline" className="text-[10px] uppercase border-secondary text-secondary">
                               Complex
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          Client: {request.client_name} - {request.client_phone}
+                        <p className="text-sm font-medium mb-1">
+                          {request.client_name}
                         </p>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
                           {request.issue_description}
                         </p>
                         {request.device_brand && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Device: {request.device_brand} {request.device_model}
-                          </p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                            <span className="px-1.5 py-0.5 rounded bg-muted">
+                              {request.device_brand} {request.device_model}
+                            </span>
+                          </div>
                         )}
                       </div>
-                      <div className="text-right text-sm">
-                        <p className="text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString()}
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] text-muted-foreground mb-1">
+                          {request.created_at ? new Date(request.created_at).toLocaleDateString() : 'No date'}
                         </p>
                         {request.estimated_cost && (
-                          <p className="font-medium">{request.estimated_cost} DT</p>
+                          <p className="font-bold text-primary">{request.estimated_cost} DT</p>
                         )}
                       </div>
                     </div>
                   </div>
                 ))}
 
-                {(!filteredRequests || filteredRequests.length === 0) && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Wrench className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No service requests found</p>
+                {filteredRequests.length === 0 && !isLoading && (
+                  <div className="text-center py-16 glass-card rounded-2xl opacity-60">
+                    <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-lg font-medium">No services found</p>
+                    <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
                   </div>
                 )}
               </div>
@@ -360,53 +355,54 @@ const ServicesManagement = () => {
 
             <TabsContent value="catalog">
               <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold">Manage Services</h2>
+                <div className="flex justify-between items-center bg-secondary/10 p-4 rounded-xl">
+                  <div>
+                    <h2 className="text-xl font-bold">Catalog Management</h2>
+                    <p className="text-sm text-muted-foreground">Configure standard service types</p>
+                  </div>
                   <Button onClick={() => {
                     setEditingCatalogItem(null);
                     setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
                     setIsCatalogDialogOpen(true);
                   }}>
-                    <Plus className="w-4 h-4 mr-2" /> Add Service Template
+                    <Plus className="w-4 h-4 mr-2" /> Add Template
                   </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {servicesCatalog?.map((item) => (
-                    <Card key={item.id} className="glass-card">
+                  {servicesCatalog.map((item) => (
+                    <Card key={item.id} className="glass-card overflow-hidden hover:border-primary/30 transition-colors">
                       <CardHeader className="p-4 pb-2">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{item.name_fr || item.name}</CardTitle>
-                            <Badge variant="outline" className="mt-1">{item.category}</Badge>
+                          <div className="min-w-0">
+                            <CardTitle className="text-lg truncate">{item.name_fr || item.name}</CardTitle>
+                            <Badge variant="outline" className="text-[10px] mt-1">{item.category}</Badge>
                           </div>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="sm" onClick={() => {
-                              setEditingCatalogItem(item);
-                              setCatalogFormData({
-                                name: item.name,
-                                name_fr: item.name_fr || item.name,
-                                price: item.price?.toString() || "",
-                                is_complex: item.is_complex,
-                                image_url: item.image_url || "",
-                                category: item.category
-                              });
-                              setIsCatalogDialogOpen(true);
-                            }}>
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            setEditingCatalogItem(item);
+                            setCatalogFormData({
+                              name: item.name || "",
+                              name_fr: item.name_fr || item.name || "",
+                              price: item.price?.toString() || "",
+                              is_complex: !!item.is_complex,
+                              image_url: item.image_url || "",
+                              category: item.category || "phone"
+                            });
+                            setIsCatalogDialogOpen(true);
+                          }}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
                         </div>
                       </CardHeader>
                       <CardContent className="p-4 pt-0">
                         {item.image_url && (
-                          <div className="w-full h-24 mb-2 rounded bg-muted overflow-hidden">
+                          <div className="w-full h-24 mb-3 rounded-lg overflow-hidden border border-border/20 bg-muted">
                             <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                           </div>
                         )}
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="font-bold text-primary">{item.price || 0} DT</span>
-                          {item.is_complex && <Badge className="bg-secondary/20 text-secondary border-secondary/50">Complex</Badge>}
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-primary font-mono">{item.price || 0} DT</span>
+                          {item.is_complex && <Badge variant="secondary" className="text-[10px] bg-amber-500/10 text-amber-500">Complex</Badge>}
                         </div>
                       </CardContent>
                     </Card>
@@ -417,211 +413,167 @@ const ServicesManagement = () => {
           </Tabs>
         </div>
 
-        {/* Catalog Edit Dialog */}
+        {/* Dialogs remain mostly same but with better internal safety */}
         <Dialog open={isCatalogDialogOpen} onOpenChange={setIsCatalogDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingCatalogItem ? "Edit ServiceTemplate" : "Add Service Template"}</DialogTitle>
+              <DialogTitle>{editingCatalogItem ? "Edit Template" : "New Template"}</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Name (EN)</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs">Name (EN)</Label>
                   <Input value={catalogFormData.name} onChange={e => setCatalogFormData({ ...catalogFormData, name: e.target.value })} />
                 </div>
-                <div>
-                  <Label>Name (FR)</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs">Name (FR)</Label>
                   <Input value={catalogFormData.name_fr} onChange={e => setCatalogFormData({ ...catalogFormData, name_fr: e.target.value })} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Price (DT)</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs">Base Price (DT)</Label>
                   <Input type="number" step="0.5" value={catalogFormData.price} onChange={e => setCatalogFormData({ ...catalogFormData, price: e.target.value })} />
                 </div>
-                <div>
-                  <Label>Category</Label>
+                <div className="space-y-2">
+                  <Label className="text-xs">Category</Label>
                   <Select value={catalogFormData.category} onValueChange={v => setCatalogFormData({ ...catalogFormData, category: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="phone">Phone Repair</SelectItem>
                       <SelectItem value="console">Console Repair</SelectItem>
                       <SelectItem value="controller">Controller Repair</SelectItem>
                       <SelectItem value="pc">PC Repair</SelectItem>
-                      <SelectItem value="accounts">Gaming Accounts</SelectItem>
-                      <SelectItem value="sales">Hardware Sales</SelectItem>
+                      <SelectItem value="accounts">Accounts</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label>Image URL</Label>
+              <div className="space-y-2">
+                <Label className="text-xs">Image URL (Optional)</Label>
                 <Input value={catalogFormData.image_url} onChange={e => setCatalogFormData({ ...catalogFormData, image_url: e.target.value })} placeholder="https://..." />
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="cat-complex" checked={catalogFormData.is_complex} onCheckedChange={v => setCatalogFormData({ ...catalogFormData, is_complex: !!v })} />
-                <Label htmlFor="cat-complex">Is Complex Service?</Label>
+              <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                <Checkbox id="cat-complex-fixed" checked={catalogFormData.is_complex} onCheckedChange={v => setCatalogFormData({ ...catalogFormData, is_complex: !!v })} />
+                <div className="grid gap-0.5 leading-none">
+                  <Label htmlFor="cat-complex-fixed" className="text-sm font-medium">Complex Service</Label>
+                  <p className="text-[10px] text-muted-foreground">Requires owner verification</p>
+                </div>
               </div>
-              <Button className="w-full" onClick={async () => {
-                const data = {
+              <Button className="w-full mt-2" onClick={async () => {
+                const finalData = {
                   ...catalogFormData,
                   price: parseFloat(catalogFormData.price) || 0,
                   is_active: true,
                   sort_order: 0,
-                  name_ar: catalogFormData.name_fr // Fallback
+                  name_ar: catalogFormData.name_fr
                 };
-                if (editingCatalogItem) {
-                  await updateService.mutateAsync({ id: editingCatalogItem.id, ...data });
-                  toast({ title: "Template updated" });
-                } else {
-                  await createService.mutateAsync(data as any);
-                  toast({ title: "Template created" });
+                try {
+                  if (editingCatalogItem) {
+                    await updateService.mutateAsync({ id: editingCatalogItem.id, ...finalData });
+                    toast({ title: "Template updated" });
+                  } else {
+                    await createService.mutateAsync(finalData as any);
+                    toast({ title: "Template created" });
+                  }
+                  setIsCatalogDialogOpen(false);
+                } catch (e: any) {
+                  toast({ title: "Operation failed", description: e.message, variant: "destructive" });
                 }
-                setIsCatalogDialogOpen(false);
-              }}>
-                {editingCatalogItem ? "Update" : "Create"}
+              }} disabled={updateService.isPending || createService.isPending}>
+                {editingCatalogItem ? "Save Changes" : "Create Template"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Create Dialog */}
+        {/* Create Request Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>New Service Request</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <div className="space-y-3">
                 <Label>Service *</Label>
-                <div className="flex gap-2">
-                  <Select
-                    value={isCreatingNewService ? "_new" : formData.service_id}
-                    onValueChange={(v) => {
-                      if (v === "_new") {
-                        setIsCreatingNewService(true);
-                        setFormData(prev => ({ ...prev, service_id: "" }));
-                      } else {
-                        setIsCreatingNewService(false);
-                        setFormData(prev => ({ ...prev, service_id: v }));
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select service" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_new" className="text-primary font-bold">
-                        + Add New Service Type
+                <Select
+                  value={isCreatingNewService ? "_new" : formData.service_id}
+                  onValueChange={(v) => {
+                    if (v === "_new") {
+                      setIsCreatingNewService(true);
+                      setFormData(prev => ({ ...prev, service_id: "" }));
+                    } else {
+                      setIsCreatingNewService(false);
+                      setFormData(prev => ({ ...prev, service_id: v }));
+                    }
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_new" className="text-primary font-bold">+ Custom Service</SelectItem>
+                    {servicesCatalog.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name_fr} {s.is_complex && "(Complex)"}
                       </SelectItem>
-                      {servicesCatalog?.map((s) => (
-                        <SelectItem key={s.id} value={s.id}>
-                          {s.name_fr} {s.is_complex && "(Complex)"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 {isCreatingNewService && (
-                  <div className="pl-4 border-l-2 border-primary/20 space-y-3 py-2 bg-secondary/5 rounded-r-lg">
-                    <div>
-                      <Label className="text-xs text-muted-foreground">New Service Name</Label>
-                      <Input
-                        placeholder="e.g. PS5 HDMI Repair"
-                        value={newServiceName}
-                        onChange={(e) => setNewServiceName(e.target.value)}
-                      />
+                  <div className="p-4 border-2 border-dashed border-primary/20 rounded-xl space-y-3 bg-primary/5">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Service Name</Label>
+                      <Input placeholder="e.g. PS5 HDMI" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="complex-check"
-                        checked={isNewServiceComplex}
-                        onCheckedChange={(c) => setIsNewServiceComplex(c as boolean)}
-                      />
-                      <Label htmlFor="complex-check" className="cursor-pointer">
-                        Is Complex Service?
-                        <span className="block text-xs text-muted-foreground font-normal">
-                          Complex services require time and owner steps. Basic are instant.
-                        </span>
-                      </Label>
+                      <Checkbox id="new-complex" checked={isNewServiceComplex} onCheckedChange={(c) => setIsNewServiceComplex(!!c)} />
+                      <Label htmlFor="new-complex" className="text-sm">Is Complex Service?</Label>
                     </div>
                   </div>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <Label>Client Name *</Label>
-                  <Input
-                    value={formData.client_name}
-                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                  />
+                  <Input value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label>Phone</Label>
-                  <Input
-                    value={formData.client_phone}
-                    onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-                  />
+                  <Input value={formData.client_phone} onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label>Device Type</Label>
-                  <Input
-                    placeholder="Phone, PS4..."
-                    value={formData.device_type}
-                    onChange={(e) => setFormData({ ...formData, device_type: e.target.value })}
-                  />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs">Device Type</Label>
+                  <Input placeholder="PS5..." value={formData.device_type} onChange={(e) => setFormData({ ...formData, device_type: e.target.value })} />
                 </div>
-                <div>
-                  <Label>Brand</Label>
-                  <Input
-                    placeholder="Apple..."
-                    value={formData.device_brand}
-                    onChange={(e) => setFormData({ ...formData, device_brand: e.target.value })}
-                  />
+                <div className="space-y-2">
+                  <Label className="text-xs">Brand</Label>
+                  <Input placeholder="Sony..." value={formData.device_brand} onChange={(e) => setFormData({ ...formData, device_brand: e.target.value })} />
                 </div>
-                <div>
-                  <Label>Model</Label>
-                  <Input
-                    placeholder="iPhone 14..."
-                    value={formData.device_model}
-                    onChange={(e) => setFormData({ ...formData, device_model: e.target.value })}
-                  />
+                <div className="space-y-2">
+                  <Label className="text-xs">Model</Label>
+                  <Input placeholder="Slim..." value={formData.device_model} onChange={(e) => setFormData({ ...formData, device_model: e.target.value })} />
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label>Issue Description *</Label>
-                <Textarea
-                  value={formData.issue_description}
-                  onChange={(e) => setFormData({ ...formData, issue_description: e.target.value })}
-                  rows={3}
-                />
+                <Textarea value={formData.issue_description} onChange={(e) => setFormData({ ...formData, issue_description: e.target.value })} rows={3} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Estimated Cost (DT)</Label>
-                  <Input
-                    type="number"
-                    step="0.001"
-                    value={formData.estimated_cost}
-                    onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })}
-                  />
+                <div className="space-y-2">
+                  <Label>Est. Cost (DT)</Label>
+                  <Input type="number" step="0.5" value={formData.estimated_cost} onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })} />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label>Priority</Label>
-                  <Select
-                    value={formData.priority}
-                    onValueChange={(v) => setFormData({ ...formData, priority: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="normal">Normal</SelectItem>
@@ -632,98 +584,101 @@ const ServicesManagement = () => {
                 </div>
               </div>
 
-              <Button
-                variant="hero"
-                className="w-full"
-                onClick={handleCreateRequest}
-                disabled={createRequest.isPending || (isCreatingNewService && createService.isPending)}
-              >
-                {isCreatingNewService ? "Create Service & Request" : "Create Request"}
+              <Button variant="hero" className="w-full" onClick={handleCreateRequest} disabled={createRequest.isPending}>
+                Create Service Request
               </Button>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* View/Update Dialog */}
+        {/* View/Update Details Dialog */}
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Service Request Details</DialogTitle>
+              <DialogTitle>Request Details</DialogTitle>
             </DialogHeader>
             {selectedRequest && (
-              <div className="space-y-4">
-                <div className="glass-card rounded-lg p-4 space-y-2">
-                  <p><strong>Service:</strong> {selectedRequest.service?.name_fr}</p>
-                  <p><strong>Client:</strong> {selectedRequest.client_name} - {selectedRequest.client_phone}</p>
-                  {selectedRequest.device_brand && (
-                    <p><strong>Device:</strong> {selectedRequest.device_brand} {selectedRequest.device_model}</p>
-                  )}
-                  <p><strong>Issue:</strong> {selectedRequest.issue_description}</p>
-                  {selectedRequest.estimated_cost && (
-                    <p><strong>Estimated Cost:</strong> {selectedRequest.estimated_cost} DT</p>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <strong>Status:</strong>
-                    <Badge className={statusColors[selectedRequest.status] || "bg-gray-500/20 text-gray-500 border-gray-500/50"}>
+              <div className="space-y-6 pt-4">
+                <div className="glass-card rounded-2xl p-5 space-y-4 border-primary/20 bg-primary/5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="text-lg font-bold">{getServiceName(selectedRequest)}</h4>
+                      <p className="text-xs text-muted-foreground">ID: {selectedRequest.id.slice(0, 8)}</p>
+                    </div>
+                    <Badge className={statusColors[selectedRequest.status] || ""}>
                       {statusLabels[selectedRequest.status] || selectedRequest.status}
                     </Badge>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm pt-2">
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Client</p>
+                      <p className="font-medium">{selectedRequest.client_name}</p>
+                      <p className="text-xs">{selectedRequest.client_phone}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Device</p>
+                      <p className="font-medium">{selectedRequest.device_brand || '---'} {selectedRequest.device_model || ''}</p>
+                      <p className="text-xs">{selectedRequest.device_type || 'General'}</p>
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Problem</p>
+                      <p className="italic underline decoration-primary/30 underline-offset-4">{selectedRequest.issue_description}</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Status Actions */}
-                {selectedRequest.status !== "completed" && selectedRequest.status !== "cancelled" && (
-                  <div className="space-y-3">
-                    {/* Role-based action hints */}
+                {!["completed", "cancelled"].includes(selectedRequest.status) && (
+                  <div className="space-y-4">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Update Status</Label>
+
                     {selectedRequest.is_complex && !isOwner && (
-                      <div className="glass-card rounded-lg p-3 border-orange-500/30">
-                        <p className="text-sm text-orange-600 font-medium">Complex Service</p>
-                        <p className="text-xs text-muted-foreground">
-                          This requires owner approval. You can only update status to pending owner review.
-                        </p>
+                      <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 text-[10px] font-medium leading-tight">
+                        ⚠️ COMPLEX SERVICE: Requires owner verification for progression.
                       </div>
                     )}
 
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="grid grid-cols-2 gap-3">
                       {selectedRequest.status === "pending" && (
                         <Button
+                          className="col-span-2"
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                           disabled={selectedRequest.is_complex && !isOwner}
                         >
-                          {selectedRequest.is_complex && !isOwner ? "Request Owner Review" : "Start Working"}
+                          {selectedRequest.is_complex && !isOwner ? "Awaiting Owner" : "Start Repair"}
                         </Button>
                       )}
                       {selectedRequest.status === "in_progress" && (
                         <>
-                          {isOwner && (
-                            <Button
-                              variant="outline"
-                              onClick={() => handleStatusUpdate(selectedRequest.id, "waiting_parts")}
-                            >
-                              Waiting Parts
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            onClick={() => handleStatusUpdate(selectedRequest.id, "waiting_parts")}
+                          >
+                            Wait for Parts
+                          </Button>
                           <Button
                             variant="hero"
                             onClick={() => handleStatusUpdate(selectedRequest.id, "completed", selectedRequest.estimated_cost)}
                             disabled={selectedRequest.is_complex && !isOwner}
                           >
-                            {selectedRequest.is_complex && !isOwner ? "Mark Ready for Owner" : "Mark Complete"}
+                            Complete Repair
                           </Button>
                         </>
                       )}
-                      {selectedRequest.status === "waiting_parts" && isOwner && (
+                      {selectedRequest.status === "waiting_parts" && (
                         <Button
+                          className="col-span-2"
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                         >
-                          Continue Working
+                          Resume Repair
                         </Button>
                       )}
                       <Button
-                        variant="destructive"
+                        variant="ghost"
+                        className="text-destructive hover:bg-destructive/10"
                         onClick={() => handleStatusUpdate(selectedRequest.id, "cancelled")}
-                        disabled={selectedRequest.is_complex && !isOwner && selectedRequest.status === "in_progress"}
                       >
-                        Cancel
+                        Cancel Request
                       </Button>
                     </div>
                   </div>

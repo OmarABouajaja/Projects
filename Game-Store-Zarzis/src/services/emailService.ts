@@ -173,6 +173,5 @@ export default {
     sendContactForm,
     sendServiceRequestNotification,
     sendSessionReceipt,
-    sendStaffInvitation,
     sendStaffAttendanceNotification,
 };
