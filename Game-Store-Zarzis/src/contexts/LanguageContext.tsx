@@ -30,6 +30,8 @@ export const translations: Translations = {
   "nav.client_dashboard": { fr: "Tableau de Bord", en: "Dashboard", ar: "لوحة التحكم" },
   "nav.login": { fr: "Se connecter", en: "Login", ar: "تسجيل الدخول" },
   "nav.logged_in": { fr: "Connecté", en: "Logged In", ar: "تم الدخول" },
+  "nav.open_menu": { fr: "Ouvrir le menu", en: "Open menu", ar: "فتح القائمة" },
+  "nav.close_menu": { fr: "Fermer le menu", en: "Close menu", ar: "إغلاق القائمة" },
   "hero.cta_client": { fr: "Mon Espace Fidélité", en: "My Loyalty Space", ar: "فضاء الولاء" },
 
   // Client Auth
@@ -73,6 +75,8 @@ export const translations: Translations = {
   "notifications.session_ending": { fr: "Session se termine bientôt", en: "Session ending soon", ar: "الجلسة ستنتهي قريباً" },
   "notifications.new_order": { fr: "Nouvelle commande reçue", en: "New order received", ar: "تم استلام طلب جديد" },
   "notifications.repair_ready": { fr: "Réparation terminée", en: "Repair completed", ar: "تم إنهاء الإصلاح" },
+  "notifications.time_up": { fr: "TEMPS ÉCOULÉ", en: "TIME UP", ar: "انتهى الوقت" },
+  "notifications.action_required": { fr: "Action requise", en: "Action required", ar: "إجراء مطلوب" },
   "notifications.daily_recap": { fr: "Récapitulatif quotidien", en: "Daily Recap", ar: "ملخص يومي" },
 
   // Hero
@@ -446,6 +450,9 @@ export const translations: Translations = {
   "sidebar.blog_marketing": { fr: "Blog \u0026 Marketing", en: "Blog \u0026 Marketing", ar: "المدونة والتسويق" },
   "sidebar.charges_management": { fr: "Gestion Charges", en: "Charges Management", ar: "إدارة المصاريف" },
   "sidebar.store_settings": { fr: "Paramètres Magasin", en: "Store Settings", ar: "إعدادات المتجر" },
+  "sidebar.orders": { fr: "Commandes", en: "Orders", ar: "الطلبات" },
+  "sidebar.history": { fr: "Historique", en: "History", ar: "السجل" },
+  "sidebar.attendance": { fr: "Présence", en: "Attendance", ar: "الحضور" },
   "sidebar.sign_out": { fr: "Déconnexion", en: "Sign Out", ar: "تسجيل الخروج" },
   "client.add": { fr: "Ajouter Client", en: "Add Client", ar: "إضافة عميل" },
   "client.total": { fr: "Total Clients", en: "Total Clients", ar: "إجمالي العملاء" },

@@ -49,7 +49,7 @@ export const useHomepageData = () => {
           .limit(6);
 
         if (error) {
-          // console.log("Products query failed, using fallback");
+
           // Fallback demo data
           return [
             { id: '1', name: 'PS5 Controller', price: 150.000, stock_quantity: 5, category: 'controller', featured: true },
@@ -60,7 +60,7 @@ export const useHomepageData = () => {
 
         return data as Product[];
       } catch (error) {
-        // console.log("Products fetch failed, using fallback");
+
         return [
           { id: '1', name: 'PS5 Controller', price: 150.000, stock_quantity: 5, category: 'controller', featured: true },
           { id: '2', name: 'Gaming Headset', price: 80.000, stock_quantity: 3, category: 'audio', featured: true },
@@ -82,7 +82,7 @@ export const useHomepageData = () => {
           .limit(6);
 
         if (error) {
-          // console.log("Services query failed, using fallback");
+
           // Fallback demo data
           return [
             { id: '1', name: 'Phone Screen Repair', category: 'phone_repair', is_complex: false, estimated_duration: '30 min', starting_price: 20.000 },
@@ -93,7 +93,7 @@ export const useHomepageData = () => {
 
         return data as Service[];
       } catch (error) {
-        // console.log("Services fetch failed, using fallback");
+
         return [
           { id: '1', name: 'Phone Screen Repair', category: 'phone_repair', is_complex: false, estimated_duration: '30 min', starting_price: 20.000 },
           { id: '2', name: 'Controller Cleaning', category: 'console_repair', is_complex: false, estimated_duration: '15 min', starting_price: 10.000 },
@@ -113,7 +113,7 @@ export const useHomepageData = () => {
           .select("*");
 
         if (error) {
-          // console.log("Settings query failed, using fallback");
+
           // Fallback demo data
           return {
             opening_hours: { open: "08:00", close: "02:00" },
@@ -130,7 +130,7 @@ export const useHomepageData = () => {
 
         return settings as StoreSettings;
       } catch (error) {
-        // console.log("Settings fetch failed, using fallback");
+
         return {
           opening_hours: { open: "08:00", close: "02:00" },
           free_game_threshold: { games_required: 5 },
@@ -151,7 +151,7 @@ export const useHomepageData = () => {
           .order("station_number");
 
         if (error) {
-          // console.log("Consoles query failed, using fallback");
+
           // Fallback demo data
           return [
             { id: '1', name: 'PS5 Station 1', console_type: 'ps5', status: 'available', station_number: 1 },
@@ -163,7 +163,7 @@ export const useHomepageData = () => {
 
         return data as ConsoleStatus[];
       } catch (error) {
-        // console.log("Consoles fetch failed, using fallback");
+
         return [
           { id: '1', name: 'PS5 Station 1', console_type: 'ps5', status: 'available', station_number: 1 },
           { id: '2', name: 'PS5 Station 2', console_type: 'ps5', status: 'in_use', station_number: 2 },
@@ -185,7 +185,7 @@ export const useHomepageData = () => {
           .limit(4);
 
         if (error) {
-          // console.log("Pricing query failed, using fallback");
+
           // Fallback demo data
           return [
             { name: 'PS5 (1 hour)', price: 10.000, console_type: 'ps5' },
@@ -197,7 +197,7 @@ export const useHomepageData = () => {
 
         return data;
       } catch (error) {
-        // console.log("Pricing fetch failed, using fallback");
+
         return [
           { name: 'PS5 (1 hour)', price: 10.000, console_type: 'ps5' },
           { name: 'PS4 (1 hour)', price: 6.000, console_type: 'ps4' },

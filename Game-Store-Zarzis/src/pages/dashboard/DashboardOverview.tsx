@@ -100,7 +100,8 @@ function getTopProducts(sales: any[]) {
 const DashboardOverview = () => {
   const { user, role } = useAuth();
   const { sales, clients, isLoading: isDataLoading } = useData();
-  const { t } = useLanguage();
+  const { t, language, dir } = useLanguage();
+  const isRTL = dir === 'rtl';
   const { data: todayStats } = useTodayStats();
   const { data: consoles } = useConsoles();
   const { data: serviceRequests } = useServiceRequests();
@@ -138,7 +139,8 @@ const DashboardOverview = () => {
 
   const handleShareRecap = () => {
     const now = new Date();
-    const dateStr = now.toLocaleDateString(t("lang") === 'ar' ? 'ar-TN' : 'fr-FR');
+    const locale = language === 'ar' ? 'ar-TN' : (language === 'en' ? 'en-GB' : 'fr-FR');
+    const dateStr = now.toLocaleDateString(locale);
 
     const recap = `
 📊 ${t("nav.dashboard")} - ${dateStr}
@@ -159,8 +161,8 @@ Game Store Zarzis - Intelligence Business
 
     navigator.clipboard.writeText(recap);
     import("sonner").then(({ toast }) => {
-      toast.success("Recap copied to clipboard!", {
-        description: "You can now paste it directly into an email or message."
+      toast.success(t("dashboard.recap_copied"), {
+        description: t("dashboard.recap_desc")
       });
     });
   };
@@ -208,7 +210,7 @@ Game Store Zarzis - Intelligence Business
                     </span>
                     <span className="sm:hidden font-bold">{activeShifts?.length || 0}</span>
                     {activeShifts && activeShifts.length > 0 && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                      <span className={`absolute -top-1 ${isRTL ? '-left-1' : '-right-1'} w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]`} />
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -272,7 +274,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-green-500 neon-cyan-glow">
+                  <Card className={`glass-card glossy-reflection neon-cyan-glow ${isRTL ? 'border-r-4 border-r-green-500' : 'border-l-4 border-l-green-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -302,7 +304,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-blue-500 neon-magenta-glow">
+                  <Card className={`glass-card glossy-reflection neon-magenta-glow ${isRTL ? 'border-r-4 border-r-blue-500' : 'border-l-4 border-l-blue-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -328,7 +330,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-purple-500 neon-purple-glow">
+                  <Card className={`glass-card glossy-reflection neon-purple-glow ${isRTL ? 'border-r-4 border-r-purple-500' : 'border-l-4 border-l-purple-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -352,7 +354,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-orange-500 neon-magenta-glow">
+                  <Card className={`glass-card glossy-reflection neon-magenta-glow ${isRTL ? 'border-r-4 border-r-orange-500' : 'border-l-4 border-l-orange-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -380,7 +382,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-green-500 neon-cyan-glow">
+                  <Card className={`glass-card glossy-reflection neon-cyan-glow ${isRTL ? 'border-r-4 border-r-green-500' : 'border-l-4 border-l-green-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -406,7 +408,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-blue-500 neon-magenta-glow">
+                  <Card className={`glass-card glossy-reflection neon-magenta-glow ${isRTL ? 'border-r-4 border-r-blue-500' : 'border-l-4 border-l-blue-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -432,7 +434,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-purple-500 neon-purple-glow">
+                  <Card className={`glass-card glossy-reflection neon-purple-glow ${isRTL ? 'border-r-4 border-r-purple-500' : 'border-l-4 border-l-purple-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -460,7 +462,7 @@ Game Store Zarzis - Intelligence Business
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <Card className="glass-card glossy-reflection border-l-4 border-l-orange-500 neon-magenta-glow">
+                  <Card className={`glass-card glossy-reflection neon-magenta-glow ${isRTL ? 'border-r-4 border-r-orange-500' : 'border-l-4 border-l-orange-500'}`}>
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
@@ -497,7 +499,7 @@ Game Store Zarzis - Intelligence Business
                 {isOwner && (
                   <Tabs value={timeRange} onValueChange={(v: any) => setTimeRange(v)}>
                     <TabsList className="bg-black/20 h-8">
-                      <TabsTrigger value="today" className="text-xs h-7">{t("sales.today").split(' ')[2] || 'Today'}</TabsTrigger>
+                      <TabsTrigger value="today" className="text-xs h-7">{t("sales.today")}</TabsTrigger>
                       <TabsTrigger value="weekly" className="text-xs h-7">{t("common.weekday")}</TabsTrigger>
                       <TabsTrigger value="monthly" className="text-xs h-7">{t("common.month") || 'Month'}</TabsTrigger>
                       <TabsTrigger value="yearly" className="text-xs h-7">{t("common.year") || 'Year'}</TabsTrigger>
@@ -553,7 +555,7 @@ Game Store Zarzis - Intelligence Business
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="w-5 h-5 text-secondary" />
-                  Recent Sales
+                  {t("dashboard.recent_sales")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -575,7 +577,7 @@ Game Store Zarzis - Intelligence Business
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-muted-foreground text-sm">No sales recorded yet.</p>
+                      <p className="text-muted-foreground text-sm">{t('dashboard.no_sales')}</p>
                     </div>
                   )}
                 </div>

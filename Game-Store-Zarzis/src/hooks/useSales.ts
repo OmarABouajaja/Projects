@@ -76,7 +76,7 @@ export const useCreateSale = () => {
 
       // If stock update fails, we still have the sale but log it
       if (stockError) {
-        // console.log("Stock update handled separately");
+
       }
 
       return newSale;

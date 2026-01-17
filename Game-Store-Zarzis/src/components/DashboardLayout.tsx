@@ -191,14 +191,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: "/dashboard/sessions", icon: Gamepad2, label: t("sidebar.session_management") },
     { path: "/dashboard/services", icon: Wrench, label: t("sidebar.service_management") },
     { path: "/dashboard/sales", icon: ShoppingCart, label: t("sidebar.sales_management") },
-    { path: "/dashboard/transactions", icon: FileText, label: "History" },
+    { path: "/dashboard/transactions", icon: FileText, label: t("sidebar.history") },
     { path: "/dashboard/clients", icon: Users, label: t("sidebar.client_management") },
-    { path: "/dashboard/orders", icon: Truck, label: "Orders" },
+    { path: "/dashboard/orders", icon: Truck, label: t("sidebar.orders") },
     { path: "/dashboard/products", icon: Package, label: t("sidebar.product_inventory") },
     { path: "/dashboard/pricing", icon: DollarSign, label: t("sidebar.pricing_config") },
     { path: "/dashboard/consoles", icon: Gamepad2, label: t("sidebar.console_settings") },
     { path: "/dashboard/staff", icon: Users, label: t("sidebar.staff_management") },
-    { path: "/dashboard/attendance", icon: Calendar, label: "Attendance" },
+    { path: "/dashboard/attendance", icon: Calendar, label: t("sidebar.attendance") },
     { path: "/dashboard/blog", icon: FileText, label: t("sidebar.blog_marketing") },
     { path: "/dashboard/expenses", icon: Receipt, label: t("sidebar.charges_management") },
     { path: "/dashboard/settings", icon: Settings, label: t("sidebar.store_settings") },
@@ -255,7 +255,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </div>
               <div className="flex flex-col">
                 <span className="font-display font-bold text-sm tracking-tight">Game Store</span>
-                <span className="text-[10px] text-muted-foreground font-mono">PRO DASHBOARD v2.1</span>
               </div>
             </div>
           )}
@@ -366,7 +365,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             onClick={handleSignOut}
           >
             <LogOut className={cn("w-4 h-4", !collapsed && "mr-2")} />
-            {!collapsed && "Sign Out"}
+            {!collapsed && t("sidebar.sign_out")}
           </Button>
         </div>
       </aside>

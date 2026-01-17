@@ -22,7 +22,8 @@ import confetti from 'canvas-confetti';
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { t, language } = useLanguage();
+    const { t, language, dir } = useLanguage();
+    const isRTL = dir === 'rtl';
     const { items, updateQuantity, removeItem, clearCart, cartTotal } = useCart();
     const { user } = useAuth();
     const { clients } = useData();
@@ -440,9 +441,9 @@ const Checkout = () => {
                                                 <div className="space-y-2">
                                                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('contact.form.name')}</Label>
                                                     <div className="relative group">
-                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                        <User className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors`} />
                                                         <Input
-                                                            className="pl-10 h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl"
+                                                            className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl`}
                                                             placeholder={t('checkout.placeholder.name')}
                                                             value={formData.name}
                                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -452,10 +453,10 @@ const Checkout = () => {
                                                 <div className="space-y-2">
                                                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('contact.phone')}</Label>
                                                     <div className="relative group">
-                                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                        <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors`} />
                                                         <Input
                                                             type="tel"
-                                                            className="pl-10 h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl"
+                                                            className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl`}
                                                             placeholder={t('checkout.placeholder.phone')}
                                                             value={formData.phone}
                                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -468,9 +469,9 @@ const Checkout = () => {
                                                         {hasDigitalItems && <span className="text-primary animate-pulse italic capitalize">{t('client.dashboard.redeem_error').split('!')[1].trim()}</span>}
                                                     </Label>
                                                     <div className="relative group">
-                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                        <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors`} />
                                                         <Input
-                                                            className={`pl-10 h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl ${hasDigitalItems && !formData.email ? 'border-primary/50 ring-1 ring-primary/20' : ''}`}
+                                                            className={`${isRTL ? 'pr-10' : 'pl-10'} h-12 bg-muted/20 border-border/50 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl ${hasDigitalItems && !formData.email ? 'border-primary/50 ring-1 ring-primary/20' : ''}`}
                                                             placeholder={t('checkout.placeholder.email')}
                                                             value={formData.email}
                                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -573,10 +574,10 @@ const Checkout = () => {
                                                         <div className="space-y-2">
                                                             <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('checkout.details.address')}</Label>
                                                             <div className="relative group">
-                                                                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                                                <MapPin className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors`} />
                                                                 <textarea
                                                                     rows={3}
-                                                                    className="w-full flex min-h-[80px] rounded-xl border border-border/50 bg-muted/20 px-3 py-2 pl-10 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                                                                    className={`w-full flex min-h-[80px] rounded-xl border border-border/50 bg-muted/20 px-3 py-2 ${isRTL ? 'pr-10' : 'pl-10'} text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50 disabled:cursor-not-allowed disabled:opacity-50 transition-all`}
                                                                     placeholder={t('checkout.details.address_placeholder')}
                                                                     value={formData.address}
                                                                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -756,7 +757,7 @@ const Checkout = () => {
                                     <div className="flex justify-between items-center">
                                         <span className="text-muted-foreground">{t('checkout.delivery')}</span>
                                         <span className={`font-mono ${deliveryCost === 0 ? 'text-green-500 font-bold' : ''}`}>
-                                            {deliveryCost === 0 ? (language === 'fr' ? "GRATUIT" : language === 'ar' ? "مجاني" : "FREE") : `${deliveryCost.toFixed(3)} ${t('services.currency')}`}
+                                            {deliveryCost === 0 ? t('checkout.delivery.free').toUpperCase() : `${deliveryCost.toFixed(3)} ${t('services.currency')}`}
                                         </span>
                                     </div>
                                 </div>
@@ -791,9 +792,9 @@ const Checkout = () => {
                                         {createOrder.isPending ? (
                                             t('dashboard.loading').split('...')[0] + "..."
                                         ) : step === 'cart' ? (
-                                            <>{t('checkout.btn.continue')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                                            <>{t('checkout.btn.continue')} {isRTL ? <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}</>
                                         ) : step === 'details' ? (
-                                            <>{t('checkout.btn.review')} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                                            <>{t('checkout.btn.review')} {isRTL ? <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}</>
                                         ) : (
                                             <>{t('checkout.btn.confirm')} <CheckCircle2 className="w-5 h-5" /></>
                                         )}

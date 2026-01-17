@@ -23,6 +23,7 @@ const Index = lazyWithRetry(() => import("./pages/Index"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const StaffAuth = lazyWithRetry(() => import("./pages/StaffAuth"));
 const ClientAuth = lazyWithRetry(() => import("./pages/ClientAuth"));
+const UserGuide = lazyWithRetry(() => import("./pages/UserGuide"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
@@ -138,6 +139,9 @@ const App = () => {
                             <Route path="/reset-password" element={<ResetPassword />} />
 
                             {/* Staff Dashboard Routes */}
+                            {/* Hidden User Guide */}
+                            <Route path="/user-guide" element={<UserGuide />} />
+
                             <Route
                               path="/dashboard"
                               element={

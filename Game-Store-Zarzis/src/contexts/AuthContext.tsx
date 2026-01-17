@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserRole = async (userId: string): Promise<AppRole | null> => {
     try {
-      // console.log("AuthContext: Fetching role for user:", userId);
+
 
       // Add internal timeout for the query (increased to 5s for reliability)
       const queryPromise = supabase
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // 🚀 Profile Sync Logic (Ensures visibility in dashboard)
   const syncProfile = async (targetUser: User) => {
     try {
-      // console.log("AuthContext: Syncing profile for", targetUser.email);
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -133,7 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         if (!isMounted) return;
 
-        // console.log("AuthContext: Auth state change:", event);
+
 
         if (event === 'SIGNED_OUT') {
           setSession(null);
@@ -375,32 +375,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!error && data.user) {
       const targetUser = data.user;
 
-      // Perform background sync and clock-in without blocking the main UI more than necessary
-      Promise.all([
+      // Perform background sync and clock-in only if this is an authorized work station
+      const isWorkStation = localStorage.getItem('GAME_STORE_WORK_STATION') === 'true';
+
+      const promises: any[] = [
         supabase
           .from('profiles')
           .upsert({
             id: targetUser.id,
             email: targetUser.email,
             last_sign_in_at: new Date().toISOString()
-          }),
-        supabase
-          .from('staff_shifts')
-          .insert({ staff_id: targetUser.id })
-          .select()
-          .single()
-      ]).then(([profileRes, shiftRes]) => {
+          })
+      ];
+
+      if (isWorkStation) {
+        promises.push(
+          supabase
+            .from('staff_shifts')
+            .insert({ staff_id: targetUser.id })
+            .select()
+            .single()
+        );
+      }
+
+      Promise.all(promises).then((results) => {
+        const profileRes = results[0];
         if (profileRes.error) console.error("Profile sync failed", profileRes.error);
 
-        if (shiftRes.data) {
-          const shiftData = shiftRes.data;
-          localStorage.setItem('current_staff_session_id', shiftData.id);
-          localStorage.setItem('currentSessionStartTime', shiftData.check_in);
-          setIsClockedIn(true);
-          setCurrentSessionStartTime(shiftData.check_in);
+        if (isWorkStation && results[1]) {
+          const shiftRes = results[1];
+          if (shiftRes.data) {
+            const shiftData = shiftRes.data;
+            localStorage.setItem('current_staff_session_id', shiftData.id);
+            localStorage.setItem('currentSessionStartTime', shiftData.check_in);
+            setIsClockedIn(true);
+            setCurrentSessionStartTime(shiftData.check_in);
 
-          // Invalidate queries for real-time dashboard sync
-          queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
+            // Invalidate queries for real-time dashboard sync
+            queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
+
+            // Notify user of auto clock-in
+            import("sonner").then(({ toast }) => {
+              toast.success("Shift Started Automatically", {
+                description: "Work Station authorized. Attendance tracking active."
+              });
+            });
+          }
         }
       }).catch(err => console.error("Post-login operations failed", err));
     }

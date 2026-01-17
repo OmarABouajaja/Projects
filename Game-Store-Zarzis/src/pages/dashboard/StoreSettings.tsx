@@ -55,6 +55,7 @@ const StoreSettings = () => {
     help_tooltips_enabled: true,
     tariff_display_mode: 'cards', // 'cards', 'table', 'comparison'
     data_limit_mb: 450,
+    daily_summary_time: "22:00", // Default 10 PM
     delivery_settings: {
       rapid_post_enabled: false,
       local_delivery_enabled: false,
@@ -214,6 +215,7 @@ const StoreSettings = () => {
         help_tooltips_enabled: settings.help_tooltips_enabled ?? true,
         tariff_display_mode: settings.tariff_display_mode ?? 'cards',
         data_limit_mb: settings.data_limit_mb ?? 450,
+        daily_summary_time: settings.daily_summary_time ?? "22:00",
         special_hours: Array.isArray(settings.special_hours) ? settings.special_hours : [],
         theme_primary: settings.theme_primary ?? '185 100% 50%',
         theme_secondary: settings.theme_secondary ?? '320 100% 60%',
@@ -266,6 +268,7 @@ const StoreSettings = () => {
         help_tooltips_enabled: localSettings.help_tooltips_enabled,
         tariff_display_mode: localSettings.tariff_display_mode,
         data_limit_mb: localSettings.data_limit_mb,
+        daily_summary_time: localSettings.daily_summary_time,
         delivery_settings: localSettings.delivery_settings,
         theme_primary: localSettings.theme_primary,
         theme_secondary: localSettings.theme_secondary,
@@ -2060,6 +2063,74 @@ const StoreSettings = () => {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="notifications" className="space-y-4">
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    {t('settings.notifications.title') || "Notifications & Alerts"}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Daily Summary */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border rounded-lg bg-muted/20">
+                    <div className="space-y-1">
+                      <Label className="text-base font-semibold">Daily Summary Report</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receive a daily summary of sales and sessions via SMS/Email.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor="daily-summary-time" className="whitespace-nowrap">Send at:</Label>
+                      <Input
+                        id="daily-summary-time"
+                        type="time"
+                        value={localSettings.daily_summary_time}
+                        onChange={(e) => updateSetting('daily_summary_time', e.target.value)}
+                        className="w-32"
+                      />
+                    </div>
+                  </div>
+
+                  {/* SMS Settings (Existing, moved here or referenced) */}
+                  <div className="p-4 border rounded-lg bg-muted/20">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="space-y-1">
+                        <Label className="text-base font-semibold">SMS Notifications</Label>
+                        <p className="text-sm text-muted-foreground">Enable SMS alerts for critical events.</p>
+                      </div>
+                      <Switch
+                        checked={localSettings.sms_enabled}
+                        onCheckedChange={(checked) => updateSetting('sms_enabled', checked)}
+                      />
+                    </div>
+                    {localSettings.sms_enabled && (
+                      <div className="grid gap-4 pl-4 border-l-2 border-primary/20">
+                        <div className="grid gap-2">
+                          <Label>Owner Phone Number</Label>
+                          <Input
+                            value={localSettings.sms_phone}
+                            onChange={(e) => updateSetting('sms_phone', e.target.value)}
+                            placeholder="+216 00 000 000"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>API Key (Optional)</Label>
+                          <Input
+                            type="password"
+                            value={localSettings.sms_api_key}
+                            onChange={(e) => updateSetting('sms_api_key', e.target.value)}
+                            placeholder="****************"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="data" className="space-y-6">
               <Card className="glass-card">
                 <CardHeader>

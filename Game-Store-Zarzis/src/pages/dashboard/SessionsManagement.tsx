@@ -567,7 +567,7 @@ const SessionsManagement = () => {
       if (fallback) pricingToSelect = fallback.id;
     }
 
-    // console.log("🎯 Auto-selecting pricing:", pricingToSelect);
+
     setSelectedPricing(pricingToSelect);
     setIsStartDialogOpen(true);
   };

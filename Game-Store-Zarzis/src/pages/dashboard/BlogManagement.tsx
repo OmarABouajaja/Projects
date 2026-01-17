@@ -136,9 +136,7 @@ const BlogManagement = () => {
         throw new Error("All language versions are required");
       }
 
-      // console.log("Submitting blog post:", postData);
-      // console.log("User ID:", authorId);
-      // console.log("Is Owner:", isOwner);
+
 
       if (editingPost) {
         // For updates, exclude fields that shouldn't be updated

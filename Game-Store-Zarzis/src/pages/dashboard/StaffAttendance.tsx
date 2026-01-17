@@ -8,20 +8,23 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar as CalendarIcon, User, AlertCircle, Briefcase, CalendarDays, TrendingUp } from "lucide-react";
+import { Clock, Calendar as CalendarIcon, User, AlertCircle, Briefcase, CalendarDays, TrendingUp, Users } from "lucide-react";
 import { format, startOfMonth, endOfMonth, differenceInMinutes, isValid } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useData } from "@/contexts/DataContext";
 
 const StaffAttendance = () => {
-    const { user } = useAuth();
+    const { user, isOwner } = useAuth();
     const { t } = useLanguage();
     // Default to current month range
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: startOfMonth(new Date()),
         to: endOfMonth(new Date())
     });
+    const [selectedStaffId, setSelectedStaffId] = useState<string>('all');
 
     // Valid Duration Helper
     const getDuration = (checkIn: string, checkOut?: string) => {
@@ -38,6 +41,20 @@ const StaffAttendance = () => {
         const interval = setInterval(() => setNow(new Date()), 60000);
         return () => clearInterval(interval);
     }, []);
+
+    // Fetch All Staff (for Filter)
+    const { data: staffProfiles } = useQuery({
+        queryKey: ['all-staff-profiles'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, full_name, email')
+                .order('full_name');
+            if (error) throw error;
+            return data || [];
+        },
+        enabled: isOwner // Only fetch if owner
+    });
 
     // Fetch sessions for the selected range
     const { data: sessionsRaw, isLoading, isError, error } = useQuery({
@@ -84,7 +101,13 @@ const StaffAttendance = () => {
     });
 
     // Normalize sessions to always be an array
-    const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
+    const allSessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
+
+    // Filter sessions by selected staff
+    const sessions = useMemo(() => {
+        if (selectedStaffId === 'all') return allSessions;
+        return allSessions.filter(s => s.staff_id === selectedStaffId);
+    }, [allSessions, selectedStaffId]);
 
     // Calculate Period Stats (Live) - Memoized for performance
     const stats = useMemo(() => sessions.reduce((acc: any, session: any) => {
@@ -137,6 +160,24 @@ const StaffAttendance = () => {
                             <h1 className="font-display text-3xl font-bold mb-2">Worker Attendance</h1>
                             <p className="text-muted-foreground">Track staff work hours and performance stats.</p>
                         </div>
+                        {isOwner && (
+                            <div className="flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/40">
+                                <Users className="w-4 h-4 ml-2 text-muted-foreground" />
+                                <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+                                    <SelectTrigger className="w-[200px] border-none shadow-none bg-transparent h-8">
+                                        <SelectValue placeholder="All Staff" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Staff</SelectItem>
+                                        {staffProfiles?.map((staff: any) => (
+                                            <SelectItem key={staff.id} value={staff.id}>
+                                                {staff.full_name || staff.email}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid lg:grid-cols-12 gap-6">
@@ -277,7 +318,7 @@ const StaffAttendance = () => {
                                             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/5">
                                                 <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
                                                 <p className="text-lg font-medium">No shifts found</p>
-                                                <p className="text-sm opacity-60">Try selecting a different date range.</p>
+                                                <p className="text-sm opacity-60">Try selecting a different date range or staff member.</p>
                                             </div>
                                         )}
                                     </div>

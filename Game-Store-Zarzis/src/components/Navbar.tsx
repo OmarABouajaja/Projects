@@ -77,7 +77,8 @@ const Navbar = () => {
     }
     return false;
   });
-  const { t } = useLanguage();
+  const { t, dir } = useLanguage();
+  const isRTL = dir === 'rtl';
   const { cartCount } = useCart();
 
   const navLinks: { name: string; href: string; icon: ElementType; id: string }[] = useMemo(() => [
@@ -193,7 +194,7 @@ const Navbar = () => {
                   <div className={`relative ${isActive ? "scale-110" : "scale-100"} transition-transform duration-200`}>
                     <Icon className="w-5 h-5" />
                     {isActive && (
-                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+                      <span className={`absolute -top-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.8)] ${isRTL ? '-left-1' : '-right-1'}`} />
                     )}
                   </div>
                   <span className={`text-[10px] font-medium leading-tight ${isActive ? "opacity-100" : "opacity-70"}`}>
@@ -233,11 +234,11 @@ const Navbar = () => {
                   <div className="relative transition-transform duration-200">
                     <ShoppingCart className="w-5 h-5" />
                     {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-accent-foreground text-[10px] flex items-center justify-center rounded-full font-bold shadow-sm">
+                      <span className={`absolute -top-1 w-4 h-4 bg-accent text-accent-foreground text-[10px] flex items-center justify-center rounded-full font-bold shadow-sm ${isRTL ? '-left-1' : '-right-1'}`}>
                         {cartCount}
                       </span>
                     )}
-                    {isCartActive && cartCount === 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />}
+                    {isCartActive && cartCount === 0 && <span className={`absolute -top-1 w-2 h-2 bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.8)] ${isRTL ? '-left-1' : '-right-1'}`} />}
                   </div>
                   <span className={`text-[10px] font-medium leading-tight ${isCartActive ? "opacity-100" : "opacity-70"}`}>
                     {t("nav.cart")}
@@ -250,7 +251,7 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Login Button & Language Switcher */}
-        <div className="fixed top-2 right-2 z-40 flex flex-col gap-1.5 items-end bg-background/80 backdrop-blur-md rounded-xl p-1.5 border border-border/30 shadow-lg">
+        <div className={`fixed top-2 z-40 flex flex-col gap-1.5 items-end bg-background/80 backdrop-blur-md rounded-xl p-1.5 border border-border/30 shadow-lg ${isRTL ? 'left-2' : 'right-2'}`}>
           {/* Login Button Mobile */}
           {(() => {
             const isLoggedIn = isStaff || isOwner || !!localStorage.getItem('client_user');
@@ -271,7 +272,7 @@ const Navbar = () => {
         </div>
 
         {/* WhatsApp Booking Button */}
-        <div className="fixed bottom-20 right-3 z-40">
+        <div className={`fixed bottom-20 z-40 ${isRTL ? 'left-3' : 'right-3'}`}>
           <a
             href="https://wa.me/21629290065?text=Bonjour%2C%20je%20souhaite%20r%C3%A9server%20une%20session%20gaming%20ou%20demander%20un%20devis%20de%20r%C3%A9paration."
             target="_blank"
@@ -290,8 +291,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`group/nav fixed left-2 sm:left-3 md:left-4 z-50 transition-all duration-300 ${isScrolled ? "top-2 sm:top-3" : "top-3 sm:top-5"
-          }`}
+        className={`group/nav fixed z-50 transition-all duration-300 ${isScrolled ? "top-2 sm:top-3" : "top-3 sm:top-5"} ${isRTL ? 'right-2 sm:right-3 md:right-4' : 'left-2 sm:left-3 md:left-4'}`}
         onMouseEnter={() => window.innerWidth >= 1024 && setExpanded(true)}
         onMouseLeave={() => window.innerWidth >= 1024 && setExpanded(false)}
         onClick={toggleExpanded}
@@ -363,8 +363,7 @@ const Navbar = () => {
                   title={link.name}
                 >
                   <span
-                    className={`absolute -left-0.5 sm:-left-1 top-1/2 -translate-y-1/2 w-1 sm:w-1.5 h-4 sm:h-5 rounded-full transition-all duration-300 ${isActive ? "bg-primary/80 shadow-[0_0_8px_hsl(var(--primary)/0.5)]" : "bg-transparent"
-                      }`}
+                    className={`absolute top-1/2 -translate-y-1/2 w-1 sm:w-1.5 h-4 sm:h-5 rounded-full transition-all duration-300 ${isActive ? "bg-primary/80 shadow-[0_0_8px_hsl(var(--primary)/0.5)]" : "bg-transparent"} ${isRTL ? '-right-0.5 sm:-right-1' : '-left-0.5 sm:-left-1'}`}
                   />
                   <Icon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0 ${collapsedActive ? "text-primary" : ""}`} />
                   <span
@@ -377,8 +376,7 @@ const Navbar = () => {
                     {link.name}
                   </span>
                   <span
-                    className={`absolute right-2 sm:right-2.5 h-0.5 sm:h-1 w-2 sm:w-2.5 rounded-full transition-all duration-300 ${showActive ? "opacity-100 bg-primary" : "opacity-0 group-hover:opacity-50 bg-primary/70"
-                      }`}
+                    className={`absolute h-0.5 sm:h-1 w-2 sm:w-2.5 rounded-full transition-all duration-300 ${showActive ? "opacity-100 bg-primary" : "opacity-0 group-hover:opacity-50 bg-primary/70"} ${isRTL ? 'left-2 sm:left-2.5' : 'right-2 sm:right-2.5'}`}
                   />
                 </a>
               );
@@ -398,11 +396,11 @@ const Navbar = () => {
                   }`}
                 title={t("nav.cart")}
               >
-                <span className={`absolute -left-0.5 sm:-left-1 top-1/2 -translate-y-1/2 w-1 sm:w-1.5 h-4 sm:h-5 rounded-full transition-all duration-300 ${isCartActive ? "bg-primary/80 shadow-[0_0_8px_hsl(var(--primary)/0.5)]" : "bg-transparent"}`} />
+                <span className={`absolute top-1/2 -translate-y-1/2 w-1 sm:w-1.5 h-4 sm:h-5 rounded-full transition-all duration-300 ${isCartActive ? "bg-primary/80 shadow-[0_0_8px_hsl(var(--primary)/0.5)]" : "bg-transparent"} ${isRTL ? '-right-0.5 sm:-right-1' : '-left-0.5 sm:-left-1'}`} />
                 <div className="relative">
                   <ShoppingCart className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 w-4 h-4 bg-accent text-accent-foreground text-[9px] flex items-center justify-center rounded-full font-bold shadow-sm">
+                    <span className={`absolute -top-2 w-4 h-4 bg-accent text-accent-foreground text-[9px] flex items-center justify-center rounded-full font-bold shadow-sm ${isRTL ? '-left-2' : '-right-2'}`}>
                       {cartCount}
                     </span>
                   )}
@@ -425,7 +423,7 @@ const Navbar = () => {
                 ? "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 active:bg-primary/30"
                 : "bg-card/50 border border-border/50 text-muted-foreground hover:bg-card/60 hover:text-primary"
                 }`}
-              aria-label={expanded ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-label={expanded ? t("nav.close_menu") : t("nav.open_menu")}
               aria-expanded={expanded}
               type="button"
             >
@@ -452,7 +450,7 @@ const Navbar = () => {
                   >
                     <div className="relative">
                       {isStaff || isOwner ? <LayoutDashboard className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0" /> : <User className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0" />}
-                      {isLoggedIn && <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_hsl(var(--primary)/0.6)]" />}
+                      {isLoggedIn && <span className={`absolute -top-1 w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_hsl(var(--primary)/0.6)] ${isRTL ? '-left-1' : '-right-1'}`} />}
                     </div>
                     <span className={`text-xs sm:text-sm font-bold uppercase tracking-wide whitespace-nowrap overflow-hidden transition-all duration-300 ${expanded ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"}`}>
                       {isLoggedIn ? t("nav.logged_in") : t("nav.login")}
