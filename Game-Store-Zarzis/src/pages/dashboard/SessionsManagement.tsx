@@ -873,49 +873,48 @@ const SessionsManagement = () => {
                     )}
                   </div>
 
-                  {/* Session Actions - Static at bottom of card */}
-                  {/* Session Actions - FORCED RENDER DEBUG */}
-                  <div className="w-full bg-yellow-500/20 text-[10px] text-center mb-1">
-                    DBG: {isActive ? "ACT" : "INA"} | {session ? "SES" : "NOS"}
-                  </div>
+                  {/* Session Actions - Floating Absolute Position to ensure visibility */}
+                  {isActive && session && (
+                    <div className="absolute bottom-2 left-2 right-2 py-1 px-2 bg-black/90 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-around shadow-2xl z-30 animate-in slide-in-from-bottom-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-full text-primary hover:bg-primary/20 hover:text-primary transition-colors"
+                        onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
+                        title="Extend Session"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </Button>
 
-                  <div className="w-full mt-2 pt-2 border-t border-white/5 flex items-center justify-between gap-1 z-20">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-9 w-9 p-0 rounded-full border-primary/30 text-primary hover:bg-primary/20 bg-white/5"
-                      onClick={(e) => { e.stopPropagation(); session && openExtendDialog(session); }}
-                      title="Extend Session"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </Button>
+                      <div className="w-px h-4 bg-white/20" />
 
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (session) {
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-full text-secondary hover:bg-secondary/20 hover:text-secondary transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedSessionForConsumption(session);
                           setIsConsumptionDialogOpen(true);
-                        }
-                      }}
-                      title="Add Consumption"
-                    >
-                      <Utensils className="w-4 h-4" />
-                    </Button>
+                        }}
+                        title="Add Consumption"
+                      >
+                        <Utensils className="w-4 h-4" />
+                      </Button>
 
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
-                      onClick={(e) => { e.stopPropagation(); session && openEndDialog(session); }}
-                      title="End Session"
-                    >
-                      <Square className="w-4 h-4 fill-current" />
-                    </Button>
-                  </div>
+                      <div className="w-px h-4 bg-white/20" />
+
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-full text-destructive hover:bg-destructive/20 hover:text-destructive transition-colors"
+                        onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
+                        title="End Session"
+                      >
+                        <Square className="w-4 h-4 fill-current" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               );
             })}
