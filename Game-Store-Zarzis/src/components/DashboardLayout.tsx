@@ -256,7 +256,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </div>
               <div className="flex flex-col">
                 <span className="font-display font-bold text-sm tracking-tight">Game Store</span>
-                <span className="text-[10px] text-muted-foreground font-mono">PRO DASHBOARD</span>
+                <span className="text-[10px] text-muted-foreground font-mono">PRO DASHBOARD v2.1</span>
               </div>
             </div>
           )}
