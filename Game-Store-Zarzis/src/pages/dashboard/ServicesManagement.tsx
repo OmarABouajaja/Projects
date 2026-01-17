@@ -2,7 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
-import { useServicesCatalog, useCreateServiceCatalog, useUpdateServiceCatalog } from "@/hooks/useServicesCatalog";
+import { useServicesCatalog, useCreateServiceCatalog, useUpdateServiceCatalog, useDeleteServiceCatalog } from "@/hooks/useServicesCatalog";
 import { useServiceRequests, useCreateServiceRequest, useUpdateServiceRequest } from "@/hooks/useServiceRequests";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sendServiceRequestNotification } from "@/services/emailService";
-import { Wrench, Plus, Edit, AlertCircle } from "lucide-react";
+import { Wrench, Plus, Edit, AlertCircle, Trash2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const statusColors: Record<string, string> = {
@@ -45,6 +45,7 @@ const ServicesManagement = () => {
   const { data: servicesCatalogRaw } = useServicesCatalog();
   const createService = useCreateServiceCatalog();
   const updateService = useUpdateServiceCatalog();
+  const deleteService = useDeleteServiceCatalog();
 
   // Normalize servicesCatalog to guarantee it's always an array
   const servicesCatalog = Array.isArray(servicesCatalogRaw) ? servicesCatalogRaw : [];
@@ -373,25 +374,44 @@ const ServicesManagement = () => {
                   {servicesCatalog.map((item) => (
                     <Card key={item.id} className="glass-card overflow-hidden hover:border-primary/30 transition-colors">
                       <CardHeader className="p-4 pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="min-w-0">
+                        <div className="flex items-start">
+                          <div className="min-w-0 flex-1">
                             <CardTitle className="text-lg truncate">{item.name_fr || item.name}</CardTitle>
                             <Badge variant="outline" className="text-[10px] mt-1">{item.category}</Badge>
                           </div>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
-                            setEditingCatalogItem(item);
-                            setCatalogFormData({
-                              name: item.name || "",
-                              name_fr: item.name_fr || item.name || "",
-                              price: item.price?.toString() || "",
-                              is_complex: !!item.is_complex,
-                              image_url: item.image_url || "",
-                              category: item.category || "phone"
-                            });
-                            setIsCatalogDialogOpen(true);
-                          }}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                              setEditingCatalogItem(item);
+                              setCatalogFormData({
+                                name: item.name || "",
+                                name_fr: item.name_fr || item.name || "",
+                                price: item.price?.toString() || "",
+                                is_complex: !!item.is_complex,
+                                image_url: item.image_url || "",
+                                category: item.category || "phone"
+                              });
+                              setIsCatalogDialogOpen(true);
+                            }}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                              onClick={async () => {
+                                if (confirm(`Remove "${item.name_fr || item.name}" from catalog?`)) {
+                                  try {
+                                    await deleteService.mutateAsync(item.id);
+                                    toast({ title: "Template removed" });
+                                  } catch (e: any) {
+                                    toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+                                  }
+                                }
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="p-4 pt-0">

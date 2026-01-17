@@ -68,3 +68,22 @@ export const useCreateServiceCatalog = () => {
     },
   });
 };
+
+export const useDeleteServiceCatalog = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // Soft delete by setting is_active to false
+      const { error } = await supabase
+        .from("services_catalog")
+        .update({ is_active: false })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["services-catalog"] });
+    },
+  });
+};
