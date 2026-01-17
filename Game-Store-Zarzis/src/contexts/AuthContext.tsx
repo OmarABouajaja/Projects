@@ -122,136 +122,96 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // console.log("AuthContext: Auth state change:", event, !!session?.user);
         if (!isMounted) return;
 
-        setSession(session);
-        setUser(session?.user ?? null);
+        // console.log("AuthContext: Auth state change:", event);
 
         if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setRole(null);
           localStorage.removeItem('user_role');
           setIsLoading(false);
           return;
         }
 
-        // Optimization: If just a token refresh and we have a role, SKIP db call
-        // This prevents "crash" on minor network glitches during auto-refresh
-        if (event === 'TOKEN_REFRESHED' && role) {
-          return;
-        }
-
         if (session?.user) {
-          // Sync profile on every login event or initial session discovery
+          setSession(session);
+          setUser(session.user);
+
+          // Force update last active on every sign in / resume
           if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-            await syncProfile(session.user);
+            syncProfile(session.user).catch(console.error);
           }
 
+          // Re-fetch role to be safe, but utilize cache if network fails
           try {
-            // Only fetch if we don't have a role, or if we want to be strict about checking updates on login
-            // For robustness, we re-fetch on login/initial, but we have a fallback now
-            const userRole = await fetchUserRole(session.user.id);
-            if (isMounted) {
-              if (userRole) {
-                setRole(userRole);
-              } else if (!role) {
-                // Only clear if we didn't have one cached. 
-                // If network fails (returns null) but we are "SIGNED_IN", keep cached role?
-                // No, `fetchUserRole` returns null on error. 
-                // If we strictly null it, we crash.
-                // Strategy: Trust cache if fetch fails but session is valid?
-                // Better: logic above "fetchUserRole" already handles caching inside it? No, explicit setItem.
+            const currentRole = localStorage.getItem('user_role') as AppRole | null;
+            // Optimistically set from cache if available to prevent flicker
+            if (currentRole && !role) {
+              setRole(currentRole);
+            }
 
-                // If userRole is null (error or not found) and we have no cached role, set null.
+            const fetchedRole = await fetchUserRole(session.user.id);
+            if (isMounted) {
+              if (fetchedRole) {
+                setRole(fetchedRole);
+              } else if (!currentRole) {
+                // Only nullify if we have NO role at all (neither fetched nor cached)
+                // This allows "offline" mode or RLS failure survival
+                console.warn("AuthContext: No role found, and no cache.");
                 setRole(null);
               }
             }
           } catch (error) {
-            console.error('AuthContext: Error fetching user role:', error);
-            // FAIL-SAFE: Do NOT setRole(null) here if we already have one.
+            console.error('AuthContext: Error checking role:', error);
           }
         } else {
-          // No user (should be covered by SIGNED_OUT, but just in case)
-          setRole(null);
-          localStorage.removeItem('user_role');
+          // Case: Session exists but user is somehow null? Rare.
         }
+
         setIsLoading(false);
       }
     );
 
-    // Check for existing session
+    // Initial Load Logic
     const initializeAuth = async () => {
-      // Add shorter timeout to prevent infinite loading (3 seconds is enough)
-      const timeoutId = setTimeout(() => {
-        if (isMounted) {
-          console.warn("AuthContext: Role fetch timed out. Defaulting to safe state.");
-          // If we have a user but no role, we might be stuck.
-          // Safety: If we have a cached role, keep it. If not, stop loading so UI can show something (even if error).
-          setIsLoading(false);
-        }
-      }, 3000);
-
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('AuthContext: Session check error:', error);
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-            setRole(null);
-            localStorage.removeItem('user_role');
-            setIsLoading(false);
-          }
-          clearTimeout(timeoutId);
-          return;
+          throw error;
         }
 
-        if (!isMounted) {
-          clearTimeout(timeoutId);
-          return;
-        }
-
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (!isMounted) return;
 
         if (session?.user) {
-          // Robust Profile Sync on Initial Load
-          await syncProfile(session.user);
+          setSession(session);
+          setUser(session.user);
 
-          try {
-            const userRole = await fetchUserRole(session.user.id);
-            if (isMounted) {
-              setRole(userRole);
-            }
-          } catch (error) {
-            console.error('AuthContext: Error fetching user role:', error);
-            if (isMounted) {
-              setRole(null);
-            }
-          }
+          // Try to get role
+          const cachedRole = localStorage.getItem('user_role') as AppRole | null;
+          if (cachedRole) setRole(cachedRole);
+
+          // Background refresh of role
+          fetchUserRole(session.user.id).then(r => {
+            if (isMounted && r) setRole(r);
+          });
         } else {
+          // No session
           setRole(null);
           localStorage.removeItem('user_role');
         }
-
-        // Ensure loading is set to false after checks
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('AuthContext: Error initializing auth:', error);
-        if (isMounted) {
-          setIsLoading(false);
-        }
+      } catch (err) {
+        console.error("AuthContext: Init error", err);
+        // Ensure we stop loading so user isn't stuck on white screen
         if (isMounted) {
           setRole(null);
         }
       } finally {
-        clearTimeout(timeoutId);
         if (isMounted) {
           setIsLoading(false);
         }
@@ -264,7 +224,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Empty dependency array prevents re-subscription loops
 
   const clockIn = async () => {
     if (!user) return;
