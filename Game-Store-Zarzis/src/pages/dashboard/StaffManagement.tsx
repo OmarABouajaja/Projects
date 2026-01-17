@@ -210,10 +210,6 @@ const StaffManagement = () => {
                   </button>
                 </div>
               </div>
-              <div className="mt-2 text-[11px] text-yellow-500 bg-yellow-500/10 p-2 rounded border border-yellow-500/20">
-                <strong>💡 Note sur le domaine de Test :</strong>
-                <p>Si vous utilisez un domaine de test MailerSend, l'email ne sera reçu <strong>QUE par vous-même</strong>. Les autres adresses le bloqueront.</p>
-              </div>
             </div>
           ),
           duration: 20000,

@@ -814,7 +814,7 @@ const SessionsManagement = () => {
               return (
                 <div key={console.id} className="relative group">
                   <div
-                    className={`glass-card rounded-xl p-2 sm:p-3 md:p-4 transition-all h-full flex flex-col items-center justify-center relative ${isOverdue
+                    className={`glass-card rounded-xl p-2 sm:p-3 md:p-4 transition-all h-full flex flex-col items-center justify-between relative ${isOverdue
                       ? "border-red-600 bg-red-600/20 animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.5)]"
                       : isMaintenance
                         ? "border-muted bg-muted/10 opacity-60 grayscale cursor-not-allowed"
@@ -878,8 +878,8 @@ const SessionsManagement = () => {
                     <div className="w-full mt-2 pt-2 border-t border-white/5 flex items-center justify-between gap-1 z-20">
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="h-9 w-9 p-0 rounded-full hover:bg-primary/20 hover:text-primary transition-colors"
+                        variant="outline"
+                        className="h-9 w-9 p-0 rounded-full border-primary/30 text-primary hover:bg-primary/20"
                         onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
                         title="Extend Session"
                       >
@@ -888,8 +888,8 @@ const SessionsManagement = () => {
 
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="h-9 w-9 p-0 rounded-full hover:bg-secondary/20 hover:text-secondary transition-colors"
+                        variant="secondary"
+                        className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSessionForConsumption(session);
@@ -897,17 +897,17 @@ const SessionsManagement = () => {
                         }}
                         title="Add Consumption"
                       >
-                        <Utensils className="w-5 h-5" />
+                        <Utensils className="w-4 h-4" />
                       </Button>
 
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="h-9 w-9 p-0 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors"
+                        variant="destructive"
+                        className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
                         onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
                         title="End Session"
                       >
-                        <Square className="w-5 h-5 fill-current" />
+                        <Square className="w-4 h-4 fill-current" />
                       </Button>
                     </div>
                   )}
@@ -1221,6 +1221,15 @@ const SessionsManagement = () => {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Grand Total Display */}
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center mt-4">
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Total à Payer</p>
+                  <p className="font-display text-4xl font-bold text-primary">
+                    {(estimatedRevenue + (sessionConsumptions?.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0) || 0)).toFixed(3)}
+                    <span className="text-lg ml-1 text-muted-foreground">DT</span>
+                  </p>
                 </div>
 
                 <Button
