@@ -7,6 +7,8 @@ import { usePricing } from "@/hooks/usePricing";
 import { useClients, useCreateClient, useClientByPhone } from "@/hooks/useClients";
 import { useStartSession, useEndSession, useTodaySessions, useActiveSessions, useAddGameToSession } from "@/hooks/useGamingSessions";
 import { useCreatePointsTransaction } from "@/hooks/usePointsTransactions";
+import { useCreateSale } from "@/hooks/useSales";
+import { useSessionConsumptions, useDeleteSessionConsumption } from "@/hooks/useSessionConsumptions";
 import { useStoreSettings, useUpdateStoreSetting } from "@/hooks/useStoreSettings";
 import { useGameShortcuts, useCreateGameShortcut, useDeleteGameShortcut } from "@/hooks/useGameShortcuts";
 import { Button } from "@/components/ui/button";
@@ -19,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee } from "lucide-react";
+import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee, Utensils } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useData } from "@/contexts/DataContext";
@@ -60,6 +62,15 @@ const SessionsManagement = () => {
   const { data: activeSessions } = useActiveSessions();
   const { data: storeSettingsData } = useStoreSettings();
   const { gameShortcuts, deleteGameShortcut, isLoading: isDataLoading, clients } = useData();
+
+  // Consumption Data for Selected Session
+  const { data: sessionConsumptions } = useSessionConsumptions(selectedSession?.id);
+  const deleteSessionConsumption = useDeleteSessionConsumption();
+  const createSale = useCreateSale();
+
+  // New State for Consumption Dialog
+  const [isConsumptionDialogOpen, setIsConsumptionDialogOpen] = useState(false);
+  const [selectedSessionForConsumption, setSelectedSessionForConsumption] = useState<any>(null);
 
   // Mutations
   const startSession = useStartSession();
@@ -376,32 +387,23 @@ const SessionsManagement = () => {
 
     const session = selectedSession;
     const pricingInfo = session.pricing;
-    let totalAmount = 0;
+    let gamingTotal = 0;
     const extraAmount = 0;
     let calculatedPoints = 0;
 
+    // 1. Calculate Gaming Cost
     if (session.session_type === "hourly") {
       const startTime = new Date(session.start_time);
       const endTime = new Date();
-      // Calculate duration including any extra time added manually? 
-      // Usually hourly is just "time played". 
-      // If extra_time_minutes is used for "pre-paid" extension, it implies logical duration.
-      // But for pay at end, we just use actual duration.
       const diffMs = endTime.getTime() - startTime.getTime();
       const hoursPlayed = diffMs / (1000 * 60 * 60);
+      gamingTotal = Math.ceil(hoursPlayed) * Number(pricingInfo.price);
 
-      // Basic calculation: ceiling to nearest hour or half-hour? 
-      // Let's stick to simple ceiling hour for now or exact logic
-      totalAmount = Math.ceil(hoursPlayed) * Number(pricingInfo.price);
-      // Standard Store Policy: Clients earn points based on settings
       if (storeSettingsData?.points_system_enabled !== false) {
-        // Simple counting: Points per DT (default 1)
         const pointsPerDT = storeSettingsData?.points_config?.points_per_dt || 1;
-        calculatedPoints = Math.floor(totalAmount * pointsPerDT);
+        calculatedPoints = Math.floor(gamingTotal * pointsPerDT);
       }
     } else {
-      // Per game
-      // Use the actual games count from DB (which includes extensions)
       const totalGames = gamesInSession;
       const prolongationCount = session.extra_time_minutes || 0;
       const prolongationFee = Number(pricingInfo.extra_time_price || 0);
@@ -414,7 +416,7 @@ const SessionsManagement = () => {
       }
 
       const actualPaidGames = totalGames - freeGames;
-      totalAmount = (actualPaidGames * Number(pricingInfo.price)) + (prolongationCount * prolongationFee);
+      gamingTotal = (actualPaidGames * Number(pricingInfo.price)) + (prolongationCount * prolongationFee);
 
       if (storeSettingsData?.points_system_enabled !== false) {
         calculatedPoints = actualPaidGames * Number(pricingInfo.points_earned || 1);
@@ -422,6 +424,10 @@ const SessionsManagement = () => {
     }
 
     setPointsEarned(calculatedPoints);
+
+    // 2. Calculate Consumption Total
+    const consumptionTotal = sessionConsumptions?.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0) || 0;
+    const grandTotal = gamingTotal + consumptionTotal;
 
     try {
       let clientId = selectedClientForSession?.id;
@@ -435,17 +441,40 @@ const SessionsManagement = () => {
         clientId = newClient.id;
       }
 
+      // 3. Process Consumptions as Sales
+      if (sessionConsumptions && sessionConsumptions.length > 0) {
+        for (const item of sessionConsumptions) {
+          await createSale.mutateAsync({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.unit_price,
+            total_amount: item.unit_price * item.quantity,
+            payment_method: "cash",
+            points_used: 0,
+            points_earned: item.product?.points_earned ? (item.product.points_earned * item.quantity) : 0,
+            client_id: clientId || null,
+            staff_id: user?.id || '',
+            notes: `Session Consumption #${session.id}`,
+            session_id: session.id,
+          } as any);
+
+          // Delete from temporary table
+          await deleteSessionConsumption.mutateAsync(item.id);
+        }
+      }
+
+      // 4. End Gaming Session
       await endSession.mutateAsync({
         session_id: session.id,
         console_id: session.console_id,
-        total_amount: totalAmount,
+        total_amount: gamingTotal, // Store only gaming revenue in session record
         games_played: gamesInSession,
         extra_amount: extraAmount,
         points_earned: calculatedPoints,
         client_id: clientId,
       });
 
-      // Award points if system is enabled and client selected
+      // Award points (Gaming)
       if (storeSettingsData?.points_system_enabled !== false && clientId && calculatedPoints > 0) {
         await createPointsTransaction.mutateAsync({
           client_id: clientId,
@@ -458,14 +487,14 @@ const SessionsManagement = () => {
         });
       }
 
-      setPointsEarned(0); // Reset after use
+      setPointsEarned(0);
       toast({
         title: "Session ended!",
-        description: `Total: ${totalAmount.toFixed(3)} DT`
+        description: `Gaming: ${gamingTotal.toFixed(3)} + Items: ${consumptionTotal.toFixed(3)} = ${grandTotal.toFixed(3)} DT`
       });
       setIsEndDialogOpen(false);
       setSelectedSession(null);
-      resetForm(); // Important: reset client states after ending
+      resetForm();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     }
@@ -840,6 +869,19 @@ const SessionsManagement = () => {
                       </Button>
                       <Button
                         size="sm"
+                        variant="default"
+                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-secondary/50 bg-secondary text-black hover:bg-secondary/80 hover:scale-110 transition-transform touch-manipulation"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSessionForConsumption(session);
+                          setIsConsumptionDialogOpen(true);
+                        }}
+                        aria-label="Add Consumption"
+                      >
+                        <Utensils className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-red-500/50 bg-background/90 backdrop-blur-sm hover:scale-110 transition-transform touch-manipulation"
                         onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
@@ -1030,6 +1072,29 @@ const SessionsManagement = () => {
                   </p>
                 </div>
 
+                {/* Consumption Summary Block */}
+                {sessionConsumptions && sessionConsumptions.length > 0 && (
+                  <div className="glass-card rounded-lg p-3 sm:p-4 border-secondary/20 bg-secondary/5">
+                    <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                      <Utensils className="w-4 h-4 text-secondary" /> Consommations (Tabs)
+                    </h4>
+                    <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+                      {sessionConsumptions.map((item: any) => (
+                        <div key={item.id} className="flex justify-between text-xs sm:text-sm">
+                          <span>{item.quantity}x {item.product?.name || 'Item'}</span>
+                          <span className="font-mono">{((item.unit_price * item.quantity).toFixed(3))}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="border-t border-white/10 mt-2 pt-2 flex justify-between font-bold text-sm">
+                      <span>Subtotal Consumables:</span>
+                      <span className="text-secondary">
+                        {sessionConsumptions.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0).toFixed(3)} DT
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {selectedSession.session_type === 'per_game' && (
                   <div className="space-y-4">
                     <div>
@@ -1153,6 +1218,15 @@ const SessionsManagement = () => {
           isOpen={isCafeMenuOpen}
           onOpenChange={setIsCafeMenuOpen}
           clientId={null} // Can be linked to active session client if needed
+        />
+
+        <QuickSaleMenu
+          isOpen={isConsumptionDialogOpen}
+          onOpenChange={(open) => {
+            setIsConsumptionDialogOpen(open);
+            if (!open) setSelectedSessionForConsumption(null);
+          }}
+          sessionId={selectedSessionForConsumption?.id}
         />
       </DashboardLayout>
     </ProtectedRoute >
