@@ -4,6 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 import os
 from services.supabase_client import get_supabase
+from supabase import Client
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 

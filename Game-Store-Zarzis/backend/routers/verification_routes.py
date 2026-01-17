@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import random
 import string
 from services.supabase_client import get_supabase
+from supabase import Client
 import os
 from services.sms_service import sms_service
 # Need to import email sending logic, currently in email_routes but should be in a service
