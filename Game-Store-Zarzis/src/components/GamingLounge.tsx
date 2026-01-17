@@ -94,9 +94,7 @@ const GamingLounge = () => {
             </div>
 
             <div className="glass-card rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 mb-4 sm:mb-5 md:mb-6 border-secondary/30 hover:border-secondary/60 transition-all duration-300 hover:shadow-[0_6px_18px_hsl(var(--secondary)/0.18)]">
-              <p className="text-secondary font-medium text-xs sm:text-sm md:text-base text-center">
-                {t("gaming.offer")}
-              </p>
+              {t("gaming.offer", { count: settings?.free_game_threshold?.games_required || 5, next: (settings?.free_game_threshold?.games_required || 5) + 1 })}
             </div>
 
             <a
