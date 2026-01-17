@@ -20,7 +20,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sendServiceRequestNotification } from "@/services/emailService";
-import { Wrench, Plus, Edit } from "lucide-react";
+import { Wrench, Plus, Edit, AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-500/20 text-yellow-500 border-yellow-500/50",
@@ -48,7 +49,7 @@ const ServicesManagement = () => {
   const updateService = useUpdateServiceCatalog();
 
 
-  const { data: serviceRequests, isLoading } = useServiceRequests();
+  const { data: serviceRequests, isLoading, isError, error } = useServiceRequests();
   const createRequest = useCreateServiceRequest();
   const updateRequest = useUpdateServiceRequest();
 
@@ -228,7 +229,13 @@ const ServicesManagement = () => {
     }
   };
 
-  const filteredRequests = serviceRequests?.filter((r) => {
+  console.log("Service Requests Data:", serviceRequests);
+
+  // Safe access for filtered requests to prevent crash
+  const safeRequests = Array.isArray(serviceRequests) ? serviceRequests : [];
+
+  const filteredRequests = safeRequests.filter((r) => {
+    if (!r) return false;
     if (filter === "all") return true;
     if (filter === "active") return ["pending", "in_progress", "waiting_parts"].includes(r.status);
     if (filter === "simple") return !r.is_complex;
@@ -256,6 +263,17 @@ const ServicesManagement = () => {
               New Request
             </Button>
           </div>
+
+          {isError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                Failed to load service requests. Please check your connection or contact support.
+                {error && <p className="mt-2 text-xs opacity-70">{(error as Error).message}</p>}
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -298,8 +316,8 @@ const ServicesManagement = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold">{request.service?.name_fr || "Service"}</h3>
-                          <Badge className={statusColors[request.status]}>
-                            {statusLabels[request.status]}
+                          <Badge className={statusColors[request.status] || "bg-gray-500/20 text-gray-500 border-gray-500/50"}>
+                            {statusLabels[request.status] || request.status}
                           </Badge>
                           {request.is_complex && (
                             <Badge variant="outline" className="border-secondary text-secondary">
@@ -646,8 +664,8 @@ const ServicesManagement = () => {
                   )}
                   <div className="flex items-center gap-2">
                     <strong>Status:</strong>
-                    <Badge className={statusColors[selectedRequest.status]}>
-                      {statusLabels[selectedRequest.status]}
+                    <Badge className={statusColors[selectedRequest.status] || "bg-gray-500/20 text-gray-500 border-gray-500/50"}>
+                      {statusLabels[selectedRequest.status] || selectedRequest.status}
                     </Badge>
                   </div>
                 </div>

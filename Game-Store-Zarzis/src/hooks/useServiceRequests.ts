@@ -44,7 +44,10 @@ export const useServiceRequests = (status?: string) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching service requests:", error);
+        throw error;
+      }
       return data;
     },
   });

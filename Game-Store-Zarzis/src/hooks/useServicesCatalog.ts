@@ -17,7 +17,10 @@ export const useServicesCatalog = (activeOnly = true) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching services catalog:", error);
+        throw error;
+      }
       return data as ServiceCatalog[];
     },
   });
