@@ -848,8 +848,9 @@ const SessionsManagement = () => {
                         </div>
 
                         {session.session_type === 'per_game' && (
-                          <div className="text-xs font-bold text-primary">
-                            {session.games_played} Game{session.games_played > 1 ? 's' : ''}
+                          <div className="flex items-center justify-center gap-1 text-sm font-bold text-primary bg-primary/10 rounded-md px-2 py-0.5 border border-primary/20">
+                            <Gamepad2 className="w-3.5 h-3.5" />
+                            <span>{session.games_played || 1}</span>
                           </div>
                         )}
 

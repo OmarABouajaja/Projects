@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,8 +70,8 @@ const StaffAttendance = () => {
     // Normalize sessions to always be an array
     const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
 
-    // Calculate Period Stats (Live)
-    const stats = sessions.reduce((acc: any, session: any) => {
+    // Calculate Period Stats (Live) - Memoized for performance
+    const stats = useMemo(() => sessions.reduce((acc: any, session: any) => {
         if (!session?.check_in) return acc;
 
         let duration = session.duration_minutes;
@@ -91,7 +91,7 @@ const StaffAttendance = () => {
         }
 
         return acc;
-    }, { totalMinutes: 0, shifts: 0, days: [] });
+    }, { totalMinutes: 0, shifts: 0, days: [] }), [sessions]);
 
 
     const totalHours = (stats.totalMinutes / 60).toFixed(1);

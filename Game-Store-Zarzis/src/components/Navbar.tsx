@@ -250,7 +250,7 @@ const Navbar = () => {
         </nav>
 
         {/* Mobile Login Button & Language Switcher */}
-        <div className="fixed top-3 right-3 z-40 flex flex-col gap-2 items-end">
+        <div className="fixed top-2 right-2 z-40 flex flex-col gap-1.5 items-end bg-background/80 backdrop-blur-md rounded-xl p-1.5 border border-border/30 shadow-lg">
           {/* Login Button Mobile */}
           {(() => {
             const isLoggedIn = isStaff || isOwner || !!localStorage.getItem('client_user');

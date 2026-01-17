@@ -206,7 +206,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const finalNavItems = isOwner ? ownerNavItems : workerNavItems;
   const navItems = finalNavItems;
-  // console.log("DashboardLayout: final navItems =", navItems.length, "items");
 
   return (
     <div className="min-h-screen bg-background flex relative overflow-hidden">
