@@ -68,7 +68,7 @@ def create_expense(expense: ExpenseCreate):
         res = supabase.table("expenses").insert(insert_data).execute()
         return res.data[0]
     except Exception as e:
-        print(f"Error creating expense: {e}")
+        # logger.error(f"Error creating expense: {e}")
         # Fallback for debugging if column names mismatch
         raise HTTPException(status_code=500, detail=f"Failed to create expense: {str(e)}")
 

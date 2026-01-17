@@ -85,7 +85,7 @@ def cleanup_data(request: Request, body: CleanupRequest):
         }
 
     except Exception as e:
-        print(f"Cleanup general error: {e}")
+        # logger.error(f"Cleanup general error: {e}")
         raise HTTPException(status_code=500, detail=f"Cleanup process failed: {str(e)}")
 
 @router.get("/export")
@@ -118,7 +118,7 @@ def export_data(request: Request):
             "data": backup
         }
     except Exception as e:
-        print(f"Export general error: {e}")
+        # logger.error(f"Export general error: {e}")
         raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 
@@ -167,7 +167,7 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
             user_id = user_response.user.id
         except Exception as auth_error:
             error_str = str(auth_error)
-            print(f"Auth Admin Error: {error_str}")
+            # logger.error(f"Auth Admin Error: {error_str}")
             # Check for common errors
             if "already registered" in error_str.lower() or "already exists" in error_str.lower():
                 raise HTTPException(status_code=400, detail="Ce membre du personnel est déjà enregistré.")
@@ -187,7 +187,7 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
                 "role": request_data.role
             }).execute()
         except Exception as role_error:
-            print(f"Failed to assign role: {role_error}")
+            # logger.error(f"Failed to assign role: {role_error}")
             # Clean up user if role assignment fails
             try:
                 supabase.auth.admin.delete_user(user_id)
@@ -205,7 +205,7 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
                 "updated_at": datetime.datetime.now().isoformat()
             }).execute()
         except Exception as profile_error:
-            print(f"Profile upsert error: {profile_error}")
+            # logger.error(f"Profile upsert error: {profile_error}")
             # Non-critical, but logged
             pass
             
@@ -229,7 +229,7 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Create staff error: {e}")
+        # logger.error(f"Create staff error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 @router.post("/sync-profiles")
 @limiter.limit("5/minute")
@@ -275,7 +275,7 @@ def sync_profiles(request: Request):
         }
 
     except Exception as e:
-        print(f"Sync profiles error: {e}")
+        # logger.error(f"Sync profiles error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -297,20 +297,23 @@ def delete_staff_member(request: Request, user_id: str):
             supabase.auth.admin.delete_user(user_id)
         except Exception as auth_err:
             error_str = str(auth_err)
-            print(f"Auth delete error: {error_str}")
+            # logger.error(f"Auth delete error: {error_str}")
             # Continue anyway to clean database
+            pass
         
         # 2. Delete from user_roles
         try:
             supabase.table("user_roles").delete().eq("user_id", user_id).execute()
         except Exception as role_err:
-            print(f"Role delete error: {role_err}")
+            # logger.error(f"Role delete error: {role_err}")
+            pass
         
         # 3. Delete from profiles
         try:
             supabase.table("profiles").delete().eq("id", user_id).execute()
         except Exception as profile_err:
-            print(f"Profile delete error: {profile_err}")
+            # logger.error(f"Profile delete error: {profile_err}")
+            pass
         
         return {
             "status": "success",
@@ -319,6 +322,6 @@ def delete_staff_member(request: Request, user_id: str):
         }
 
     except Exception as e:
-        print(f"Delete staff error: {e}")
+        # logger.error(f"Delete staff error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

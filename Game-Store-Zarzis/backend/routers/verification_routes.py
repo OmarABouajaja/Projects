@@ -53,7 +53,7 @@ def send_verification_code(request: Request, body: SendCodeRequest):
         }
         res = supabase.table("verification_codes").insert(data).execute()
     except Exception as e:
-        print(f"Error storing OTP: {e}")
+        # logger.error(f"Error storing OTP: {e}")
         raise HTTPException(status_code=500, detail="Database error")
 
     # Check global SMS setting
@@ -117,5 +117,5 @@ def check_verification_code(request: Request, body: VerifyCodeRequest):
             raise HTTPException(status_code=400, detail="Invalid or expired code")
             
     except Exception as e:
-        print(f"Error verifying OTP: {e}")
+        # logger.error(f"Error verifying OTP: {e}")
         raise HTTPException(status_code=500, detail="Verification failed")

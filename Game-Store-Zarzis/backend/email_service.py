@@ -51,7 +51,8 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
             mailer.email.send(email_request)
             return True
         except Exception as sdk_error:
-            print(f"MailerSend SDK Failed: {sdk_error}. Falling back to SMTP...")
+            # print(f"MailerSend SDK Failed: {sdk_error}. Falling back to SMTP...")
+            pass
 
     # 2. Try SMTP
     if SMTP_USER and SMTP_PASS:
@@ -70,10 +71,10 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
                 server.starttls()
                 server.login(SMTP_USER, SMTP_PASS)
                 server.sendmail(FROM_EMAIL, recipient_email, msg.as_string())
-            print(f"Email sent via SMTP to {recipient_email}")
+            # print(f"Email sent via SMTP to {recipient_email}")
             return True
         except Exception as smtp_error:
-            print(f"SMTP Failed: {smtp_error}")
+            # print(f"SMTP Failed: {smtp_error}")
             return False
             
     return False
