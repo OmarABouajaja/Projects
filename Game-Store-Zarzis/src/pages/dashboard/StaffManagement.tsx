@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { UserPlus, Key } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { createStaffMember } from "@/services/adminService";
+import { createStaffMember, deleteStaffMember } from "@/services/adminService";
 
 interface StaffMember {
   id: string;
@@ -27,6 +27,7 @@ interface StaffMember {
   phone?: string;
   created_at: string;
   last_sign_in?: string;
+  last_active_at?: string; // 🟢 For online/offline status
   is_invited?: boolean;
   invitation_sent_at?: string;
 }
@@ -73,7 +74,7 @@ const StaffManagement = () => {
         // Get profile data
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("full_name, created_at, is_active, phone, email, last_sign_in_at")
+          .select("full_name, created_at, is_active, phone, email, last_sign_in_at, last_active_at")
           .eq("id", role.user_id)
           .single();
 
@@ -100,6 +101,7 @@ const StaffManagement = () => {
           phone: profileData?.phone,
           created_at: profileData?.created_at || role.created_at || new Date().toISOString(),
           last_sign_in: role.user_id === user?.id ? user.last_sign_in_at : profileData?.last_sign_in_at,
+          last_active_at: profileData?.last_active_at, // 🟢 Online status
           is_invited: (!profileData || !profileData.full_name) && role.user_id !== user?.id
         });
       }
@@ -269,23 +271,12 @@ const StaffManagement = () => {
     try {
       setIsSubmitting(true);
 
-      // Delete from user_roles table
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId);
-
-      if (roleError) throw roleError;
-
-      // Also try to delete from profiles (won't fail if it doesn't exist)
-      await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId);
+      // Call backend API to fully delete from Auth + DB
+      await deleteStaffMember(userId, session?.access_token || '');
 
       toast({
         title: "🗑️ Membre supprimé",
-        description: `${member.email} a été retiré du personnel.`
+        description: `${member.email} a été entièrement supprimé (auth + profil). L'email peut être réutilisé.`
       });
 
       // Refresh the list
@@ -295,7 +286,7 @@ const StaffManagement = () => {
       console.error("Delete staff error:", error);
       toast({
         title: "❌ Erreur",
-        description: "Impossible de supprimer le membre du personnel.",
+        description: error.message || "Impossible de supprimer le membre du personnel.",
         variant: "destructive"
       });
     } finally {
@@ -767,6 +758,20 @@ const StaffManagement = () => {
                                   </>
                                 )}
                               </Badge>
+                              {/* 🟢 Online/Offline Badge */}
+                              {member.last_active_at && (
+                                new Date().getTime() - new Date(member.last_active_at).getTime() < 5 * 60 * 1000
+                              ) ? (
+                                <Badge className="flex items-center gap-1 bg-green-500/20 text-green-400 border-green-500/30">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                  En ligne
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
+                                  <div className="w-2 h-2 bg-gray-500 rounded-full" />
+                                  Hors ligne
+                                </Badge>
+                              )}
                               <span className="text-xs text-muted-foreground hidden sm:inline">
                                 Inscrit le {formatDate(member.created_at)}
                               </span>

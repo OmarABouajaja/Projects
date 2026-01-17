@@ -63,7 +63,7 @@ const ForgotPassword = () => {
                                     We have sent password recovery instructions to <strong>{email}</strong>
                                 </p>
                             </div>
-                            <Link to="/staff-login">
+                            <Link to="/management-gs-zarzis">
                                 <Button variant="outline" className="w-full">
                                     Back to Login
                                 </Button>
@@ -104,7 +104,7 @@ const ForgotPassword = () => {
 
                             <div className="mt-4 text-center">
                                 <Link
-                                    to="/staff-login"
+                                    to="/management-gs-zarzis"
                                     className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
                                 >
                                     <ArrowLeft className="w-4 h-4 mr-1" />

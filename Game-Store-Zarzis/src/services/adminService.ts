@@ -68,3 +68,52 @@ export async function createStaffMember(data: CreateStaffData, token: string): P
         throw error;
     }
 }
+
+/**
+ * Delete a staff member completely (from Auth and database)
+ * This allows the email to be reused.
+ */
+export async function deleteStaffMember(userId: string, token: string): Promise<any> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/staff/${userId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            let errorMessage = 'Failed to delete staff member';
+            try {
+                const error = await response.json();
+                errorMessage = error.detail || error.message || errorMessage;
+            } catch {
+                errorMessage = `Server error: ${response.status} ${response.statusText}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+    } catch (error: any) {
+        clearTimeout(timeoutId);
+        console.error('❌ Delete Staff API Call Failed:', error);
+
+        if (error.name === 'AbortError') {
+            throw new Error('Request timeout - Le serveur ne répond pas.');
+        }
+
+        if (error.message === 'Failed to fetch') {
+            throw new Error('Impossible de se connecter au serveur.');
+        }
+
+        throw error;
+    }
+}
+

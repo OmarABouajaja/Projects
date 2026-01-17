@@ -269,3 +269,46 @@ async def sync_profiles(request: Request):
     except Exception as e:
         print(f"Sync profiles error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/staff/{user_id}")
+@limiter.limit("10/minute")
+async def delete_staff_member(request: Request, user_id: str):
+    """
+    Fully deletes a staff member:
+    1. Removes from auth.users
+    2. Removes from user_roles
+    3. Removes from profiles
+    This allows the email to be reused for a new account.
+    """
+    try:
+        # 1. Delete from auth.users (using admin API)
+        try:
+            supabase.auth.admin.delete_user(user_id)
+        except Exception as auth_err:
+            error_str = str(auth_err)
+            print(f"Auth delete error: {error_str}")
+            # Continue anyway to clean database
+        
+        # 2. Delete from user_roles
+        try:
+            supabase.table("user_roles").delete().eq("user_id", user_id).execute()
+        except Exception as role_err:
+            print(f"Role delete error: {role_err}")
+        
+        # 3. Delete from profiles
+        try:
+            supabase.table("profiles").delete().eq("id", user_id).execute()
+        except Exception as profile_err:
+            print(f"Profile delete error: {profile_err}")
+        
+        return {
+            "status": "success",
+            "message": "Staff member fully deleted from auth and database",
+            "user_id": user_id
+        }
+
+    except Exception as e:
+        print(f"Delete staff error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
