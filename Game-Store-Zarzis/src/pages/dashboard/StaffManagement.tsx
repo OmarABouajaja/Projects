@@ -508,7 +508,7 @@ const StaffManagement = () => {
                               className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary bg-black/50"
                             />
                             <label htmlFor="skipEmail" className="text-xs text-yellow-500 cursor-pointer select-none">
-                              Créer sans envoyer d'email (Urgence / Test)
+                              Créer sans envoyer d'email
                             </label>
                           </div>
                         )}
