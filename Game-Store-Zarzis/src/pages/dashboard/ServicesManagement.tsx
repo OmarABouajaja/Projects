@@ -46,8 +46,6 @@ const ServicesManagement = () => {
   const { data: servicesCatalog } = useServicesCatalog();
   const createService = useCreateServiceCatalog();
   const updateService = useUpdateServiceCatalog();
-  const updateService = useUpdateServiceCatalog();
-  // Removed undefined deleteServiceMutation
 
 
   const { data: serviceRequests, isLoading } = useServiceRequests();

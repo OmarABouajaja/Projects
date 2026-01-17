@@ -8,9 +8,32 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export const AttendanceToggle: React.FC = () => {
-    const { isClockedIn, clockIn, clockOut, isStaff, isLoading } = useAuth();
+    const { isClockedIn, clockIn, clockOut, isStaff, isLoading, currentSessionStartTime } = useAuth() as any;
     const { t } = useLanguage();
     const [pending, setPending] = useState(false);
+    const [duration, setDuration] = useState("");
+
+    React.useEffect(() => {
+        if (!isClockedIn || !currentSessionStartTime) {
+            setDuration("");
+            return;
+        }
+
+        const updateTimer = () => {
+            const start = new Date(currentSessionStartTime).getTime();
+            const now = new Date().getTime();
+            const diff = now - start;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            setDuration(`${hours}h ${minutes}m`);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 60000); // Update every minute
+        return () => clearInterval(interval);
+    }, [isClockedIn, currentSessionStartTime]);
 
     if (!isStaff) return null;
 
@@ -46,7 +69,12 @@ export const AttendanceToggle: React.FC = () => {
                     )}
                 >
                     <div className={cn("w-1.5 h-1.5 rounded-full", isClockedIn ? "bg-green-500 animate-pulse" : "bg-muted-foreground")} />
-                    {isClockedIn ? t("attendance.in_service") : t("attendance.offline")}
+                    {isClockedIn ? (
+                        <>
+                            {t("attendance.in_service")}
+                            {duration && <span className="ml-1 opacity-80 border-l border-green-500/30 pl-1.5">{duration}</span>}
+                        </>
+                    ) : t("attendance.offline")}
                 </Badge>
             </div>
 
@@ -79,3 +107,4 @@ export const AttendanceToggle: React.FC = () => {
         </div>
     );
 };
+
