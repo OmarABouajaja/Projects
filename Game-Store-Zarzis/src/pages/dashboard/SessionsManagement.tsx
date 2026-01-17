@@ -271,42 +271,60 @@ const SessionsManagement = () => {
     setOverdueSessions(newOverdue);
   }, [activeSessions]);
 
-  // Live Points Calculation for End Dialog
+  // Live Points & Revenue Calculation
   const [estimatedPoints, setEstimatedPoints] = useState(0);
+  const [estimatedRevenue, setEstimatedRevenue] = useState(0);
 
   useEffect(() => {
-    if (!selectedSession || storeSettingsData?.points_system_enabled === false) {
+    if (!selectedSession) {
       setEstimatedPoints(0);
+      setEstimatedRevenue(0);
       return;
     }
 
     const calculate = () => {
       const pricingInfo = selectedSession.pricing;
-      if (!pricingInfo) return 0;
+      if (!pricingInfo) return { points: 0, revenue: 0 };
+
+      let revenue = 0;
+      let points = 0;
 
       if (selectedSession.session_type === 'hourly') {
         const startTime = new Date(selectedSession.start_time);
         const now = new Date();
         const diffMs = now.getTime() - startTime.getTime();
-        const hoursPlayed = Math.ceil(diffMs / (1000 * 60 * 60)); // Match handleEndSession logic
-        const totalAmount = hoursPlayed * Number(pricingInfo.price);
-        const pointsPerDT = storeSettingsData?.points_config?.points_per_dt || 1;
-        return Math.floor(totalAmount * pointsPerDT);
+        const hoursPlayed = Math.ceil(diffMs / (1000 * 60 * 60));
+        revenue = hoursPlayed * Number(pricingInfo.price);
+
+        if (storeSettingsData?.points_system_enabled !== false) {
+          const pointsPerDT = storeSettingsData?.points_config?.points_per_dt || 1;
+          points = Math.floor(revenue * pointsPerDT);
+        }
       } else {
         // Per game
         const totalGames = gamesInSession;
         let freeGames = 0;
+        const prolongationCount = selectedSession.extra_time_minutes || 0;
+        const prolongationFee = Number(pricingInfo.extra_time_price || 0);
+
         if (storeSettingsData?.free_games_enabled !== false) {
           if (totalGames >= freeGameThreshold + 1) {
             freeGames = Math.floor(totalGames / (freeGameThreshold + 1));
           }
         }
         const actualPaidGames = totalGames - freeGames;
-        return actualPaidGames * Number(pricingInfo.points_earned || 1);
+        revenue = (actualPaidGames * Number(pricingInfo.price)) + (prolongationCount * prolongationFee);
+
+        if (storeSettingsData?.points_system_enabled !== false) {
+          points = actualPaidGames * Number(pricingInfo.points_earned || 1);
+        }
       }
+      return { revenue, points };
     };
 
-    setEstimatedPoints(calculate());
+    const { revenue, points } = calculate();
+    setEstimatedPoints(points);
+    setEstimatedRevenue(revenue);
   }, [selectedSession, gamesInSession, storeSettingsData]);
 
   const handleMuteSession = (sessionId: string) => {
@@ -855,39 +873,41 @@ const SessionsManagement = () => {
                     )}
                   </div>
 
-                  {/* Session Actions - Always Visible on Mobile, Hover on Desktop */}
+                  {/* Session Actions - Static at bottom of card */}
                   {isActive && session && (
-                    <div className="absolute -bottom-2 sm:-bottom-3 left-0 right-0 flex justify-center gap-2 sm:gap-3 pb-2 z-20">
+                    <div className="w-full mt-2 pt-2 border-t border-white/5 flex items-center justify-between gap-1 z-20">
                       <Button
                         size="sm"
-                        variant="hero"
-                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-primary/50 bg-background/90 backdrop-blur-sm hover:scale-110 transition-transform touch-manipulation"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 rounded-full hover:bg-primary/20 hover:text-primary transition-colors"
                         onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
-                        aria-label="Extend session"
+                        title="Extend Session"
                       >
-                        <Plus className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <Plus className="w-5 h-5" />
                       </Button>
+
                       <Button
                         size="sm"
-                        variant="default"
-                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-secondary/50 bg-secondary text-black hover:bg-secondary/80 hover:scale-110 transition-transform touch-manipulation"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 rounded-full hover:bg-secondary/20 hover:text-secondary transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSessionForConsumption(session);
                           setIsConsumptionDialogOpen(true);
                         }}
-                        aria-label="Add Consumption"
+                        title="Add Consumption"
                       >
-                        <Utensils className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                        <Utensils className="w-5 h-5" />
                       </Button>
+
                       <Button
                         size="sm"
-                        variant="destructive"
-                        className="h-10 w-10 sm:h-11 sm:w-11 rounded-full shadow-lg border-red-500/50 bg-background/90 backdrop-blur-sm hover:scale-110 transition-transform touch-manipulation"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors"
                         onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
-                        aria-label="End session"
+                        title="End Session"
                       >
-                        <Square className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
+                        <Square className="w-5 h-5 fill-current" />
                       </Button>
                     </div>
                   )}

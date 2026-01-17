@@ -11,6 +11,7 @@
 import { useState } from 'react';
 import { useConsumablesByCategory } from '@/hooks/useConsumables';
 import { useCreateSale } from '@/hooks/useSales';
+import { useAddSessionConsumption } from '@/hooks/useSessionConsumptions';
 import { useCreatePointsTransaction } from '@/hooks/usePointsTransactions';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -31,7 +32,9 @@ import type { Product } from '@/types';
 interface QuickSaleMenuProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
+    onOpenChange: (open: boolean) => void;
     clientId?: string | null; // Optional: Link sale to client
+    sessionId?: string | null; // Optional: Link to running session
 }
 
 interface CartItem {
@@ -39,10 +42,11 @@ interface CartItem {
     quantity: number;
 }
 
-export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId }: QuickSaleMenuProps) => {
+export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: QuickSaleMenuProps) => {
     const { user } = useAuth();
     const { data: groupedConsumables, isLoading } = useConsumablesByCategory();
     const createSale = useCreateSale();
+    const addSessionConsumption = useAddSessionConsumption();
     const createPointsTransaction = useCreatePointsTransaction();
 
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -108,46 +112,62 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId }: QuickSaleMenuP
         }
 
         try {
-            // Process each item as a separate sale (or combine if you prefer)
-            // For simplicity, we'll create one sale per item
-            for (const item of cart) {
-                await createSale.mutateAsync({
-                    product_id: item.product.id,
-                    quantity: item.quantity,
-                    unit_price: item.product.price,
-                    total_amount: item.product.price * item.quantity,
-                    payment_method: 'cash',
-                    points_used: 0,
-                    points_earned: (item.product.points_earned || 0) * item.quantity,
-                    client_id: clientId || null,
-                    staff_id: user?.id || null,
-                    notes: null,
-                });
-
-                // Award points if client is associated
-                if (clientId && item.product.points_earned > 0) {
-                    await createPointsTransaction.mutateAsync({
-                        client_id: clientId,
-                        transaction_type: "earned",
-                        amount: (item.product.points_earned || 0) * item.quantity,
-                        description: `Quick Sale: ${item.product.name} x${item.quantity}`,
-                        reference_type: "sale",
-                        staff_id: user?.id || null,
+            // IF SESSION ID IS PRESENT, ADD TO SESSION CONSUMPTIONS
+            if (sessionId) {
+                for (const item of cart) {
+                    await addSessionConsumption.mutateAsync({
+                        session_id: sessionId,
+                        product_id: item.product.id,
+                        quantity: item.quantity,
+                        unit_price: item.product.price
                     });
                 }
-            }
 
-            toast({
-                title: 'Sale Complete!',
-                description: `Sold ${getTotalItems()} item(s) for ${getTotalAmount().toFixed(3)} DT`,
-            });
+                toast({
+                    title: 'Added to Session',
+                    description: `${getTotalItems()} items added to session tab.`,
+                });
+            } else {
+                // OTHERWISE, PROCESS AS DIRECT SALE
+                for (const item of cart) {
+                    await createSale.mutateAsync({
+                        product_id: item.product.id,
+                        quantity: item.quantity,
+                        unit_price: item.product.price,
+                        total_amount: item.product.price * item.quantity,
+                        payment_method: 'cash',
+                        points_used: 0,
+                        points_earned: (item.product.points_earned || 0) * item.quantity,
+                        client_id: clientId || null,
+                        staff_id: user?.id || null,
+                        notes: null,
+                    });
+
+                    // Award points if client is associated
+                    if (clientId && item.product.points_earned > 0) {
+                        await createPointsTransaction.mutateAsync({
+                            client_id: clientId,
+                            transaction_type: "earned",
+                            amount: (item.product.points_earned || 0) * item.quantity,
+                            description: `Quick Sale: ${item.product.name} x${item.quantity}`,
+                            reference_type: "sale",
+                            staff_id: user?.id || null,
+                        });
+                    }
+                }
+
+                toast({
+                    title: 'Sale Complete!',
+                    description: `Sold ${getTotalItems()} item(s) for ${getTotalAmount().toFixed(3)} DT`,
+                });
+            }
 
             clearCart();
             onOpenChange(false);
         } catch (error: any) {
             toast({
-                title: 'Sale Failed',
-                description: error.message || 'Could not complete sale',
+                title: 'Operation Failed',
+                description: error.message || 'Could not complete action',
                 variant: 'destructive',
             });
         }
@@ -314,7 +334,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId }: QuickSaleMenuP
                                             className="h-12 bg-primary hover:bg-primary/90"
                                         >
                                             <ShoppingCart className="w-4 h-4 mr-2" />
-                                            Complete Sale
+                                            {sessionId ? "Add to Tab" : "Complete Sale"}
                                         </Button>
                                     </div>
                                 </div>
