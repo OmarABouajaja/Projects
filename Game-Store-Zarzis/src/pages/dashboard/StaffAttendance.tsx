@@ -1,23 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar as CalendarIcon, User, AlertCircle, Briefcase, CalendarDays, TrendingUp } from "lucide-react";
-import { format, startOfMonth, endOfMonth, differenceInMinutes } from "date-fns";
+import { format, startOfMonth, endOfMonth, differenceInMinutes, isValid } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Separator } from "@/components/ui/separator";
 
-// ... imports
-import { useAuth } from "@/contexts/AuthContext";
-
 const StaffAttendance = () => {
-    const { user, currentSessionStartTime } = useAuth() as any; // Using extended context
+    const { user } = useAuth();
+    const { t } = useLanguage();
     // Default to current month range
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: startOfMonth(new Date()),
@@ -28,6 +27,7 @@ const StaffAttendance = () => {
     const getDuration = (checkIn: string, checkOut?: string) => {
         const start = new Date(checkIn);
         const end = checkOut ? new Date(checkOut) : new Date();
+        if (!isValid(start)) return 0;
         return differenceInMinutes(end, start);
     };
 
@@ -40,8 +40,8 @@ const StaffAttendance = () => {
     }, []);
 
     // Fetch sessions for the selected range
-    const { data: sessions, isLoading } = useQuery({
-        queryKey: ['staff-sessions-range', dateRange?.from?.toISOString(), dateRange?.to?.toISOString(), now.getMinutes()], // Refetch/Re-calc on minute change
+    const { data: sessionsRaw, isLoading, isError, error } = useQuery({
+        queryKey: ['staff-sessions-range', dateRange?.from?.toISOString(), dateRange?.to?.toISOString(), now.getMinutes()],
         queryFn: async () => {
             if (!dateRange?.from) return [];
 
@@ -49,7 +49,7 @@ const StaffAttendance = () => {
                 .from('staff_shifts')
                 .select(`
                     *,
-                    profile:staff_id (full_name, email)
+                    profile:profiles!staff_id (full_name, email)
                 `)
                 .gte('check_in', dateRange.from.toISOString());
 
@@ -59,20 +59,21 @@ const StaffAttendance = () => {
                 query = query.lte('check_in', endDate.toISOString());
             }
 
-            const { data, error } = await query.order('check_in', { ascending: false });
+            const { data, error: fetchError } = await query.order('check_in', { ascending: false });
 
-            if (error) throw error;
+            if (fetchError) throw fetchError;
             return data;
         },
         enabled: !!dateRange?.from
     });
 
-    // Calculate Period Stats (Live)
-    const stats = sessions?.reduce((acc: any, session: any) => {
-        if (!session.check_in) return acc;
+    // Normalize sessions to always be an array
+    const sessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
 
-        // Use calculated duration from DB OR calculate live if active
-        // If active (no check_out), use (now - check_in)
+    // Calculate Period Stats (Live)
+    const stats = sessions.reduce((acc: any, session: any) => {
+        if (!session?.check_in) return acc;
+
         let duration = session.duration_minutes;
         if (!duration && !session.check_out) {
             duration = differenceInMinutes(new Date(), new Date(session.check_in));
@@ -83,15 +84,33 @@ const StaffAttendance = () => {
         acc.totalMinutes += (duration || 0);
         acc.shifts += 1;
 
-        const day = new Date(session.check_in).toDateString();
-        if (!acc.days.includes(day)) acc.days.push(day);
+        const checkInDate = new Date(session.check_in);
+        if (isValid(checkInDate)) {
+            const day = checkInDate.toDateString();
+            if (!acc.days.includes(day)) acc.days.push(day);
+        }
 
         return acc;
-    }, { totalMinutes: 0, shifts: 0, days: [] }) || { totalMinutes: 0, shifts: 0, days: [] };
+    }, { totalMinutes: 0, shifts: 0, days: [] });
 
 
     const totalHours = (stats.totalMinutes / 60).toFixed(1);
     const avgHoursPerDay = stats.days.length > 0 ? (stats.totalMinutes / 60 / stats.days.length).toFixed(1) : "0.0";
+
+    // Helper to extract profile data safely
+    const getStaffInfo = (session: any) => {
+        const profile = session?.profile;
+        if (Array.isArray(profile)) {
+            return profile[0]?.email || profile[0]?.full_name || 'Unknown Staff';
+        }
+        return profile?.email || profile?.full_name || 'Unknown Staff';
+    };
+
+    const safeFormat = (date: any, formatStr: string) => {
+        const d = new Date(date);
+        if (!isValid(d)) return "---";
+        return format(d, formatStr);
+    };
 
     return (
         <ProtectedRoute>
@@ -102,13 +121,9 @@ const StaffAttendance = () => {
                             <h1 className="font-display text-3xl font-bold mb-2">Worker Attendance</h1>
                             <p className="text-muted-foreground">Track staff work hours and performance stats.</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                            {/* ... */}
-                        </div>
                     </div>
 
                     <div className="grid lg:grid-cols-12 gap-6">
-                        {/* ... Calendar & Stats Cards (Same as before) ... */}
                         <div className="lg:col-span-4 space-y-6">
                             <Card className="glass-card">
                                 <CardHeader>
@@ -140,9 +155,9 @@ const StaffAttendance = () => {
                                         <div>
                                             <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Period Summary</p>
                                             <h3 className="text-xl font-bold text-foreground">
-                                                {dateRange?.from ? format(dateRange.from, "MMM d") : '--'}
+                                                {dateRange?.from ? safeFormat(dateRange.from, "MMM d") : '--'}
                                                 {' - '}
-                                                {dateRange?.to ? format(dateRange.to, "MMM d") : '--'}
+                                                {dateRange?.to ? safeFormat(dateRange.to, "MMM d") : '--'}
                                             </h3>
                                         </div>
                                     </div>
@@ -165,7 +180,6 @@ const StaffAttendance = () => {
                             </Card>
                         </div>
 
-                        {/* Right Column: Detailed List */}
                         <div className="lg:col-span-8">
                             <Card className="glass-card h-full min-h-[500px]">
                                 <CardHeader>
@@ -184,9 +198,8 @@ const StaffAttendance = () => {
                                                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                                                 <p>Loading attendance data...</p>
                                             </div>
-                                        ) : sessions && sessions.length > 0 ? (
+                                        ) : sessions.length > 0 ? (
                                             sessions.map((session) => {
-                                                // Calculate dynamic duration for display
                                                 let durationMinutes = session.duration_minutes;
                                                 const isActive = !session.check_out;
 
@@ -207,17 +220,17 @@ const StaffAttendance = () => {
                                                             </div>
                                                             <div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <p className="font-bold text-foreground">{format(new Date(session.check_in), 'EEEE, MMM d')}</p>
+                                                                    <p className="font-bold text-foreground">{safeFormat(session.check_in, 'EEEE, MMM d')}</p>
                                                                 </div>
                                                                 <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
                                                                     <span className="flex items-center gap-1">
                                                                         <Clock className="w-3 h-3" />
-                                                                        {format(new Date(session.check_in), 'HH:mm')}
+                                                                        {safeFormat(session.check_in, 'HH:mm')}
                                                                         {' → '}
-                                                                        {session.check_out ? format(new Date(session.check_out), 'HH:mm') : 'Now'}
+                                                                        {session.check_out ? safeFormat(session.check_out, 'HH:mm') : 'Now'}
                                                                     </span>
                                                                     <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                                                                    <span>{session.profile?.email || session.profile?.full_name || 'Unknown Staff'}</span>
+                                                                    <span>{getStaffInfo(session)}</span>
                                                                 </div>
                                                             </div>
                                                         </div>

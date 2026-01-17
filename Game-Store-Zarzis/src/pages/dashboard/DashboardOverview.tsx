@@ -12,10 +12,12 @@ import { useConsoles } from "@/hooks/useConsoles";
 import { useServiceRequests } from "@/hooks/useServiceRequests";
 import { useActiveSessions } from "@/hooks/useGamingSessions";
 import { useExpenses } from "@/hooks/useExpenses";
+import { useAllActiveShifts } from "@/hooks/useStaffShifts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAnalytics } from "@/contexts/AnalyticsContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, AreaChart, Area } from 'recharts';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DollarSign, TrendingUp, Users, Gamepad2, Wrench, CheckCircle2,
   Star, Gift, BarChart3, Settings, ArrowUpRight, ArrowDownRight,
@@ -104,6 +106,7 @@ const DashboardOverview = () => {
   const { data: serviceRequests } = useServiceRequests();
   const { data: activeSessions } = useActiveSessions();
   const { summary, timeRange, setTimeRange, isLoading: isAnalyticsLoading } = useAnalytics();
+  const { data: activeShifts } = useAllActiveShifts();
 
   const isOwner = role === "owner";
 
@@ -180,6 +183,60 @@ Game Store Zarzis - Intelligence Business
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {!isOwner && <AttendanceToggle />}
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="glass-card gap-2 neon-cyan-glow relative">
+                    <Users className="w-4 h-4 text-cyan-400" />
+                    <span className="hidden sm:inline">
+                      {activeShifts?.length
+                        ? t("dashboard.staff_on_shift", { count: activeShifts.length })
+                        : t("dashboard.no_staff_on_shift")
+                      }
+                    </span>
+                    <span className="sm:hidden font-bold">{activeShifts?.length || 0}</span>
+                    {activeShifts && activeShifts.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 glass-card border-white/10 p-0 overflow-hidden" align="end">
+                  <div className="p-3 border-b border-white/5 bg-white/5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                      <Clock className="w-3 h-3" />
+                      {t("sidebar.staff_management")}
+                    </h4>
+                  </div>
+                  <div className="max-h-[250px] overflow-y-auto">
+                    {activeShifts && activeShifts.length > 0 ? (
+                      <div className="divide-y divide-white/5">
+                        {activeShifts.map((shift: any) => (
+                          <div key={shift.id} className="p-3 flex items-center gap-3 hover:bg-white/5 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
+                              {(shift.profile?.full_name || shift.profile?.email || "?").substring(0, 2)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">
+                                {shift.profile?.full_name || t("common.welcome_back")}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                                {t("attendance.in_service")} • {new Date(shift.check_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-8 text-center">
+                        <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground opacity-20" />
+                        <p className="text-xs text-muted-foreground italic">{t("dashboard.no_staff_on_shift")}</p>
+                      </div>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
               {isOwner && (
                 <Button variant="outline" size="sm" className="glass-card gap-2 neon-purple-glow" onClick={handleShareRecap}>
                   <Activity className="w-4 h-4 text-purple-400" />

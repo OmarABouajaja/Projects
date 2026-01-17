@@ -6,16 +6,21 @@ export const useServicesCatalog = (activeOnly = true) => {
   return useQuery({
     queryKey: ["services-catalog", activeOnly],
     queryFn: async () => {
-      let query = supabase
+      const query = supabase
         .from("services_catalog")
         .select("*")
         .order("sort_order");
 
       if (activeOnly) {
-        query = query.eq("is_active", true);
+        query.eq("is_active", true);
       }
 
-      const { data, error } = await query;
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Query timeout")), 5000)
+      );
+
+      const result = await Promise.race([query, timeoutPromise]) as any;
+      const { data, error } = result;
 
       if (error) {
         console.error("Error fetching services catalog:", error);

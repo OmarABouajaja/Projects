@@ -15,7 +15,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PSBackground from "@/components/PSBackground";
-
+import CacheManager from "@/components/CacheManager";
 import OfflineIndicator from "@/components/OfflineIndicator";
 
 // Lazy load pages for better performance
@@ -112,6 +112,7 @@ const App = () => {
                       <Toaster />
                       <Sonner />
                       <OfflineIndicator />
+                      <CacheManager />
                       <BrowserRouter future={routerFutureFlags}>
                         <Suspense fallback={<div className="min-h-screen bg-background" />}>
                           <Routes>

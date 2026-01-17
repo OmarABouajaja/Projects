@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
+import { useQueryClient } from "@tanstack/react-query";
 
 type AppRole = "owner" | "worker";
 
@@ -22,6 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   /* 
@@ -184,12 +186,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Initial Load Logic
     const initializeAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const query = supabase.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Auth Timeout")), 5000)
+        );
 
-        if (error) {
-          throw error;
-        }
+        const { data: { session }, error } = await Promise.race([query, timeoutPromise]) as any;
 
+        if (error) throw error;
         if (!isMounted) return;
 
         if (session?.user) {
@@ -205,20 +209,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (isMounted && r) setRole(r);
           });
         } else {
-          // No session
           setRole(null);
           localStorage.removeItem('user_role');
         }
       } catch (err) {
         console.error("AuthContext: Init error", err);
-        // Ensure we stop loading so user isn't stuck on white screen
-        if (isMounted) {
-          setRole(null);
-        }
+        if (isMounted) setRole(null);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
@@ -236,7 +234,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const checkActiveShift = async () => {
       try {
-        const { data, error } = await supabase
+        const query = supabase
           .from('staff_shifts')
           .select('id, check_in')
           .eq('staff_id', user.id)
@@ -244,6 +242,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .order('check_in', { ascending: false })
           .limit(1)
           .maybeSingle();
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Shift Check Timeout")), 5000)
+        );
+
+        const { data, error } = await Promise.race([query, timeoutPromise]) as any;
 
         if (error) {
           console.error("AuthContext: Failed to check active shift", error);
@@ -294,6 +298,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           time: new Date().toLocaleTimeString('fr-FR')
         });
       });
+
+      // Invalidate queries for real-time dashboard sync
+      queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
     }
   };
 
@@ -303,7 +310,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Fallback: If no local ID, check DB for any open shift to close it
     let targetSessionId = sessionId;
     if (!targetSessionId && user) {
-      const { data } = await supabase.from('staff_shifts').select('id').eq('staff_id', user.id).is('check_out', null).limit(1).maybeSingle();
+      const { data } = await supabase
+        .from('staff_shifts')
+        .select('id')
+        .eq('staff_id', user.id)
+        .is('check_out', null)
+        .limit(1)
+        .maybeSingle();
       if (data) targetSessionId = data.id;
     }
 
@@ -328,6 +341,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           time: new Date().toLocaleTimeString('fr-FR')
         });
       });
+
+      // Invalidate queries for real-time dashboard sync
+      queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
     }
   };
 
@@ -338,36 +354,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     if (!error && data.user) {
-      // 1. Sync public profile for visibility (Owner needs to see this)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: data.user.id,
-          email: data.user.email,
-          last_sign_in_at: new Date().toISOString()
-        });
+      const targetUser = data.user;
 
-      if (profileError) {
-        console.error("AuthContext: Profile sync failed", profileError);
-      }
-
-      // 2. Auto-clock in for all staff
-      try {
-        const { data: sessionData } = await supabase
+      // Perform background sync and clock-in without blocking the main UI more than necessary
+      Promise.all([
+        supabase
+          .from('profiles')
+          .upsert({
+            id: targetUser.id,
+            email: targetUser.email,
+            last_sign_in_at: new Date().toISOString()
+          }),
+        supabase
           .from('staff_shifts')
-          .insert({ staff_id: data.user.id })
+          .insert({ staff_id: targetUser.id })
           .select()
-          .single();
+          .single()
+      ]).then(([profileRes, shiftRes]) => {
+        if (profileRes.error) console.error("Profile sync failed", profileRes.error);
 
-        if (sessionData) {
-          localStorage.setItem('current_staff_session_id', sessionData.id);
-          localStorage.setItem('currentSessionStartTime', sessionData.check_in);
+        if (shiftRes.data) {
+          const shiftData = shiftRes.data;
+          localStorage.setItem('current_staff_session_id', shiftData.id);
+          localStorage.setItem('currentSessionStartTime', shiftData.check_in);
           setIsClockedIn(true);
-          setCurrentSessionStartTime(sessionData.check_in);
+          setCurrentSessionStartTime(shiftData.check_in);
+
+          // Invalidate queries for real-time dashboard sync
+          queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
         }
-      } catch (err) {
-        console.error("Auto-clock-in failed", err);
-      }
+      }).catch(err => console.error("Post-login operations failed", err));
     }
 
     return { error: error as Error | null };

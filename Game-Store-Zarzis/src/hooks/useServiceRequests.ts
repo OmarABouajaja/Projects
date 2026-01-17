@@ -30,7 +30,7 @@ export const useServiceRequests = (status?: string) => {
   return useQuery({
     queryKey: ["service-requests", status],
     queryFn: async () => {
-      let query = supabase
+      const query = supabase
         .from("service_requests")
         .select(`
           *,
@@ -39,10 +39,15 @@ export const useServiceRequests = (status?: string) => {
         .order("created_at", { ascending: false });
 
       if (status) {
-        query = query.eq("status", status);
+        query.eq("status", status);
       }
 
-      const { data, error } = await query;
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Query timeout")), 5000)
+      );
+
+      const result = await Promise.race([query, timeoutPromise]) as any;
+      const { data, error } = result;
 
       if (error) {
         console.error("Error fetching service requests:", error);

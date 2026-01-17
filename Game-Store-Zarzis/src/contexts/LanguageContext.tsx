@@ -154,6 +154,8 @@ export const translations: Translations = {
   "dashboard.available": { fr: "Disponible", en: "Available", ar: "متاح" },
   "dashboard.available_colon": { fr: "Disponible :", en: "Available:", ar: "متاح:" },
   "dashboard.to_process": { fr: "À Traiter", en: "To Process", ar: "للمعالجة" },
+  "dashboard.staff_on_shift": { fr: "{count} personnel en service", en: "{count} staff on shift", ar: "{count} موظفين في الخدمة" },
+  "dashboard.no_staff_on_shift": { fr: "Aucun personnel en service", en: "No staff on shift", ar: "لا يوجد موظفين في الخدمة" },
   "dashboard.consoles": { fr: "Consoles", en: "Consoles", ar: "الأجهزة" },
 
   // Dashboard Analytics & Charts

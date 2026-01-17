@@ -20,9 +20,21 @@ export const AttendanceToggle: React.FC = () => {
         }
 
         const updateTimer = () => {
-            const start = new Date(currentSessionStartTime).getTime();
-            const now = new Date().getTime();
-            const diff = now - start;
+            if (!currentSessionStartTime) return;
+            const start = new Date(currentSessionStartTime);
+            const now = new Date();
+
+            // Safety check for invalid dates
+            if (isNaN(start.getTime())) {
+                setDuration("");
+                return;
+            }
+
+            const diff = now.getTime() - start.getTime();
+            if (diff < 0) {
+                setDuration("0h 0m");
+                return;
+            }
 
             const hours = Math.floor(diff / (1000 * 60 * 60));
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));

@@ -17,39 +17,38 @@ export const useTodayStats = () => {
   return useQuery({
     queryKey: ["today-stats", today],
     queryFn: async () => {
-      // Get gaming sessions revenue
-      const { data: sessions, error: sessionsError } = await supabase
-        .from("gaming_sessions")
-        .select("total_amount, status")
-        .gte("created_at", `${today}T00:00:00`)
-        .eq("status", "completed");
+      const startOfDay = `${today}T00:00:00`;
 
-      if (sessionsError) throw sessionsError;
+      const [sessionsRes, salesRes, servicesRes, countRes] = await Promise.all([
+        supabase
+          .from("gaming_sessions")
+          .select("total_amount, status")
+          .gte("created_at", startOfDay)
+          .eq("status", "completed"),
+        supabase
+          .from("sales")
+          .select("total_amount")
+          .gte("created_at", startOfDay),
+        supabase
+          .from("service_requests")
+          .select("final_cost, status")
+          .gte("created_at", startOfDay)
+          .eq("status", "completed"),
+        supabase
+          .from("gaming_sessions")
+          .select("id", { count: "exact" })
+          .gte("created_at", startOfDay)
+      ]);
 
-      // Get sales revenue
-      const { data: sales, error: salesError } = await supabase
-        .from("sales")
-        .select("total_amount")
-        .gte("created_at", `${today}T00:00:00`);
+      if (sessionsRes.error) throw sessionsRes.error;
+      if (salesRes.error) throw salesRes.error;
+      if (servicesRes.error) throw servicesRes.error;
+      if (countRes.error) throw countRes.error;
 
-      if (salesError) throw salesError;
-
-      // Get services revenue
-      const { data: services, error: servicesError } = await supabase
-        .from("service_requests")
-        .select("final_cost, status")
-        .gte("created_at", `${today}T00:00:00`)
-        .eq("status", "completed");
-
-      if (servicesError) throw servicesError;
-
-      // Get all sessions count (active + completed)
-      const { count: sessionCount, error: countError } = await supabase
-        .from("gaming_sessions")
-        .select("id", { count: "exact" })
-        .gte("created_at", `${today}T00:00:00`);
-
-      if (countError) throw countError;
+      const sessions = sessionsRes.data;
+      const sales = salesRes.data;
+      const services = servicesRes.data;
+      const sessionCount = countRes.count;
 
       const gamingRevenue = sessions?.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) || 0;
       const salesRevenue = sales?.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) || 0;
@@ -76,31 +75,30 @@ export const useMonthlyStats = () => {
   return useQuery({
     queryKey: ["monthly-stats", startOfMonth],
     queryFn: async () => {
-      // Get gaming sessions revenue
-      const { data: sessions, error: sessionsError } = await supabase
-        .from("gaming_sessions")
-        .select("total_amount")
-        .gte("created_at", startOfMonth)
-        .eq("status", "completed");
+      const [sessionsRes, salesRes, servicesRes] = await Promise.all([
+        supabase
+          .from("gaming_sessions")
+          .select("total_amount")
+          .gte("created_at", startOfMonth)
+          .eq("status", "completed"),
+        supabase
+          .from("sales")
+          .select("total_amount")
+          .gte("created_at", startOfMonth),
+        supabase
+          .from("service_requests")
+          .select("final_cost")
+          .gte("created_at", startOfMonth)
+          .eq("status", "completed")
+      ]);
 
-      if (sessionsError) throw sessionsError;
+      if (sessionsRes.error) throw sessionsRes.error;
+      if (salesRes.error) throw salesRes.error;
+      if (servicesRes.error) throw servicesRes.error;
 
-      // Get sales revenue
-      const { data: sales, error: salesError } = await supabase
-        .from("sales")
-        .select("total_amount")
-        .gte("created_at", startOfMonth);
-
-      if (salesError) throw salesError;
-
-      // Get services revenue
-      const { data: services, error: servicesError } = await supabase
-        .from("service_requests")
-        .select("final_cost")
-        .gte("created_at", startOfMonth)
-        .eq("status", "completed");
-
-      if (servicesError) throw servicesError;
+      const sessions = sessionsRes.data;
+      const sales = salesRes.data;
+      const services = servicesRes.data;
 
       const gamingRevenue = sessions?.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) || 0;
       const salesRevenue = sales?.reduce((sum, s) => sum + (Number(s.total_amount) || 0), 0) || 0;
