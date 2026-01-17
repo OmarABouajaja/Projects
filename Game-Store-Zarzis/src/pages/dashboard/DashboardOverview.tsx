@@ -106,7 +106,19 @@ const DashboardOverview = () => {
   const { data: serviceRequests } = useServiceRequests();
   const { data: activeSessions } = useActiveSessions();
   const { summary, timeRange, setTimeRange, isLoading: isAnalyticsLoading } = useAnalytics();
-  const { data: activeShifts } = useAllActiveShifts();
+  const { data: activeShiftsRaw } = useAllActiveShifts();
+
+  // Deduplicate active shifts by staff_id for display
+  const activeShifts = useMemo(() => {
+    if (!activeShiftsRaw) return [];
+
+    const uniqueStaffIds = new Set();
+    return activeShiftsRaw.filter((shift: any) => {
+      if (uniqueStaffIds.has(shift.staff_id)) return false;
+      uniqueStaffIds.add(shift.staff_id);
+      return true;
+    });
+  }, [activeShiftsRaw]);
 
   const isOwner = role === "owner";
 

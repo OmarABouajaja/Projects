@@ -271,7 +271,7 @@ const ServicesManagement = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="requests">Requests List</TabsTrigger>
-              <TabsTrigger value="catalog" disabled={!isOwner}>Catalog Editor</TabsTrigger>
+              <TabsTrigger value="catalog">Catalog Editor</TabsTrigger>
             </TabsList>
 
             <TabsContent value="requests" className="space-y-6">
@@ -355,113 +355,121 @@ const ServicesManagement = () => {
             </TabsContent>
 
             <TabsContent value="catalog">
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-secondary/10 to-transparent p-4 sm:p-5 rounded-2xl border border-border/30">
-                  <div>
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                      <Wrench className="w-5 h-5 text-primary" />
-                      Catalog Management
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">Configure standard service types and pricing</p>
-                  </div>
-                  <Button variant="hero" onClick={() => {
-                    setEditingCatalogItem(null);
-                    setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
-                    setIsCatalogDialogOpen(true);
-                  }}>
-                    <Plus className="w-4 h-4" />
-                    Add Template
-                  </Button>
+              {!isOwner ? (
+                <div className="text-center py-16 glass-card rounded-2xl border-dashed border-2 border-destructive/30 bg-destructive/5 mt-6">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
+                  <p className="text-lg font-bold text-destructive">Access Restricted</p>
+                  <p className="text-sm text-muted-foreground">Only store owners can manage the Service Catalog.</p>
                 </div>
-
-                {servicesCatalog.length === 0 ? (
-                  <div className="text-center py-16 glass-card rounded-2xl border-dashed border-2 border-border/50">
-                    <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-                    <p className="text-lg font-medium text-muted-foreground">No service templates yet</p>
-                    <p className="text-sm text-muted-foreground/60 mt-1">Create your first template to get started</p>
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={() => {
-                        setEditingCatalogItem(null);
-                        setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
-                        setIsCatalogDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" /> Create Template
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-secondary/10 to-transparent p-4 sm:p-5 rounded-2xl border border-border/30">
+                    <div>
+                      <h2 className="text-xl font-bold flex items-center gap-2">
+                        <Wrench className="w-5 h-5 text-primary" />
+                        Catalog Management
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-0.5">Configure standard service types and pricing</p>
+                    </div>
+                    <Button variant="hero" onClick={() => {
+                      setEditingCatalogItem(null);
+                      setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
+                      setIsCatalogDialogOpen(true);
+                    }}>
+                      <Plus className="w-4 h-4" />
+                      Add Template
                     </Button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {servicesCatalog.map((item) => (
-                      <Card key={item.id} className="glass-card overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
-                        <CardHeader className="p-4 pb-2">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                              <Wrench className="w-5 h-5 text-primary" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <CardTitle className="text-base font-bold truncate group-hover:text-primary transition-colors">{item.name_fr || item.name}</CardTitle>
-                              <Badge variant="outline" className="text-[9px] mt-1 uppercase tracking-wider">{item.category}</Badge>
-                            </div>
-                            <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                                setEditingCatalogItem(item);
-                                setCatalogFormData({
-                                  name: item.name || "",
-                                  name_fr: item.name_fr || item.name || "",
-                                  price: item.price?.toString() || "",
-                                  is_complex: !!item.is_complex,
-                                  image_url: item.image_url || "",
-                                  category: item.category || "phone"
-                                });
-                                setIsCatalogDialogOpen(true);
-                              }}>
-                                <Edit className="w-3.5 h-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7 text-destructive hover:bg-destructive/10"
-                                onClick={async () => {
-                                  if (confirm(`Remove "${item.name_fr || item.name}" from catalog?`)) {
-                                    try {
-                                      await deleteService.mutateAsync(item.id);
-                                      toast({ title: "Template removed" });
-                                    } catch (e: any) {
-                                      toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+
+                  {servicesCatalog.length === 0 ? (
+                    <div className="text-center py-16 glass-card rounded-2xl border-dashed border-2 border-border/50">
+                      <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
+                      <p className="text-lg font-medium text-muted-foreground">No service templates yet</p>
+                      <p className="text-sm text-muted-foreground/60 mt-1">Create your first template to get started</p>
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={() => {
+                          setEditingCatalogItem(null);
+                          setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
+                          setIsCatalogDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" /> Create Template
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {servicesCatalog.map((item) => (
+                        <Card key={item.id} className="glass-card overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
+                          <CardHeader className="p-4 pb-2">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                                <Wrench className="w-5 h-5 text-primary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <CardTitle className="text-base font-bold truncate group-hover:text-primary transition-colors">{item.name_fr || item.name}</CardTitle>
+                                <Badge variant="outline" className="text-[9px] mt-1 uppercase tracking-wider">{item.category}</Badge>
+                              </div>
+                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                                  setEditingCatalogItem(item);
+                                  setCatalogFormData({
+                                    name: item.name || "",
+                                    name_fr: item.name_fr || item.name || "",
+                                    price: item.price?.toString() || "",
+                                    is_complex: !!item.is_complex,
+                                    image_url: item.image_url || "",
+                                    category: item.category || "phone"
+                                  });
+                                  setIsCatalogDialogOpen(true);
+                                }}>
+                                  <Edit className="w-3.5 h-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                  onClick={async () => {
+                                    if (confirm(`Remove "${item.name_fr || item.name}" from catalog?`)) {
+                                      try {
+                                        await deleteService.mutateAsync(item.id);
+                                        toast({ title: "Template removed" });
+                                      } catch (e: any) {
+                                        toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+                                      }
                                     }
-                                  }
-                                }}
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </Button>
+                                  }}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-4 pt-2">
-                          {item.image_url && (
-                            <div className="w-full h-20 mb-3 rounded-lg overflow-hidden border border-border/20 bg-muted">
-                              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                            </div>
-                          )}
-                          <div className="flex justify-between items-center">
-                            <div className="flex items-baseline gap-1">
-                              <span className="text-xl font-bold text-primary">{item.price || 0}</span>
-                              <span className="text-xs text-muted-foreground">DT</span>
-                            </div>
-                            {item.is_complex && (
-                              <Badge variant="secondary" className="text-[9px] bg-amber-500/15 text-amber-500 border-amber-500/20">
-                                ⚡ Complex
-                              </Badge>
+                          </CardHeader>
+                          <CardContent className="p-4 pt-2">
+                            {item.image_url && (
+                              <div className="w-full h-20 mb-3 rounded-lg overflow-hidden border border-border/20 bg-muted">
+                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                              </div>
                             )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-xl font-bold text-primary">{item.price || 0}</span>
+                                <span className="text-xs text-muted-foreground">DT</span>
+                              </div>
+                              {item.is_complex && (
+                                <Badge variant="secondary" className="text-[9px] bg-amber-500/15 text-amber-500 border-amber-500/20">
+                                  ⚡ Complex
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

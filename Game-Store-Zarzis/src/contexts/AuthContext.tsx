@@ -276,6 +276,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const clockIn = async () => {
     if (!user) return;
 
+    // 1. Check for existing active session first
+    const { data: existingSession } = await supabase
+      .from('staff_shifts')
+      .select('id, check_in')
+      .eq('staff_id', user.id)
+      .is('check_out', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingSession) {
+      // Resume existing session
+      localStorage.setItem('current_staff_session_id', existingSession.id);
+      localStorage.setItem('currentSessionStartTime', existingSession.check_in);
+      setIsClockedIn(true);
+      setCurrentSessionStartTime(existingSession.check_in);
+      return;
+    }
+
+    // 2. No existing session, create new one
     const { data: sessionData, error: sessionError } = await supabase
       .from('staff_shifts')
       .insert({ staff_id: user.id })
