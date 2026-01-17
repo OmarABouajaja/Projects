@@ -47,10 +47,7 @@ const StaffAttendance = () => {
 
             let query = supabase
                 .from('staff_shifts')
-                .select(`
-                    *,
-                    profile:profiles!staff_id (full_name, email)
-                `)
+                .select('*')
                 .gte('check_in', dateRange.from.toISOString());
 
             if (dateRange.to) {
@@ -59,10 +56,29 @@ const StaffAttendance = () => {
                 query = query.lte('check_in', endDate.toISOString());
             }
 
-            const { data, error: fetchError } = await query.order('check_in', { ascending: false });
+            const { data: shifts, error: fetchError } = await query.order('check_in', { ascending: false });
 
             if (fetchError) throw fetchError;
-            return data;
+            if (!shifts || shifts.length === 0) return [];
+
+            // Manual join since FK seems missing in Supabase types/schema
+            const staffIds = Array.from(new Set(shifts.map(s => s.staff_id)));
+
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, full_name, email')
+                .in('id', staffIds);
+
+            if (profilesError) throw profilesError;
+
+            // map profiles to shifts
+            return shifts.map(shift => {
+                const profile = profiles?.find(p => p.id === shift.staff_id);
+                return {
+                    ...shift,
+                    profile: profile || null
+                };
+            });
         },
         enabled: !!dateRange?.from
     });
