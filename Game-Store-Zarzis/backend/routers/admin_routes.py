@@ -8,10 +8,10 @@ import json
 from utils.security import require_admin
 from utils.limiter import limiter
 
-# Initialize Supabase client
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_SERVICE_KEY")
-supabase: Client = create_client(url, key)
+from services.supabase_client import get_supabase
+
+# Initialize Supabase client via Singleton
+supabase: Client = get_supabase()
 
 # Move status to a public diagnostic router or define it before the protected one
 diag_router = APIRouter(prefix="/api/diag", tags=["Diagnostics"])

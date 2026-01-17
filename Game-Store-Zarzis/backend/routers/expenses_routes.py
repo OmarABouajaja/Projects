@@ -3,14 +3,12 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 import os
-from supabase import create_client, Client
+from services.supabase_client import get_supabase
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
 
 # Supabase setup
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_SERVICE_KEY")
-supabase: Client = create_client(url, key)
+supabase: Client = get_supabase()
 
 class ExpenseCreate(BaseModel):
     description: str

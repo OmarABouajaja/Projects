@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 import random
 import string
-from supabase import create_client, Client
+from services.supabase_client import get_supabase
 import os
 from services.sms_service import sms_service
 # Need to import email sending logic, currently in email_routes but should be in a service
@@ -13,9 +13,7 @@ from services.sms_service import sms_service
 router = APIRouter(prefix="/verify", tags=["Verification"])
 
 # Supabase setup for backend
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_SERVICE_KEY") # Use Service Key for backend ops
-supabase: Client = create_client(url, key)
+supabase: Client = get_supabase()
 
 class TIMEOUTS:
     OTP_EXPIRY_MINUTES = 10

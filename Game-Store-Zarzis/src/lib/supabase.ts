@@ -13,7 +13,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     storageKey: 'gs-zarzis-staff-auth', // Namespace isolation to prevent conflicts with client auth
-  }
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
 })
 
 // Database table names (matching the final schema)
