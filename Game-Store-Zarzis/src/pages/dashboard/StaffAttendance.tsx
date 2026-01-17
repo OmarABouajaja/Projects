@@ -264,5 +264,3 @@ const StaffAttendance = () => {
 
 export default StaffAttendance;
 
-
-export default StaffAttendance;
