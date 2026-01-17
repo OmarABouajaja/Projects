@@ -13,17 +13,35 @@ import { DateRange } from "react-day-picker";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Separator } from "@/components/ui/separator";
 
+// ... imports
+import { useAuth } from "@/contexts/AuthContext";
+
 const StaffAttendance = () => {
-    const { user } = useAuth();
+    const { user, currentSessionStartTime } = useAuth() as any; // Using extended context
     // Default to current month range
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: startOfMonth(new Date()),
         to: endOfMonth(new Date())
     });
 
+    // Valid Duration Helper
+    const getDuration = (checkIn: string, checkOut?: string) => {
+        const start = new Date(checkIn);
+        const end = checkOut ? new Date(checkOut) : new Date();
+        return differenceInMinutes(end, start);
+    };
+
+    // Live Timer State (forces re-render every minute)
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), 60000);
+        return () => clearInterval(interval);
+    }, []);
+
     // Fetch sessions for the selected range
     const { data: sessions, isLoading } = useQuery({
-        queryKey: ['staff-sessions-range', dateRange?.from?.toISOString(), dateRange?.to?.toISOString()],
+        queryKey: ['staff-sessions-range', dateRange?.from?.toISOString(), dateRange?.to?.toISOString(), now.getMinutes()], // Refetch/Re-calc on minute change
         queryFn: async () => {
             if (!dateRange?.from) return [];
 
@@ -36,7 +54,6 @@ const StaffAttendance = () => {
                 .gte('check_in', dateRange.from.toISOString());
 
             if (dateRange.to) {
-                // Set end date to end of day to include sessions on that day
                 const endDate = new Date(dateRange.to);
                 endDate.setHours(23, 59, 59, 999);
                 query = query.lte('check_in', endDate.toISOString());
@@ -50,29 +67,27 @@ const StaffAttendance = () => {
         enabled: !!dateRange?.from
     });
 
-    // Calculate Period Stats
+    // Calculate Period Stats (Live)
     const stats = sessions?.reduce((acc: any, session: any) => {
-        if (!session.check_in) return acc; // Skip invalid
+        if (!session.check_in) return acc;
 
-        // Use calculated duration from DB or calculate manually if missing
-        const duration = session.duration_minutes ||
-            (session.check_out ? differenceInMinutes(new Date(session.check_out), new Date(session.check_in)) : 0);
+        // Use calculated duration from DB OR calculate live if active
+        // If active (no check_out), use (now - check_in)
+        let duration = session.duration_minutes;
+        if (!duration && !session.check_out) {
+            duration = differenceInMinutes(new Date(), new Date(session.check_in));
+        } else if (!duration && session.check_out) {
+            duration = differenceInMinutes(new Date(session.check_out), new Date(session.check_in));
+        }
 
-        acc.totalMinutes += duration;
+        acc.totalMinutes += (duration || 0);
         acc.shifts += 1;
 
-        // Group by day for average
         const day = new Date(session.check_in).toDateString();
         if (!acc.days.includes(day)) acc.days.push(day);
 
         return acc;
     }, { totalMinutes: 0, shifts: 0, days: [] }) || { totalMinutes: 0, shifts: 0, days: [] };
-
-    // ... [Rendering Logic Updates] ...
-    // Note: I will need to update the JSX mapping too. 
-    // Instead of doing multiple small replacements, I will do a larger replace for the JSX map section.
-
-    // Actually, I can target the JSX separately.
 
 
     const totalHours = (stats.totalMinutes / 60).toFixed(1);
@@ -88,12 +103,12 @@ const StaffAttendance = () => {
                             <p className="text-muted-foreground">Track staff work hours and performance stats.</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <HelpTooltip content="Select a date range to view detailed statistics for that period." />
+                            {/* ... */}
                         </div>
                     </div>
 
                     <div className="grid lg:grid-cols-12 gap-6">
-                        {/* Left Column: Calendar Picker */}
+                        {/* ... Calendar & Stats Cards (Same as before) ... */}
                         <div className="lg:col-span-4 space-y-6">
                             <Card className="glass-card">
                                 <CardHeader>
@@ -116,7 +131,6 @@ const StaffAttendance = () => {
                                 </CardContent>
                             </Card>
 
-                            {/* Period Summary Card */}
                             <Card className="glass-card border-l-4 border-l-primary bg-primary/5">
                                 <CardContent className="p-6">
                                     <div className="flex items-center gap-4 mb-4">
@@ -171,48 +185,65 @@ const StaffAttendance = () => {
                                                 <p>Loading attendance data...</p>
                                             </div>
                                         ) : sessions && sessions.length > 0 ? (
-                                            sessions.map((session) => (
-                                                <div key={session.id} className="group flex items-center justify-between p-4 rounded-xl border bg-card/40 hover:bg-card/60 transition-all hover:shadow-md hover:border-primary/20">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-white/10">
-                                                            <CalendarDays className="w-5 h-5 text-foreground/80" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="font-bold text-foreground">{format(new Date(session.check_in), 'EEEE, MMM d')}</p>
-                                                                {/* <Badge variant="outline" className="text-[10px] h-5 bg-background/50">
-                                                                    {session.work_station_id || 'Device Unknown'}
-                                                                </Badge> */}
-                                                            </div>
-                                                            <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
-                                                                <span className="flex items-center gap-1">
-                                                                    <Clock className="w-3 h-3" />
-                                                                    {format(new Date(session.check_in), 'HH:mm')}
-                                                                    {' → '}
-                                                                    {session.check_out ? format(new Date(session.check_out), 'HH:mm') : 'Now'}
-                                                                </span>
-                                                                <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                                                                <span>{session.profile?.email || session.profile?.full_name || 'Unknown Staff'}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                            sessions.map((session) => {
+                                                // Calculate dynamic duration for display
+                                                let durationMinutes = session.duration_minutes;
+                                                const isActive = !session.check_out;
 
-                                                    <div className="text-right">
-                                                        {session.check_out ? (
-                                                            <div className="flex flex-col items-end">
-                                                                <span className="font-bold text-lg text-primary leading-none">
-                                                                    {Math.floor((differenceInMinutes(new Date(session.check_out), new Date(session.check_in))) / 60)}h {Math.round((differenceInMinutes(new Date(session.check_out), new Date(session.check_in))) % 60)}m
-                                                                </span>
-                                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Duration</span>
+                                                if (isActive) {
+                                                    durationMinutes = differenceInMinutes(new Date(), new Date(session.check_in));
+                                                } else if (!durationMinutes && session.check_out) {
+                                                    durationMinutes = differenceInMinutes(new Date(session.check_out), new Date(session.check_in));
+                                                }
+
+                                                const displayHours = Math.floor((durationMinutes || 0) / 60);
+                                                const displayMinutes = Math.round((durationMinutes || 0) % 60);
+
+                                                return (
+                                                    <div key={session.id} className="group flex items-center justify-between p-4 rounded-xl border bg-card/40 hover:bg-card/60 transition-all hover:shadow-md hover:border-primary/20">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center border border-white/10">
+                                                                <CalendarDays className="w-5 h-5 text-foreground/80" />
                                                             </div>
-                                                        ) : (
-                                                            <Badge variant="default" className="animate-pulse bg-green-500 hover:bg-green-600 border-green-400/50 shadow-[0_0_10px_rgba(34,197,94,0.4)]">
-                                                                Active Now
-                                                            </Badge>
-                                                        )}
+                                                            <div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <p className="font-bold text-foreground">{format(new Date(session.check_in), 'EEEE, MMM d')}</p>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5">
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Clock className="w-3 h-3" />
+                                                                        {format(new Date(session.check_in), 'HH:mm')}
+                                                                        {' → '}
+                                                                        {session.check_out ? format(new Date(session.check_out), 'HH:mm') : 'Now'}
+                                                                    </span>
+                                                                    <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                                                                    <span>{session.profile?.email || session.profile?.full_name || 'Unknown Staff'}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="text-right">
+                                                            {isActive ? (
+                                                                <div className="flex flex-col items-end">
+                                                                    <Badge variant="default" className="mb-1 bg-green-500 hover:bg-green-600 border-green-400/50 shadow-[0_0_10px_rgba(34,197,94,0.4)] animate-pulse">
+                                                                        Active
+                                                                    </Badge>
+                                                                    <span className="font-mono text-sm text-foreground/80">
+                                                                        {displayHours}h {displayMinutes}m
+                                                                    </span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className="font-bold text-lg text-primary leading-none">
+                                                                        {displayHours}h {displayMinutes}m
+                                                                    </span>
+                                                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Duration</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))
+                                                );
+                                            })
                                         ) : (
                                             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/5">
                                                 <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
@@ -230,5 +261,8 @@ const StaffAttendance = () => {
         </ProtectedRoute>
     );
 };
+
+export default StaffAttendance;
+
 
 export default StaffAttendance;
