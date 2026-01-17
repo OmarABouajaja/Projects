@@ -17,12 +17,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner 
     </div>;
   }
 
-  // If user is authenticated but role isn't loaded yet, show loading
-  if (user && role === null) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-    </div>;
-  }
+  // REMOVED: The block that showed spinner if (user && role === null)
+  // Reason: If role fetch fails (e.g. RLS block), role remains null and isLoading becomes false.
+  // We must NOT show spinner here, effectively trapping the user. We must let it fall through to "Access Denied".
 
   // Redirect to primary staff login route if not authenticated
   if (!user) {
