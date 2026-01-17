@@ -23,16 +23,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  /* 
+   * CRITICAL FIX: Session Stability
+   * Initialize isLoading to TRUE to prevent premature redirects
+   * Initialize role from localStorage to prevent "flicker" on refresh
+   */
   const [role, setRole] = useState<AppRole | null>(() => {
     return localStorage.getItem('user_role') as AppRole | null;
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [isClockedIn, setIsClockedIn] = useState(false);
-
-  useEffect(() => {
-    const sessionId = localStorage.getItem('current_staff_session_id');
-    setIsClockedIn(!!sessionId);
-  }, []);
+  const [isClockedIn, setIsClockedIn] = useState(() => {
+    return localStorage.getItem('isClockedIn') === 'true';
+  });
 
   const fetchUserRole = async (userId: string): Promise<AppRole | null> => {
     try {
@@ -182,17 +184,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Check for existing session
     const initializeAuth = async () => {
-      // Add shorter timeout to prevent infinite loading
+      // Add shorter timeout to prevent infinite loading (3 seconds is enough)
       const timeoutId = setTimeout(() => {
         if (isMounted) {
           console.warn("AuthContext: Role fetch timed out. Defaulting to safe state.");
-          // Don't kill app if we have a role in cache!
-          if (!role) {
-            setRole(null);
-          }
+          // If we have a user but no role, we might be stuck.
+          // Safety: If we have a cached role, keep it. If not, stop loading so UI can show something (even if error).
           setIsLoading(false);
         }
-      }, 5000);
+      }, 3000);
 
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -235,9 +235,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         } else {
           setRole(null);
+          localStorage.removeItem('user_role');
+        }
+
+        // Ensure loading is set to false after checks
+        if (isMounted) {
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('AuthContext: Error initializing auth:', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
         if (isMounted) {
           setRole(null);
         }

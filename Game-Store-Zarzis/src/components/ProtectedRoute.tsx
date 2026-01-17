@@ -29,8 +29,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner 
     return <Navigate to="/management-gs-zarzis" replace />;
   }
 
-  if (role !== 'owner' && role !== 'worker') {
-    return <Navigate to="/management-gs-zarzis" replace />;
+  // If we have a user but no role (and not loading), it means role fetch failed or user has no role.
+  // CRITICAL FIX: Do NOT redirect to login, as login will redirect back here -> Infinite Loop.
+  // Instead, show an "Access Denied" or "Role Missing" screen.
+  if (!role || (role !== 'owner' && role !== 'worker')) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
+        <h2 className="text-2xl font-bold text-destructive mb-2">Access Denied</h2>
+        <p className="text-muted-foreground mb-4">You do not have the required permissions to access this area.</p>
+        <button
+          onClick={() => window.location.href = '/management-gs-zarzis'}
+          className="bg-primary text-secondary px-4 py-2 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          Return to Login
+        </button>
+      </div>
+    );
   }
 
   if (requireOwner && !isOwner) {
