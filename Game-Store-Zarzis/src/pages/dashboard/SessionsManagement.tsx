@@ -874,43 +874,48 @@ const SessionsManagement = () => {
                   </div>
 
                   {/* Session Actions - Static at bottom of card */}
-                  {isActive && session && (
-                    <div className="w-full mt-2 pt-2 border-t border-white/5 flex items-center justify-between gap-1 z-20">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 w-9 p-0 rounded-full border-primary/30 text-primary hover:bg-primary/20"
-                        onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
-                        title="Extend Session"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </Button>
+                  {/* Session Actions - FORCED RENDER DEBUG */}
+                  <div className="w-full bg-yellow-500/20 text-[10px] text-center mb-1">
+                    DBG: {isActive ? "ACT" : "INA"} | {session ? "SES" : "NOS"}
+                  </div>
 
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
-                        onClick={(e) => {
-                          e.stopPropagation();
+                  <div className="w-full mt-2 pt-2 border-t border-white/5 flex items-center justify-between gap-1 z-20">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-9 w-9 p-0 rounded-full border-primary/30 text-primary hover:bg-primary/20 bg-white/5"
+                      onClick={(e) => { e.stopPropagation(); session && openExtendDialog(session); }}
+                      title="Extend Session"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (session) {
                           setSelectedSessionForConsumption(session);
                           setIsConsumptionDialogOpen(true);
-                        }}
-                        title="Add Consumption"
-                      >
-                        <Utensils className="w-4 h-4" />
-                      </Button>
+                        }
+                      }}
+                      title="Add Consumption"
+                    >
+                      <Utensils className="w-4 h-4" />
+                    </Button>
 
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
-                        onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
-                        title="End Session"
-                      >
-                        <Square className="w-4 h-4 fill-current" />
-                      </Button>
-                    </div>
-                  )}
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-9 w-9 p-0 rounded-full shadow-sm hover:scale-105 transition-transform"
+                      onClick={(e) => { e.stopPropagation(); session && openEndDialog(session); }}
+                      title="End Session"
+                    >
+                      <Square className="w-4 h-4 fill-current" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
