@@ -45,7 +45,6 @@ const ServicesManagement = () => {
   const isOwner = role === "owner";
 
   const { data: servicesCatalog } = useServicesCatalog();
-  const createService = useCreateServiceCatalog();
   const updateService = useUpdateServiceCatalog();
 
 
