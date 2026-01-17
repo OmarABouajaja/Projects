@@ -93,9 +93,11 @@ const GamingLounge = () => {
               ))}
             </div>
 
-            <div className="glass-card rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 mb-4 sm:mb-5 md:mb-6 border-secondary/30 hover:border-secondary/60 transition-all duration-300 hover:shadow-[0_6px_18px_hsl(var(--secondary)/0.18)]">
-              {t("gaming.offer", { count: settings?.free_game_threshold?.games_required || 5, next: (settings?.free_game_threshold?.games_required || 5) + 1 })}
-            </div>
+            {settings?.free_games_enabled !== false && (
+              <div className="glass-card rounded-lg sm:rounded-xl p-2.5 sm:p-3 md:p-4 mb-4 sm:mb-5 md:mb-6 border-secondary/30 hover:border-secondary/60 transition-all duration-300 hover:shadow-[0_6px_18px_hsl(var(--secondary)/0.18)]">
+                {t("gaming.offer", { count: settings?.free_game_threshold?.games_required || 5, next: (settings?.free_game_threshold?.games_required || 5) + 1 })}
+              </div>
+            )}
 
             <a
               href="https://wa.me/21629290065?text=Bonjour%2C%20je%20souhaite%20r%C3%A9server%20une%20session%20gaming%20sur%20PS4%20ou%20PS5."
