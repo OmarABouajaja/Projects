@@ -17,7 +17,7 @@ supabase: Client = get_supabase()
 diag_router = APIRouter(prefix="/api/diag", tags=["Diagnostics"])
 
 @diag_router.get("/status")
-async def get_admin_status():
+def get_admin_status():
     """Diagnostic endpoint to verify Supabase service role connectivity (Public)"""
     try:
         # Try to read from a restricted table to verify service role permissions
@@ -47,7 +47,9 @@ class CleanupRequest(BaseModel):
 
 @router.delete("/cleanup")
 @limiter.limit("5/hour")
-async def cleanup_data(request: Request, body: CleanupRequest):
+@router.delete("/cleanup")
+@limiter.limit("5/hour")
+def cleanup_data(request: Request, body: CleanupRequest):
     """
     Deletes data older than X days from specified tables to free up space.
     """
@@ -88,7 +90,9 @@ async def cleanup_data(request: Request, body: CleanupRequest):
 
 @router.get("/export")
 @limiter.limit("2/hour") # Lower limit for heavy operation
-async def export_data(request: Request):
+@router.get("/export")
+@limiter.limit("2/hour") # Lower limit for heavy operation
+def export_data(request: Request):
     """
     Exports core data as JSON for backup.
     """
@@ -129,7 +133,9 @@ class CreateStaffRequest(BaseModel):
 
 @router.post("/staff")
 @limiter.limit("10/minute")
-async def create_staff_member(request: Request, body: CreateStaffRequest):
+@router.post("/staff")
+@limiter.limit("10/minute")
+def create_staff_member(request: Request, body: CreateStaffRequest):
     request_data = body
     """
     Creates a new staff member:
@@ -227,7 +233,9 @@ async def create_staff_member(request: Request, body: CreateStaffRequest):
         raise HTTPException(status_code=500, detail=str(e))
 @router.post("/sync-profiles")
 @limiter.limit("5/minute")
-async def sync_profiles(request: Request):
+@router.post("/sync-profiles")
+@limiter.limit("5/minute")
+def sync_profiles(request: Request):
     """
     Force-syncs auth.users data to public.profiles.
     Fixes 'Email non disponible' issues.
@@ -273,7 +281,9 @@ async def sync_profiles(request: Request):
 
 @router.delete("/staff/{user_id}")
 @limiter.limit("10/minute")
-async def delete_staff_member(request: Request, user_id: str):
+@router.delete("/staff/{user_id}")
+@limiter.limit("10/minute")
+def delete_staff_member(request: Request, user_id: str):
     """
     Fully deletes a staff member:
     1. Removes from auth.users

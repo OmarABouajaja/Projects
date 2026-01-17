@@ -73,7 +73,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 
 @router.post("/otp")
 @limiter.limit("5/minute")
-async def send_otp(request: Request, body: OTPRequest):
+@router.post("/otp")
+@limiter.limit("5/minute")
+def send_otp(request: Request, body: OTPRequest):
     """Send OTP verification code"""
     if body.is_sms_alternative:
         success = send_otp_email_alternative(body.email, body.otp)
@@ -85,7 +87,8 @@ async def send_otp(request: Request, body: OTPRequest):
     return {"status": "success", "message": "OTP sent successfully"}
 
 @router.post("/booking")
-async def send_booking(request: BookingConfirmationRequest):
+@router.post("/booking")
+def send_booking(request: BookingConfirmationRequest):
     """Send booking confirmation"""
     success = send_booking_confirmation(
         client_name=request.client_name,
@@ -100,7 +103,8 @@ async def send_booking(request: BookingConfirmationRequest):
     return {"status": "success", "message": "Booking confirmation sent"}
 
 @router.post("/contact")
-async def send_contact(request: ContactFormRequest):
+@router.post("/contact")
+def send_contact(request: ContactFormRequest):
     """Send contact form message"""
     success = send_contact_form_notification(
         from_name=request.from_name,
@@ -113,7 +117,8 @@ async def send_contact(request: ContactFormRequest):
     return {"status": "success", "message": "Message sent"}
 
 @router.post("/service-update")
-async def send_service_update(request: ServiceRequestNotification):
+@router.post("/service-update")
+def send_service_update(request: ServiceRequestNotification):
     """Send service request update"""
     success = send_service_request_notification(
         client_name=request.client_name,
@@ -129,7 +134,8 @@ async def send_service_update(request: ServiceRequestNotification):
     return {"status": "success", "message": "Service update sent"}
 
 @router.post("/receipt")
-async def send_receipt(request: SessionReceiptRequest):
+@router.post("/receipt")
+def send_receipt(request: SessionReceiptRequest):
     """Send session receipt"""
     success = send_session_receipt(
         client_name=request.client_name,
@@ -145,7 +151,8 @@ async def send_receipt(request: SessionReceiptRequest):
     return {"status": "success", "message": "Receipt sent"}
 
 @router.post("/staff-invite")
-async def invite_staff(request: StaffInvitationRequest):
+@router.post("/staff-invite")
+def invite_staff(request: StaffInvitationRequest):
     """Send staff invitation"""
     success = send_staff_invitation(
         email=request.email,
@@ -157,7 +164,8 @@ async def invite_staff(request: StaffInvitationRequest):
     return {"status": "success", "message": "Invitation sent"}
 
 @router.post("/notification")
-async def send_general_notification(request: NotificationRequest):
+@router.post("/notification")
+def send_general_notification(request: NotificationRequest):
     """Send generic notification"""
     success = send_notification_email(
         to_email=request.to_email,

@@ -1,6 +1,6 @@
 import os
 import logging
-import aiohttp
+import requests
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ class SMSService:
         self.provider_url = os.getenv("SMS_PROVIDER_URL", "https://api.sms-provider.com/send")
         self.enabled = os.getenv("SMS_ENABLED", "False").lower() == "true"
 
-    async def send_sms(self, to_number: str, message: str) -> bool:
+    def send_sms(self, to_number: str, message: str) -> bool:
         """
         Send an SMS to the specified number.
         
@@ -38,15 +38,15 @@ class SMSService:
                 "api_key": self.api_key
             }
             
-            async with aiohttp.ClientSession() as session:
-                async with session.post(self.provider_url, json=payload) as response:
-                    if response.status == 200:
-                        logger.info(f"SMS sent successfully to {to_number}")
-                        return True
-                    else:
-                        response_text = await response.text()
-                        logger.error(f"Failed to send SMS: {response.status} - {response_text}")
-                        return False
+            # Use sync requests
+            response = requests.post(self.provider_url, json=payload, timeout=10)
+            
+            if response.status_code == 200:
+                logger.info(f"SMS sent successfully to {to_number}")
+                return True
+            else:
+                logger.error(f"Failed to send SMS: {response.status_code} - {response.text}")
+                return False
 
         except Exception as e:
             logger.exception(f"Exception sending SMS: {str(e)}")

@@ -35,7 +35,9 @@ from fastapi import Request
 
 @router.post("/send")
 @limiter.limit("3/minute")
-async def send_verification_code(request: Request, body: SendCodeRequest):
+@router.post("/send")
+@limiter.limit("3/minute")
+def send_verification_code(request: Request, body: SendCodeRequest):
     # Map body to original logic args
     request_data = body
     code = generate_otp()
@@ -77,7 +79,7 @@ async def send_verification_code(request: Request, body: SendCodeRequest):
     if effective_type == 'sms':
         if not sms_enabled:
             raise HTTPException(status_code=400, detail="SMS verification is currently disabled. Please use email.")
-        sent = await sms_service.send_sms(request_data.identifier, f"Your Game Store Zarzis verification code is: {code}")
+        sent = sms_service.send_sms(request_data.identifier, f"Your Game Store Zarzis verification code is: {code}")
 
     elif effective_type == 'email':
         from email_service import send_otp_email_alternative
@@ -90,7 +92,9 @@ async def send_verification_code(request: Request, body: SendCodeRequest):
 
 @router.post("/check")
 @limiter.limit("5/minute")
-async def check_verification_code(request: Request, body: VerifyCodeRequest):
+@router.post("/check")
+@limiter.limit("5/minute")
+def check_verification_code(request: Request, body: VerifyCodeRequest):
     request_data = body
     try:
         # Check for valid, non-expired, matching code
