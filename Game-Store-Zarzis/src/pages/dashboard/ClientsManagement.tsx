@@ -286,7 +286,7 @@ const ClientsManagement = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ahmed Mansour"
-                      className="glass-card pl-10 h-10 sm:h-11 focus-visible:ring-primary/50"
+                      className="bg-white/5 border-white/10 hover:bg-white/10 focus:bg-black/40 transition-colors pl-10 h-10 sm:h-11 focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -299,7 +299,7 @@ const ClientsManagement = () => {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="23 290 065"
-                      className="glass-card pl-10 h-10 sm:h-11 font-mono focus-visible:ring-primary/50"
+                      className="bg-white/5 border-white/10 hover:bg-white/10 focus:bg-black/40 transition-colors pl-10 h-10 sm:h-11 font-mono focus-visible:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -311,7 +311,7 @@ const ClientsManagement = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="client@email.com"
                     type="email"
-                    className="glass-card h-10 sm:h-11 focus-visible:ring-primary/50"
+                    className="bg-white/5 border-white/10 hover:bg-white/10 focus:bg-black/40 transition-colors h-10 sm:h-11 focus-visible:ring-primary/50"
                   />
                 </div>
 
@@ -321,7 +321,7 @@ const ClientsManagement = () => {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="e.g. Favorite game: FIFA"
-                    className="glass-card h-10 sm:h-11 focus-visible:ring-primary/50"
+                    className="bg-white/5 border-white/10 hover:bg-white/10 focus:bg-black/40 transition-colors h-10 sm:h-11 focus-visible:ring-primary/50"
                   />
                 </div>
 

@@ -32,27 +32,7 @@
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
   <link rel="manifest" href="/manifest.json" />
 
-  <!-- SPA Redirect Script for GitHub Pages -->
-  <script type="text/javascript">
-    (function (l) {
-      // Check for ?/... pattern
-      if (l.search[1] === '/') {
-        var decoded = l.search.slice(1).split('&').map(function (p) {
-          return p.replace(/~and~/g, '&')
-        }).join('?');
-        window.history.replaceState(null, null,
-          l.pathname.slice(0, -1) + decoded + l.hash
-        );
-      } 
-      // Check for ?p=/... pattern (common alternative)
-      else if (l.search.startsWith('?p=/')) {
-        var path = l.search.slice(3); // Remove ?p=
-        window.history.replaceState(null, null,
-          l.pathname.slice(0, -1) + path + l.hash
-        );
-      }
-    }(window.location))
-  </script>
+
 
   <!-- Language alternatives -->
   <link rel="alternate" hreflang="fr" href="https://www.gamestorezarzis.com.tn" />
