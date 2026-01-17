@@ -226,6 +226,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []); // Empty dependency array prevents re-subscription loops
 
+  // 🚀 Attendance Hardening: Check DB for active shift on mount (prevents local storage desync)
+  useEffect(() => {
+    if (!user) return;
+
+    const checkActiveShift = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('staff_shifts')
+          .select('id')
+          .eq('staff_id', user.id)
+          .is('check_out', null)
+          .order('check_in', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          console.error("AuthContext: Failed to check active shift", error);
+          return;
+        }
+
+        if (data) {
+          // console.log("AuthContext: Found active shift from DB", data.id);
+          localStorage.setItem('current_staff_session_id', data.id);
+          setIsClockedIn(true);
+        } else {
+          // console.log("AuthContext: No active shift found in DB");
+          localStorage.removeItem('current_staff_session_id');
+          setIsClockedIn(false);
+        }
+      } catch (err) {
+        console.error("AuthContext: Active shift check exception", err);
+      }
+    };
+
+    checkActiveShift();
+  }, [user]);
+
   const clockIn = async () => {
     if (!user) return;
 
@@ -241,22 +278,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (sessionData) {
       localStorage.setItem('current_staff_session_id', sessionData.id);
       setIsClockedIn(true);
+
+      // Notify Owner
+      import('@/services/emailService').then(({ sendStaffAttendanceNotification }) => {
+        sendStaffAttendanceNotification({
+          staffName: user.user_metadata?.full_name || user.email || 'Staff',
+          action: 'clock_in',
+          time: new Date().toLocaleTimeString('fr-FR')
+        });
+      });
     }
   };
 
   const clockOut = async () => {
     const sessionId = localStorage.getItem('current_staff_session_id');
-    if (sessionId) {
+
+    // Fallback: If no local ID, check DB for any open shift to close it
+    let targetSessionId = sessionId;
+    if (!targetSessionId && user) {
+      const { data } = await supabase.from('staff_shifts').select('id').eq('staff_id', user.id).is('check_out', null).limit(1).maybeSingle();
+      if (data) targetSessionId = data.id;
+    }
+
+    if (targetSessionId) {
       // Throw error to let UI handle it
       const { error } = await supabase
         .from('staff_shifts')
         .update({ check_out: new Date().toISOString() })
-        .eq('id', sessionId);
+        .eq('id', targetSessionId);
 
       if (error) throw error;
 
       localStorage.removeItem('current_staff_session_id');
       setIsClockedIn(false);
+
+      // Notify Owner
+      import('@/services/emailService').then(({ sendStaffAttendanceNotification }) => {
+        sendStaffAttendanceNotification({
+          staffName: user?.user_metadata?.full_name || user?.email || 'Staff',
+          action: 'clock_out',
+          time: new Date().toLocaleTimeString('fr-FR')
+        });
+      });
     }
   };
 

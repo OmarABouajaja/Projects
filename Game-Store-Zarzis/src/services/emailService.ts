@@ -140,37 +140,39 @@ export async function sendSessionReceipt(data: SessionReceiptData): Promise<bool
     }
 }
 
+export interface StaffAttendanceData {
+    staffName: string;
+    action: 'clock_in' | 'clock_out';
+    time: string;
+}
+
+/**
+ * Send staff attendance notification via Backend API
+ */
+export async function sendStaffAttendanceNotification(data: StaffAttendanceData): Promise<boolean> {
+    try {
+        const response = await fetch(`${API_BASE_URL}/staff-attendance`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                staff_name: data.staffName,
+                action: data.action,
+                time: data.time,
+            }),
+        });
+        return response.ok;
+    } catch (error) {
+        // Silently fail for now as email service might not be critical path
+        console.warn('⚠️ Attendance Email Failed:', error);
+        return false;
+    }
+}
+
 export default {
     sendBookingConfirmation,
     sendContactForm,
     sendServiceRequestNotification,
     sendSessionReceipt,
     sendStaffInvitation,
+    sendStaffAttendanceNotification,
 };
-
-export interface StaffInvitationData {
-    email: string;
-    role: string;
-    password: string;
-}
-
-/**
- * Send staff invitation via Backend API
- */
-export async function sendStaffInvitation(data: StaffInvitationData): Promise<boolean> {
-    try {
-        const response = await fetch(`${API_BASE_URL}/staff-invitation`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: data.email,
-                role: data.role,
-                password: data.password,
-            }),
-        });
-        return response.ok;
-    } catch (error) {
-        console.error('❌ API Call Failed:', error);
-        return false;
-    }
-}
