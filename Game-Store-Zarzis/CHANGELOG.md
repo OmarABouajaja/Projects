@@ -85,4 +85,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Note**: This is the initial public release. Previous development history has been consolidated into v1.0.0.
 
-For more details on any release, please refer to the [commit history](https://github.com/your-username/game-store-zarzis/commits/main).
+For more details on any release, please refer to the [commit history](https://github.com/OmarABouajaja/Projects/main/Game-Store-Zarzis).

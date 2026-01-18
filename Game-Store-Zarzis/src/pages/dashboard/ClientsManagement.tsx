@@ -281,13 +281,18 @@ const ClientsManagement = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white/70">{t("client.full_name")}</Label>
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Ahmed Mansour"
-                      className="pl-10 h-10 sm:h-12 text-base font-medium"
-                      style={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#fff' }}
+                      className="pl-10 h-10 sm:h-12 text-base font-medium relative z-0"
+                      style={{
+                        backgroundColor: '#18181b',
+                        borderColor: '#52525b',
+                        color: '#ffffff',
+                        opacity: 1
+                      }}
                     />
                   </div>
                 </div>
@@ -295,13 +300,18 @@ const ClientsManagement = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-white/70">{t("client.phone_number")} *</Label>
                   <div className="relative">
-                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50" />
+                    <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
                     <Input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="23 290 065"
-                      className="pl-10 h-10 sm:h-12 text-base font-mono"
-                      style={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#fff' }}
+                      className="pl-10 h-10 sm:h-12 text-base font-mono relative z-0"
+                      style={{
+                        backgroundColor: '#18181b',
+                        borderColor: '#52525b',
+                        color: '#ffffff',
+                        opacity: 1
+                      }}
                     />
                   </div>
                 </div>
@@ -313,8 +323,13 @@ const ClientsManagement = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="client@email.com"
                     type="email"
-                    className="h-10 sm:h-12 text-base"
-                    style={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#fff' }}
+                    className="h-10 sm:h-12 text-base relative z-0"
+                    style={{
+                      backgroundColor: '#18181b',
+                      borderColor: '#52525b',
+                      color: '#ffffff',
+                      opacity: 1
+                    }}
                   />
                 </div>
 
@@ -324,8 +339,13 @@ const ClientsManagement = () => {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="e.g. Favorite game: FIFA"
-                    className="h-10 sm:h-12 text-base"
-                    style={{ backgroundColor: '#27272a', borderColor: '#3f3f46', color: '#fff' }}
+                    className="h-10 sm:h-12 text-base relative z-0"
+                    style={{
+                      backgroundColor: '#18181b',
+                      borderColor: '#52525b',
+                      color: '#ffffff',
+                      opacity: 1
+                    }}
                   />
                 </div>
 
