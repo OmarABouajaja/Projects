@@ -27,9 +27,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   /* 
-   * CRITICAL FIX: Session Stability
-   * Initialize isLoading to TRUE to prevent premature redirects
-   * Initialize role from localStorage to prevent "flicker" on refresh
+   * Session Stability:
+   * Start with isLoading=true to prevent flashing redirects.
+   * Cache role in localStorage to avoid flicker on page refresh.
    */
   const [role, setRole] = useState<AppRole | null>(() => {
     return localStorage.getItem('user_role') as AppRole | null;

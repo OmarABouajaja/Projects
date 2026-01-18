@@ -125,4 +125,5 @@ Security patches will be released as needed and announced via:
 
 **Last Updated**: January 13, 2026
 
-For general questions, please use [GitHub Discussions](https://github.com/your-username/game-store-zarzis/discussions).
+For general questions, please use [GitHub Discussions]https://github.com/OmarABouajaja/Projects/tree/main/Game-Store-Zarzis).
+

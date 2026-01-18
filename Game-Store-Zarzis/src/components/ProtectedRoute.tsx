@@ -17,9 +17,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner 
     </div>;
   }
 
-  // REMOVED: The block that showed spinner if (user && role === null)
-  // Reason: If role fetch fails (e.g. RLS block), role remains null and isLoading becomes false.
-  // We must NOT show spinner here, effectively trapping the user. We must let it fall through to "Access Denied".
+  // If role fetch fails, we fall through to Access Denied - don't trap the user in a spinner.
 
   // Redirect to primary staff login route if not authenticated
   if (!user) {
@@ -27,8 +25,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireOwner 
   }
 
   // If we have a user but no role (and not loading), it means role fetch failed or user has no role.
-  // CRITICAL FIX: Do NOT redirect to login, as login will redirect back here -> Infinite Loop.
-  // Instead, show an "Access Denied" or "Role Missing" screen.
+  // Don't redirect to login here - that causes an infinite loop.
+  // Show "Access Denied" instead so the user can manually navigate.
   if (!role || (role !== 'owner' && role !== 'worker')) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
