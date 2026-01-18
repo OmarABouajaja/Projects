@@ -21,8 +21,6 @@ export const useCreateOrder = () => {
             const { data: order, error: orderError } = await supabase
                 .from("orders")
                 .insert({
-                    client_name: orderData.client_name,
-                    client_phone: orderData.client_phone,
                     delivery_method: orderData.delivery_method,
                     delivery_address: orderData.delivery_address,
                     delivery_cost: deliveryCost,

@@ -210,8 +210,8 @@ export interface Order {
   id: string;
   order_number: string;
   client_id?: string;
-  client_name: string;
-  client_phone: string;
+  client_name?: string;
+  client_phone?: string;
   client_email?: string;
 
   // Order details
