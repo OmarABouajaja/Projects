@@ -55,6 +55,7 @@ const SessionsManagement = () => {
   const [gamesInSession, setGamesInSession] = useState(0);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
+  const [endSessionStep, setEndSessionStep] = useState<'summary' | 'confirm'>('summary');
 
   // Data Hooks
   const { data: consoles } = useConsoles();
@@ -403,6 +404,11 @@ const SessionsManagement = () => {
   const handleEndSession = async () => {
     if (!selectedSession) return;
 
+    if (endSessionStep === 'summary') {
+      setEndSessionStep('confirm');
+      return;
+    }
+
     const session = selectedSession;
     const pricingInfo = session.pricing;
     let gamingTotal = 0;
@@ -593,6 +599,7 @@ const SessionsManagement = () => {
     }
 
     setGamesInSession(initialGames);
+    setEndSessionStep('summary');
     setIsEndDialogOpen(true);
   };
 
@@ -876,6 +883,13 @@ const SessionsManagement = () => {
                       <span className="text-xs text-muted-foreground font-bold italic uppercase">Maintenance</span>
                     ) : (
                       <span className="text-xs text-green-500 font-bold">AVAILABLE</span>
+                    )}
+
+                    {/* Games Count Badge (Absolute Top Right) */}
+                    {isActive && session && session.session_type === 'per_game' && (
+                      <div className="absolute top-2 right-2 z-20 flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold shadow-lg border border-primary/50 animate-in zoom-in">
+                        {session.games_played || 1} <span className="text-[8px] ml-0.5 opacity-70">G</span>
+                      </div>
                     )}
                   </div>
 
@@ -1188,6 +1202,22 @@ const SessionsManagement = () => {
                   </div>
                 )}
 
+                {/* Suggested vs Actual Games Info - Only in Summary Step */}
+                {selectedSession.session_type === 'per_game' && (
+                  <div className="glass-card p-3 rounded-lg border-primary/20 bg-primary/5 text-xs flex justify-between items-center">
+                    <span className="text-muted-foreground">Estimated based on time:</span>
+                    <Badge variant="outline" className="font-mono">
+                      {(() => {
+                        const startTime = new Date(selectedSession.start_time).getTime();
+                        const now = new Date().getTime();
+                        const elapsedMinutes = (now - startTime) / 60000;
+                        const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
+                        return tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
+                      })()} Suggested
+                    </Badge>
+                  </div>
+                )}
+
                 <div className="space-y-3 pt-2 border-t">
                   <Label>Client (Mandatory for Points)</Label>
 
@@ -1242,15 +1272,22 @@ const SessionsManagement = () => {
                   </p>
                 </div>
 
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  onClick={handleEndSession}
-                  disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone)) || isConsumptionsLoading}
-                >
-                  {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <Square className="w-4 h-4 mr-2" />}
-                  {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading Data..." : "Stop & Calculate Payment"}
-                </Button>
+                <div className="flex gap-2">
+                  {endSessionStep === 'confirm' && (
+                    <Button variant="outline" onClick={() => setEndSessionStep('summary')} className="flex-1">
+                      Back
+                    </Button>
+                  )}
+                  <Button
+                    variant={endSessionStep === 'confirm' ? "default" : "secondary"}
+                    className="flex-1 font-bold"
+                    onClick={handleEndSession}
+                    disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone)) || isConsumptionsLoading}
+                  >
+                    {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : endSessionStep === 'confirm' ? <Square className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                    {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading..." : endSessionStep === 'confirm' ? "Confirm & Pay" : "Review Payment"}
+                  </Button>
+                </div>
               </div>
             )}
           </DialogContent>

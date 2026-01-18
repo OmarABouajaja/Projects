@@ -453,6 +453,7 @@ export const translations: Translations = {
   "sidebar.orders": { fr: "Commandes", en: "Orders", ar: "الطلبات" },
   "sidebar.history": { fr: "Historique", en: "History", ar: "السجل" },
   "sidebar.attendance": { fr: "Présence", en: "Attendance", ar: "الحضور" },
+  "sidebar.user_guide": { fr: "Guide Utilisateur", en: "User Guide", ar: "دليل المستخدم" },
   "sidebar.sign_out": { fr: "Déconnexion", en: "Sign Out", ar: "تسجيل الخروج" },
   "client.add": { fr: "Ajouter Client", en: "Add Client", ar: "إضافة عميل" },
   "client.total": { fr: "Total Clients", en: "Total Clients", ar: "إجمالي العملاء" },

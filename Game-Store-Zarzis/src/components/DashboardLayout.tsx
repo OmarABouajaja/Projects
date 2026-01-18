@@ -22,6 +22,7 @@ import {
   X,
   Truck,
   Calendar,
+  Book,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -184,6 +185,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: "/dashboard/sales", icon: ShoppingCart, label: t("sidebar.sales_management") },
     { path: "/dashboard/orders", icon: Truck, label: "Orders" },
     { path: "/dashboard/clients", icon: Users, label: t("sidebar.client_management") },
+    { path: "/user-guide", icon: Book, label: t("sidebar.user_guide") },
   ];
 
   const ownerNavItems = [
@@ -201,6 +203,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: "/dashboard/attendance", icon: Calendar, label: t("sidebar.attendance") },
     { path: "/dashboard/blog", icon: FileText, label: t("sidebar.blog_marketing") },
     { path: "/dashboard/expenses", icon: Receipt, label: t("sidebar.charges_management") },
+    { path: "/user-guide", icon: Book, label: t("sidebar.user_guide") },
     { path: "/dashboard/settings", icon: Settings, label: t("sidebar.store_settings") },
   ];
 
