@@ -43,6 +43,12 @@ const Footer = () => {
             <a href="#contact" className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm hover:underline">
               {t("nav.contact")}
             </a>
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm hover:underline">
+              Terms
+            </Link>
+            <Link to="/delivery" className="text-muted-foreground hover:text-primary transition-colors text-xs md:text-sm hover:underline">
+              Delivery
+            </Link>
           </div>
 
           {/* Copyright */}

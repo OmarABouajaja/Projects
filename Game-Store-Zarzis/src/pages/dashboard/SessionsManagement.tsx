@@ -583,20 +583,9 @@ const SessionsManagement = () => {
 
     let initialGames = session.games_played || 1;
 
-    // 🧮 Pre-count logic with average time
-    if (session.session_type === 'per_game') {
-      const startTime = new Date(session.start_time).getTime();
-      const now = new Date().getTime();
-      const elapsedMinutes = (now - startTime) / 60000;
-      const tarifDuration = session.pricing?.game_duration_minutes || 0;
-
-      if (tarifDuration > 0) {
-        // Use Math.ceil to count "started" games (e.g. 35 mins / 30 mins = 2 games)
-        const estimatedByTime = Math.ceil(elapsedMinutes / tarifDuration);
-        const currentDbValue = session.games_played || 1;
-        initialGames = Math.max(currentDbValue, estimatedByTime);
-      }
-    }
+    // Initialize with the database value (Manual Count)
+    // We let the user decide if they want to switch to "Suggested" in the dialog UI
+    initialGames = session.games_played || 1;
 
     setGamesInSession(initialGames);
     setEndSessionStep('summary');
@@ -1145,76 +1134,100 @@ const SessionsManagement = () => {
 
                 {selectedSession.session_type === 'per_game' && (
                   <div className="space-y-4">
+                    {/* Counter Control */}
                     <div>
-                      <Label>Total Games Played</Label>
+                      <Label className="flex justify-between items-center">
+                        <span>Total Games Played</span>
+                        <Badge variant={gamesInSession !== (() => {
+                          const startTime = new Date(selectedSession.start_time).getTime();
+                          const now = new Date().getTime();
+                          const elapsedMinutes = (now - startTime) / 60000;
+                          const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
+                          return tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
+                        })() ? "destructive" : "secondary"}>
+                          {gamesInSession !== (() => {
+                            const startTime = new Date(selectedSession.start_time).getTime();
+                            const now = new Date().getTime();
+                            const elapsedMinutes = (now - startTime) / 60000;
+                            const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
+                            return tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
+                          })() ? "Modified" : "Matches Suggestion"}
+                        </Badge>
+                      </Label>
+
                       <div className="flex items-center gap-2 mt-2">
                         <Button
                           variant="outline"
                           size="icon"
-                          onClick={() => {
-                            // Calculate elapsed time in minutes
-                            const startTime = new Date(selectedSession.start_time).getTime();
-                            const now = new Date().getTime();
-                            const elapsedMinutes = (now - startTime) / 60000;
-
-                            // Check "avg tarif time" (game duration from pricing)
-                            // Default to 0 if not set (which means no threshold, so maybe strict? or loose? 
-                            // User said: "put 0 only if the avg tarif time isn't passed". 
-                            // If duration is missing, we assume we can't verify, so enforce 1 to be safe? 
-                            // Or maybe pricing.game_duration_minutes is standard 30?
-                            const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
-
-                            // Allow 0 only if elapsed time is LESS than the tariff duration
-                            const minGames = (tarifDuration > 0 && elapsedMinutes < tarifDuration) ? 0 : 1;
-
-                            setGamesInSession(Math.max(minGames, gamesInSession - 1));
-                          }}
-                          aria-label="Decrease games"
+                          onClick={() => setGamesInSession(Math.max(0, gamesInSession - 1))}
+                          className="h-12 w-12"
                         >
-                          -
+                          <span className="text-xl">-</span>
                         </Button>
-                        <span className={`font-display text-2xl font-bold w-12 text-center ${gamesInSession === 0 ? 'text-muted-foreground' : ''}`}>
-                          {gamesInSession}
-                        </span>
+                        <div className="flex-1 text-center bg-background/50 rounded-lg border-2 border-primary/20 h-12 flex items-center justify-center relative overflow-hidden">
+                          <span className="font-display text-2xl font-bold">{gamesInSession}</span>
+                          <span className="absolute bottom-1 text-[8px] text-muted-foreground uppercase tracking-widest">Manual Count</span>
+                        </div>
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => setGamesInSession(gamesInSession + 1)}
-                          aria-label="Increase games"
+                          className="h-12 w-12"
                         >
-                          +
+                          <span className="text-xl">+</span>
                         </Button>
                       </div>
                     </div>
 
-                    {/* Free Game Calculation */}
-                    {storeSettingsData?.free_games_enabled !== false && gamesInSession >= freeGameThreshold + 1 && (
-                      <div className="glass-card rounded-lg p-3 border-secondary/30">
-                        <div className="flex items-center gap-2 text-secondary">
-                          <Gift className="w-5 h-5" />
-                          <span className="font-medium">Free Game Linked!</span>
-                        </div>
-                        <p className="text-sm text-secondary mt-1">
-                          {Math.floor(gamesInSession / (freeGameThreshold + 1))} free game(s) available.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Suggested vs Actual Games Info - Only in Summary Step */}
-                {selectedSession.session_type === 'per_game' && (
-                  <div className="glass-card p-3 rounded-lg border-primary/20 bg-primary/5 text-xs flex justify-between items-center">
-                    <span className="text-muted-foreground">Estimated based on time:</span>
-                    <Badge variant="outline" className="font-mono">
-                      {(() => {
+                    {/* Suggestion Block */}
+                    <div className="glass-card p-3 rounded-lg border-primary/20 bg-primary/5 flex justify-between items-center group cursor-pointer hover:bg-primary/10 transition-colors"
+                      onClick={() => {
                         const startTime = new Date(selectedSession.start_time).getTime();
                         const now = new Date().getTime();
                         const elapsedMinutes = (now - startTime) / 60000;
                         const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
-                        return tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
-                      })()} Suggested
-                    </Badge>
+                        const suggested = tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
+                        setGamesInSession(suggested);
+                        toast({ title: "Applied Suggested Count", description: `Updated count to ${suggested} games.` });
+                      }}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">Estimated by Time</span>
+                        <div className="flex items-end gap-2">
+                          <span className="font-display text-xl font-bold text-primary">
+                            {(() => {
+                              const startTime = new Date(selectedSession.start_time).getTime();
+                              const now = new Date().getTime();
+                              const elapsedMinutes = (now - startTime) / 60000;
+                              const tarifDuration = selectedSession.pricing?.game_duration_minutes || 0;
+                              return tarifDuration > 0 ? Math.ceil(elapsedMinutes / tarifDuration) : 1;
+                            })()}
+                          </span>
+                          <span className="text-xs mb-1">Predicted Games</span>
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          Based on duration: {getSessionDuration(selectedSession.start_time)}
+                        </div>
+                      </div>
+                      <Button size="sm" variant="ghost" className="text-primary hover:bg-primary/20">
+                        Use Suggested
+                      </Button>
+                    </div>
+
+                    {/* Free Game Info */}
+                    {storeSettingsData?.free_games_enabled !== false && gamesInSession >= freeGameThreshold + 1 && (
+                      <div className="glass-card rounded-lg p-3 border-secondary/30 flex items-center gap-3">
+                        <div className="p-2 bg-secondary/20 rounded-full text-secondary">
+                          <Gift className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-secondary">Free Game Unlocked!</p>
+                          <p className="text-xs text-muted-foreground">
+                            {Math.floor(gamesInSession / (freeGameThreshold + 1))} free game(s) deducted from total.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 

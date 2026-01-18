@@ -28,6 +28,8 @@ const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
 const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const Checkout = lazyWithRetry(() => import("./pages/Checkout"));
+const TermsOfService = lazyWithRetry(() => import("./pages/TermsOfService"));
+const DeliveryConditions = lazyWithRetry(() => import("./pages/DeliveryConditions"));
 
 // Import Simple Dashboard lazy
 const SimpleDashboard = lazyWithRetry(() => import("./pages/dashboard/DashboardOverview"));
@@ -123,6 +125,8 @@ const App = () => {
                             {/* Public Routes */}
                             <Route path="/" element={<Index />} />
                             <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/terms" element={<TermsOfService />} />
+                            <Route path="/delivery" element={<DeliveryConditions />} />
 
                             {/* Client Routes */}
                             <Route path="/client-auth" element={<ClientAuth />} />

@@ -23,7 +23,6 @@ export const useCreateOrder = () => {
                 .insert({
                     client_name: orderData.client_name,
                     client_phone: orderData.client_phone,
-                    client_email: orderData.client_email,
                     delivery_method: orderData.delivery_method,
                     delivery_address: orderData.delivery_address,
                     delivery_cost: deliveryCost,

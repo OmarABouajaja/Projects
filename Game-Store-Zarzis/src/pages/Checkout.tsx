@@ -812,7 +812,8 @@ const Checkout = () => {
                                 )}
 
                                 <p className="text-[10px] text-center text-muted-foreground mt-2 px-4 italic leading-tight">
-                                    {t('checkout.terms')}
+                                    {t('checkout.terms')} <br />
+                                    By confirming, you agree to our <a href="/terms" target="_blank" className="text-primary hover:underline">Terms</a> & <a href="/delivery" target="_blank" className="text-primary hover:underline">Delivery Conditions</a>.
                                 </p>
                             </CardFooter>
                         </Card>
