@@ -17,12 +17,22 @@ export const useCreateOrder = () => {
 
             const totalAmount = subtotal + deliveryCost;
 
+            // Combine client info into notes since columns are missing
+            const clientInfoNote = `
+--- Client Info ---
+Name: ${orderData.client_name}
+Phone: ${orderData.client_phone}
+Email: ${orderData.client_email || 'N/A'}
+Address: ${orderData.delivery_address || 'N/A'}
+-------------------`;
+
+            const finalNotes = orderData.notes ? `${orderData.notes}\n${clientInfoNote}` : clientInfoNote;
+
             // 2. Insert Order
             const { data: order, error: orderError } = await supabase
                 .from("orders")
                 .insert({
                     delivery_method: orderData.delivery_method,
-                    delivery_address: orderData.delivery_address,
                     delivery_cost: deliveryCost,
                     subtotal: subtotal,
                     total_amount: totalAmount,
@@ -30,7 +40,7 @@ export const useCreateOrder = () => {
                     payment_method: orderData.payment_method || 'cash',
                     payment_reference: orderData.payment_reference || null,
                     status: 'pending',
-                    notes: orderData.notes
+                    notes: finalNotes.trim()
                 })
                 .select()
                 .single();
