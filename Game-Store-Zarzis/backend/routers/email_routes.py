@@ -6,12 +6,14 @@ Provides endpoints for sending emails via MailerSend
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+import secrets
 from email_service import (
     send_booking_confirmation,
     send_contact_form_notification,
     send_service_request_notification,
     send_session_receipt,
     send_staff_invitation,
+    send_password_reset_email,
 )
 
 router = APIRouter(prefix="/email", tags=["Email"])
@@ -144,3 +146,30 @@ async def api_send_staff_invitation(request: StaffInvitationRequest):
         raise HTTPException(status_code=500, detail="Failed to send email")
     
     return {"success": True, "message": "Staff invitation sent"}
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+    lang: Optional[str] = "fr"
+
+
+@router.post("/password-reset")
+async def api_send_password_reset(request: PasswordResetRequest):
+    """Send password reset email with magic link"""
+    # Generate a secure token (in production, store this with expiry in database)
+    reset_token = secrets.token_urlsafe(32)
+    
+    success = send_password_reset_email(
+        to_email=request.email,
+        reset_token=reset_token,
+        lang=request.lang or "fr",
+    )
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to send reset email")
+    
+    return {
+        "success": True, 
+        "message": "Password reset email sent",
+        "token": reset_token  # In production, don't return this - store in DB instead
+    }

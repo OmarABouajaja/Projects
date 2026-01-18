@@ -4,8 +4,60 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2, Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { Gamepad2, Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import PSBackground from "@/components/PSBackground";
+
+// API URL - use environment variable or fallback
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+
+// Get current language from localStorage
+const getLanguage = (): 'fr' | 'en' | 'ar' => {
+    const stored = localStorage.getItem('language');
+    if (stored === 'en' || stored === 'ar') return stored;
+    return 'fr';
+};
+
+const translations = {
+    fr: {
+        title: "Réinitialiser le Mot de Passe",
+        subtitle: "Entrez votre email pour recevoir les instructions de récupération",
+        emailLabel: "Adresse Email",
+        emailPlaceholder: "nom@exemple.com",
+        sendButton: "Envoyer le Lien",
+        sendingButton: "Envoi en cours...",
+        backToLogin: "Retour à la Connexion",
+        successTitle: "Vérifiez votre email",
+        successMessage: "Nous avons envoyé les instructions de récupération à",
+        errorSending: "Erreur lors de l'envoi de l'email de récupération",
+        errorGeneric: "Une erreur s'est produite. Veuillez réessayer.",
+    },
+    en: {
+        title: "Reset Password",
+        subtitle: "Enter your email to receive recovery instructions",
+        emailLabel: "Email Address",
+        emailPlaceholder: "name@example.com",
+        sendButton: "Send Reset Link",
+        sendingButton: "Sending Link...",
+        backToLogin: "Back to Login",
+        successTitle: "Check your email",
+        successMessage: "We have sent password recovery instructions to",
+        errorSending: "Error sending recovery email",
+        errorGeneric: "An error occurred. Please try again.",
+    },
+    ar: {
+        title: "إعادة تعيين كلمة المرور",
+        subtitle: "أدخل بريدك الإلكتروني لتلقي تعليمات الاسترداد",
+        emailLabel: "عنوان البريد الإلكتروني",
+        emailPlaceholder: "الاسم@مثال.com",
+        sendButton: "إرسال رابط إعادة التعيين",
+        sendingButton: "جاري الإرسال...",
+        backToLogin: "العودة إلى تسجيل الدخول",
+        successTitle: "تحقق من بريدك الإلكتروني",
+        successMessage: "لقد أرسلنا تعليمات استرداد كلمة المرور إلى",
+        errorSending: "خطأ في إرسال البريد الإلكتروني للاسترداد",
+        errorGeneric: "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    }
+};
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -13,30 +65,49 @@ const ForgotPassword = () => {
     const [isSent, setIsSent] = useState(false);
     const [error, setError] = useState("");
 
+    const lang = getLanguage();
+    const t = translations[lang];
+    const isRTL = lang === 'ar';
+
     const handleReset = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
 
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            // Try backend API first (uses MailerSend)
+            const response = await fetch(`${API_BASE_URL}/email/password-reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, lang }),
+            });
+
+            if (response.ok) {
+                setIsSent(true);
+                return;
+            }
+
+            // If backend fails, try Supabase as fallback
+            console.warn('Backend API failed, trying Supabase fallback...');
+            const { error: supabaseError } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/reset-password`,
             });
 
-            if (error) {
-                throw error;
+            if (supabaseError) {
+                throw supabaseError;
             }
 
             setIsSent(true);
         } catch (err: any) {
-            setError(err.message || "Failed to send reset email");
+            console.error('Password reset error:', err);
+            setError(err.message || t.errorGeneric);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-background relative flex items-center justify-center p-4">
+        <div className={`min-h-screen bg-background relative flex items-center justify-center p-4 ${isRTL ? 'rtl' : 'ltr'}`}>
             <PSBackground />
 
             <div className="relative z-10 w-full max-w-md">
@@ -46,9 +117,9 @@ const ForgotPassword = () => {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/20 mb-4">
                             <Gamepad2 className="w-8 h-8 text-primary" />
                         </div>
-                        <h1 className="font-display text-2xl font-bold mb-2">Reset Password</h1>
+                        <h1 className="font-display text-2xl font-bold mb-2">{t.title}</h1>
                         <p className="text-muted-foreground text-sm">
-                            Enter your email to receive recovery instructions
+                            {t.subtitle}
                         </p>
                     </div>
 
@@ -58,37 +129,39 @@ const ForgotPassword = () => {
                                 <CheckCircle className="w-8 h-8" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="font-semibold text-lg">Check your email</h3>
+                                <h3 className="font-semibold text-lg">{t.successTitle}</h3>
                                 <p className="text-muted-foreground">
-                                    We have sent password recovery instructions to <strong>{email}</strong>
+                                    {t.successMessage} <strong>{email}</strong>
                                 </p>
                             </div>
                             <Link to="/management-gs-zarzis">
                                 <Button variant="outline" className="w-full">
-                                    Back to Login
+                                    {t.backToLogin}
                                 </Button>
                             </Link>
                         </div>
                     ) : (
                         <form onSubmit={handleReset} className="space-y-4">
                             {error && (
-                                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center">
+                                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm text-center flex items-center justify-center gap-2">
+                                    <AlertCircle className="w-4 h-4" />
                                     {error}
                                 </div>
                             )}
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
+                                <Label htmlFor="email">{t.emailLabel}</Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground`} />
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="name@example.com"
+                                        placeholder={t.emailPlaceholder}
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10"
+                                        className={isRTL ? 'pr-10' : 'pl-10'}
                                         required
+                                        dir={isRTL ? 'rtl' : 'ltr'}
                                     />
                                 </div>
                             </div>
@@ -99,7 +172,7 @@ const ForgotPassword = () => {
                                 className="w-full"
                                 disabled={isLoading}
                             >
-                                {isLoading ? "Sending Link..." : "Send Reset Link"}
+                                {isLoading ? t.sendingButton : t.sendButton}
                             </Button>
 
                             <div className="mt-4 text-center">
@@ -107,8 +180,8 @@ const ForgotPassword = () => {
                                     to="/management-gs-zarzis"
                                     className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
                                 >
-                                    <ArrowLeft className="w-4 h-4 mr-1" />
-                                    Back to Login
+                                    <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-1 rotate-180' : 'mr-1'}`} />
+                                    {t.backToLogin}
                                 </Link>
                             </div>
                         </form>

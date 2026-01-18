@@ -594,3 +594,97 @@ def send_notification_email(
         html_content=html_content,
         text_content=message
     )
+
+
+# Password Reset Translation Dictionary
+PASSWORD_RESET_TRANSLATIONS = {
+    "subject": {
+        "fr": "Réinitialisation du Mot de Passe - Game Store Zarzis",
+        "en": "Password Reset - Game Store Zarzis",
+        "ar": "إعادة تعيين كلمة المرور - Game Store Zarzis"
+    },
+    "title": {
+        "fr": "Réinitialisation du Mot de Passe",
+        "en": "Password Reset",
+        "ar": "إعادة تعيين كلمة المرور"
+    },
+    "greeting": {
+        "fr": "Bonjour,",
+        "en": "Hello,",
+        "ar": "مرحباً،"
+    },
+    "instruction": {
+        "fr": "Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour continuer :",
+        "en": "You have requested to reset your password. Click the button below to continue:",
+        "ar": "لقد طلبت إعادة تعيين كلمة المرور الخاصة بك. انقر على الزر أدناه للمتابعة:"
+    },
+    "button": {
+        "fr": "Réinitialiser le Mot de Passe",
+        "en": "Reset Password",
+        "ar": "إعادة تعيين كلمة المرور"
+    },
+    "expiry": {
+        "fr": "Ce lien expire dans 1 heure.",
+        "en": "This link expires in 1 hour.",
+        "ar": "تنتهي صلاحية هذا الرابط خلال ساعة واحدة."
+    },
+    "ignore": {
+        "fr": "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.",
+        "en": "If you did not request this reset, please ignore this email.",
+        "ar": "إذا لم تطلب هذه الإعادة، يرجى تجاهل هذا البريد الإلكتروني."
+    }
+}
+
+
+def send_password_reset_email(
+    to_email: str,
+    reset_token: str,
+    lang: str = "fr"
+) -> bool:
+    """Send password reset email with magic link in specific language"""
+    lang = lang if lang in ["fr", "en", "ar"] else "fr"
+    t = PASSWORD_RESET_TRANSLATIONS
+    is_rtl = lang == "ar"
+    align = "right" if is_rtl else "left"
+    direction = "rtl" if is_rtl else "ltr"
+    
+    reset_url = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+
+    html_content = f"""
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: {direction}; text-align: {align};">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+            <h1 style="color: white; margin: 0;">Game Store Zarzis</h1>
+        </div>
+        <div style="padding: 40px; background: #f9f9f9; text-align: center;">
+            <h2 style="color: #333;">{t["title"][lang]}</h2>
+            <p style="font-size: 16px; color: #666;">{t["greeting"][lang]}</p>
+            <p style="font-size: 16px; color: #666;">{t["instruction"][lang]}</p>
+            
+            <div style="margin: 30px auto;">
+                <a href="{reset_url}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+                    {t["button"][lang]}
+                </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #999; margin-top: 20px;">{t["expiry"][lang]}</p>
+            <p style="font-size: 12px; color: #aaa;">{t["ignore"][lang]}</p>
+            
+            <div style="margin-top: 30px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                <p style="font-size: 12px; color: #666; margin: 0;">Si le bouton ne fonctionne pas, copiez ce lien :</p>
+                <p style="font-size: 11px; color: #999; word-break: break-all;">{reset_url}</p>
+            </div>
+        </div>
+        <div style="padding: 15px; text-align: center; background: #333; color: white;">
+            <p style="margin: 0;">Zarzis, Tunisie | Tel: 23 290 065</p>
+        </div>
+    </div>
+    """
+    text_content = f"{t['instruction'][lang]} {reset_url}. {t['expiry'][lang]}"
+    
+    return send_email_core(
+        subject=t["subject"][lang],
+        recipient_email=to_email,
+        recipient_name="User",
+        html_content=html_content,
+        text_content=text_content
+    )
