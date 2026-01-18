@@ -1,12 +1,82 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2, Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { Gamepad2, Lock, Eye, EyeOff, CheckCircle, AlertCircle, ArrowLeft, XCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import PSBackground from "@/components/PSBackground";
+
+// Get current language from localStorage
+const getLanguage = (): 'fr' | 'en' | 'ar' => {
+    const stored = localStorage.getItem('language');
+    if (stored === 'en' || stored === 'ar') return stored;
+    return 'fr';
+};
+
+const translations = {
+    fr: {
+        title: "Définir un Nouveau Mot de Passe",
+        subtitle: "Créez un nouveau mot de passe sécurisé pour votre compte",
+        newPassword: "Nouveau Mot de Passe",
+        confirmPassword: "Confirmer le Mot de Passe",
+        minChars: "Min. 6 caractères",
+        reenter: "Retapez le mot de passe",
+        updateButton: "Mettre à Jour",
+        updating: "Mise à jour...",
+        successTitle: "Succès !",
+        successMessage: "Votre mot de passe a été mis à jour. Redirection vers la connexion...",
+        loginNow: "Se Connecter Maintenant",
+        errorMismatch: "Les mots de passe ne correspondent pas",
+        errorMinLength: "Le mot de passe doit contenir au moins 6 caractères",
+        errorGeneric: "Échec de la mise à jour du mot de passe",
+        errorExpiredTitle: "Lien Expiré ou Invalide",
+        errorExpiredMessage: "Ce lien de réinitialisation a expiré ou est invalide. Veuillez demander un nouveau lien.",
+        requestNewLink: "Demander un Nouveau Lien",
+        backToLogin: "Retour à la Connexion",
+    },
+    en: {
+        title: "Set New Password",
+        subtitle: "Create a new secure password for your account",
+        newPassword: "New Password",
+        confirmPassword: "Confirm Password",
+        minChars: "Min. 6 characters",
+        reenter: "Re-enter password",
+        updateButton: "Update Password",
+        updating: "Updating...",
+        successTitle: "Success!",
+        successMessage: "Your password has been updated. Redirecting to login...",
+        loginNow: "Login Now",
+        errorMismatch: "Passwords do not match",
+        errorMinLength: "Password must be at least 6 characters",
+        errorGeneric: "Failed to update password",
+        errorExpiredTitle: "Link Expired or Invalid",
+        errorExpiredMessage: "This reset link has expired or is invalid. Please request a new link.",
+        requestNewLink: "Request New Link",
+        backToLogin: "Back to Login",
+    },
+    ar: {
+        title: "تعيين كلمة مرور جديدة",
+        subtitle: "إنشاء كلمة مرور جديدة وآمنة لحسابك",
+        newPassword: "كلمة المرور الجديدة",
+        confirmPassword: "تأكيد كلمة المرور",
+        minChars: "الحد الأدنى 6 أحرف",
+        reenter: "أعد إدخال كلمة المرور",
+        updateButton: "تحديث كلمة المرور",
+        updating: "جاري التحديث...",
+        successTitle: "تم بنجاح!",
+        successMessage: "تم تحديث كلمة المرور الخاصة بك. جاري إعادة التوجيه إلى تسجيل الدخول...",
+        loginNow: "تسجيل الدخول الآن",
+        errorMismatch: "كلمات المرور غير متطابقة",
+        errorMinLength: "يجب أن تحتوي كلمة المرور على 6 أحرف على الأقل",
+        errorGeneric: "فشل تحديث كلمة المرور",
+        errorExpiredTitle: "الرابط منتهي الصلاحية أو غير صالح",
+        errorExpiredMessage: "انتهت صلاحية رابط إعادة التعيين هذا أو أنه غير صالح. يرجى طلب رابط جديد.",
+        requestNewLink: "طلب رابط جديد",
+        backToLogin: "العودة إلى تسجيل الدخول",
+    }
+};
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -16,14 +86,43 @@ const ResetPassword = () => {
     const [isSuccess, setIsSuccess] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [linkError, setLinkError] = useState<string | null>(null);
+
+    const lang = getLanguage();
+    const t = translations[lang];
+    const isRTL = lang === 'ar';
 
     useEffect(() => {
-        // Check if we have the access_token in the URL (Supabase puts it in the fragment)
+        // Check for error in URL hash (Supabase returns errors this way)
         const hash = window.location.hash;
-        if (!hash || (!hash.includes("access_token") && !hash.includes("type=recovery"))) {
-            // If no token, this page shouldn't be accessible directly
-            // But we'll let it render for now to avoid redirect loops if the user is just checking the page.
-            // Or better, show an error.
+
+        if (hash) {
+            const params = new URLSearchParams(hash.substring(1));
+            const errorCode = params.get('error_code');
+            const errorDescription = params.get('error_description');
+
+            if (errorCode || params.get('error')) {
+                console.error('Reset password error:', errorCode, errorDescription);
+                setLinkError(errorDescription?.replace(/\+/g, ' ') || 'Link expired or invalid');
+                return;
+            }
+
+            // Check if we have a valid recovery token
+            const accessToken = params.get('access_token');
+            const type = params.get('type');
+
+            if (type === 'recovery' && accessToken) {
+                // Set the session from the recovery token
+                supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: params.get('refresh_token') || '',
+                }).then(({ error }) => {
+                    if (error) {
+                        console.error('Session error:', error);
+                        setLinkError(error.message);
+                    }
+                });
+            }
         }
     }, []);
 
@@ -32,12 +131,12 @@ const ResetPassword = () => {
         setError("");
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setError(t.errorMismatch);
             return;
         }
 
         if (password.length < 6) {
-            setError("Password must be at least 6 characters");
+            setError(t.errorMinLength);
             return;
         }
 
@@ -52,24 +151,61 @@ const ResetPassword = () => {
 
             setIsSuccess(true);
             toast({
-                title: "Password Updated",
-                description: "Your password has been successfully reset.",
+                title: t.successTitle,
+                description: t.successMessage,
             });
 
             // Redirect after 3 seconds
             setTimeout(() => {
-                navigate("/staff-login");
+                navigate("/management-gs-zarzis");
             }, 3000);
 
         } catch (err: any) {
-            setError(err.message || "Failed to update password");
+            setError(err.message || t.errorGeneric);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Show error state if link is expired/invalid
+    if (linkError) {
+        return (
+            <div className={`min-h-screen bg-background relative flex items-center justify-center p-4 ${isRTL ? 'rtl' : 'ltr'}`}>
+                <PSBackground />
+
+                <div className="relative z-10 w-full max-w-md">
+                    <div className="glass-card rounded-2xl p-8 neon-border">
+                        <div className="text-center space-y-6">
+                            <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center mx-auto">
+                                <XCircle className="w-8 h-8 text-destructive" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="font-semibold text-lg text-destructive">{t.errorExpiredTitle}</h3>
+                                <p className="text-muted-foreground text-sm">
+                                    {t.errorExpiredMessage}
+                                </p>
+                            </div>
+                            <div className="space-y-3">
+                                <Link to="/forgot-password">
+                                    <Button variant="hero" className="w-full">
+                                        {t.requestNewLink}
+                                    </Button>
+                                </Link>
+                                <Link to="/management-gs-zarzis">
+                                    <Button variant="outline" className="w-full">
+                                        {t.backToLogin}
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-background relative flex items-center justify-center p-4">
+        <div className={`min-h-screen bg-background relative flex items-center justify-center p-4 ${isRTL ? 'rtl' : 'ltr'}`}>
             <PSBackground />
 
             <div className="relative z-10 w-full max-w-md">
@@ -78,9 +214,9 @@ const ResetPassword = () => {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/20 mb-4">
                             <Gamepad2 className="w-8 h-8 text-primary" />
                         </div>
-                        <h1 className="font-display text-2xl font-bold mb-2">Set New Password</h1>
+                        <h1 className="font-display text-2xl font-bold mb-2">{t.title}</h1>
                         <p className="text-muted-foreground text-sm">
-                            Create a new secure password for your account
+                            {t.subtitle}
                         </p>
                     </div>
 
@@ -90,17 +226,17 @@ const ResetPassword = () => {
                                 <CheckCircle className="w-8 h-8" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="font-semibold text-lg text-green-400">Success!</h3>
+                                <h3 className="font-semibold text-lg text-green-400">{t.successTitle}</h3>
                                 <p className="text-muted-foreground">
-                                    Your password has been updated. Redirecting to login...
+                                    {t.successMessage}
                                 </p>
                             </div>
                             <Button
                                 variant="outline"
                                 className="w-full"
-                                onClick={() => navigate("/staff-login")}
+                                onClick={() => navigate("/management-gs-zarzis")}
                             >
-                                Inscription Login Now
+                                {t.loginNow}
                             </Button>
                         </div>
                     ) : (
@@ -113,22 +249,23 @@ const ResetPassword = () => {
                             )}
 
                             <div className="space-y-2">
-                                <Label htmlFor="password">New Password</Label>
+                                <Label htmlFor="password">{t.newPassword}</Label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                                     <Input
                                         id="password"
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 pr-10"
-                                        placeholder="Min. 6 characters"
+                                        className={`${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}`}
+                                        placeholder={t.minChars}
                                         required
+                                        dir={isRTL ? 'rtl' : 'ltr'}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                        className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground`}
                                     >
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
@@ -136,17 +273,18 @@ const ResetPassword = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                <Label htmlFor="confirmPassword">{t.confirmPassword}</Label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                                     <Input
                                         id="confirmPassword"
                                         type={showPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="pl-10"
-                                        placeholder="Re-enter password"
+                                        className={isRTL ? 'pr-10' : 'pl-10'}
+                                        placeholder={t.reenter}
                                         required
+                                        dir={isRTL ? 'rtl' : 'ltr'}
                                     />
                                 </div>
                             </div>
@@ -157,8 +295,18 @@ const ResetPassword = () => {
                                 className="w-full mt-2"
                                 disabled={isLoading}
                             >
-                                {isLoading ? "Updating..." : "Update Password"}
+                                {isLoading ? t.updating : t.updateButton}
                             </Button>
+
+                            <div className="mt-4 text-center">
+                                <Link
+                                    to="/management-gs-zarzis"
+                                    className="inline-flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-1 rotate-180' : 'mr-1'}`} />
+                                    {t.backToLogin}
+                                </Link>
+                            </div>
                         </form>
                     )}
                 </div>
