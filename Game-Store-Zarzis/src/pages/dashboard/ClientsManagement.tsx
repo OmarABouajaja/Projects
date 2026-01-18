@@ -269,7 +269,7 @@ const ClientsManagement = () => {
 
           {/* Create Client Dialog */}
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogContent className="glass-panel border-primary/30 max-w-[95vw] sm:max-w-md overflow-hidden p-0">
+            <DialogContent className="glass-panel border-primary/30 max-w-[95vw] sm:max-w-md overflow-hidden p-0 !translate-x-[-50%] !translate-y-[-50%]">
               <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
               <div className="p-6">
                 <DialogHeader className="mb-6">
