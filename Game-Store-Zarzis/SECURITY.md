@@ -42,7 +42,7 @@ We take security seriously. The following versions are currently supported with 
 
 ### Reporting Process
 
-1. **Email**: Send details to `security@yourdomain.com` (update with your email)
+1. **Email**: Send details to `omarbouajaja48@gmail.com`
 2. **Include**:
    - Description of the vulnerability
    - Steps to reproduce
@@ -97,12 +97,12 @@ We appreciate security researchers who help keep our project safe:
 8. ✅ Regular database backups (automated via Supabase)
 
 ### Supabase Security Checklist
-- [ ] RLS enabled on all tables
-- [ ] Service role key never exposed to client
-- [ ] Email confirmations enabled
-- [ ] Rate limiting configured
-- [ ] Realtime authorization configured
-- [ ] Storage bucket policies set correctly
+- ✅ RLS enabled on all tables
+- ✅ Service role key never exposed to client
+- ✅ Email confirmations enabled
+- ✅ Rate limiting configured
+- ✅ Realtime authorization configured
+- ✅ Storage bucket policies set correctly
 
 ---
 
