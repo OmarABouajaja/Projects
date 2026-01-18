@@ -6,16 +6,10 @@ export const useCreateOrder = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (orderData: OrderFormData) => {
-            // 1. Calculate totals
-            const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            let deliveryCost = 0;
-
-            // Fetch delivery settings to get exact cost if needed, or trust frontend (should verify on backend in real app)
-            // For now, we will trust the passed values or calculate simple logic
-            if (orderData.delivery_method === 'rapid_post') deliveryCost = 10.000;
-            if (orderData.delivery_method === 'local_delivery') deliveryCost = 7.000;
-
-            const totalAmount = subtotal + deliveryCost;
+            // 1. Get totals from orderData (calculated in frontend with store settings)
+            const subtotal = orderData.subtotal;
+            const deliveryCost = orderData.delivery_cost;
+            const totalAmount = orderData.total_amount;
 
             // Combine client info into notes since columns are missing
             const clientInfoNote = `
@@ -24,6 +18,8 @@ Name: ${orderData.client_name}
 Phone: ${orderData.client_phone}
 Email: ${orderData.client_email || 'N/A'}
 Address: ${orderData.delivery_address || 'N/A'}
+Subtotal: ${subtotal.toFixed(3)} DT
+Delivery: ${deliveryCost.toFixed(3)} DT
 -------------------`;
 
             const finalNotes = orderData.notes ? `${orderData.notes}\n${clientInfoNote}` : clientInfoNote;
@@ -33,8 +29,6 @@ Address: ${orderData.delivery_address || 'N/A'}
                 .from("orders")
                 .insert({
                     delivery_method: orderData.delivery_method,
-                    delivery_cost: deliveryCost,
-                    subtotal: subtotal,
                     total_amount: totalAmount,
                     items: orderData.items, // JSONB column
                     payment_method: orderData.payment_method || 'cash',

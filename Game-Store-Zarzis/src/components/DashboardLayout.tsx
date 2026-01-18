@@ -23,6 +23,7 @@ import {
   Truck,
   Calendar,
   Book,
+  Key,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -31,6 +32,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { UserGuide } from "@/components/onboarding/UserGuide";
 import Interactive3DBackground from "@/components/Interactive3DBackground";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import PasswordChangeDialog from "@/components/PasswordChangeDialog";
 
 // assertive 4-beep sound
 const playBeep = () => {
@@ -358,6 +360,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </div>
             </div>
           )}
+
+          <PasswordChangeDialog
+            trigger={
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors rounded-xl mb-1",
+                  collapsed && "justify-center px-0"
+                )}
+              >
+                <Key className={cn("w-4 h-4", !collapsed && "mr-2")} />
+                {!collapsed && t("password.security")}
+              </Button>
+            }
+          />
 
           <Button
             variant="ghost"

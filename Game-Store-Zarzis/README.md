@@ -5,12 +5,15 @@
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.0-3ecf8e)](https://supabase.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646cff)](https://vitejs.dev/)
+[![CI/CD](https://github.com/OmarABouajaja/Projects/actions/workflows/ci.yml/badge.svg)](https://github.com/OmarABouajaja/Projects/actions)
 
 **Modern, full-featured management system for gaming cafés and console rental stores.**
 
 Built with React + TypeScript + Supabase. Features real-time session tracking, inventory management, client loyalty system, and comprehensive analytics.
 
-> 🌟 **New:** Trilingual support (English, French, Arabic with full RTL), Premium glassmorphism UI, Real-time collaboration.
+> 🌐 **Live Demo:** [gamestorezarzis.com.tn](https://www.gamestorezarzis.com.tn/) | 🔧 **API:** [bck.gamestorezarzis.com.tn](https://bck.gamestorezarzis.com.tn/)
+
+> 🌟 **Features:** Trilingual support (EN/FR/AR with RTL), Premium glassmorphism UI, Real-time collaboration, PWA-ready
 
 ### 📚 [Read the User Guide (How to Use)](./GUIDE.md)
 
@@ -21,14 +24,14 @@ Built with React + TypeScript + Supabase. Features real-time session tracking, i
 <details>
 <summary>Click to view screenshots</summary>
 
-> **Note**: Screenshots will be added in the `docs/screenshots/` folder
+### Landing Page
+![Hero Section](docs/screenshots/hero.png)
 
-- Dashboard Overview
-- Session Management
-- Console Management  
-- Inventory & POS
-- Analytics & Reports
-- Client Portal
+### Expert Repair Services
+![Services Section](docs/screenshots/services.png)
+
+### Gaming Lounge
+![Gaming Zone](docs/screenshots/lounge.png)
 
 </details>
 
@@ -101,8 +104,8 @@ Get up and running in 5 minutes:
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/Start-Z/game-store-zarzis.git
-cd game-store-zarzis
+git clone https://github.com/OmarABouajaja/Projects.git
+cd Projects/Game-Store-Zarzis
 npm install
 ```
 
@@ -173,16 +176,30 @@ This system features a **Premium WoW** design aesthetic:
 
 ---
 
+## 🌐 Deployment
+
+This project is deployed using:
+
+| Service | Purpose | URL |
+|---------|---------|-----|
+| **Cloudflare Pages** | Frontend Hosting | [gamestorezarzis.com.tn](https://www.gamestorezarzis.com.tn/) |
+| **Render** | Backend API | [bck.gamestorezarzis.com.tn](https://bck.gamestorezarzis.com.tn/) |
+| **Supabase** | Database + Auth | PostgreSQL + Realtime |
+
+---
+
 ## 👨‍💻 Author
 
-**Built with ❤️ for Game Store Zarzis.**
+**Omar A. Bouajaja** — [GitHub](https://github.com/OmarABouajaja)
 
-For support or questions, please open an issue in the repository.
+Built with ❤️ for Game Store Zarzis, Tunisia.
 
 ---
 
 <div align="center">
 
 **🎮 Start managing your game store like a pro! 🎮**
+
+⭐ Star this repo if you find it useful!
 
 </div>

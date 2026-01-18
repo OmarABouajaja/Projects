@@ -15,6 +15,7 @@ export interface CreateStaffData {
     full_name: string;
     phone?: string;
     skip_email?: boolean;
+    lang?: string;
 }
 
 /**

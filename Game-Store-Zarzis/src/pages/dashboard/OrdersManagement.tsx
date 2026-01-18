@@ -167,6 +167,12 @@ const OrdersManagement = () => {
                                                                     <span className="capitalize">{order.delivery_method?.replace('_', ' ')}</span> <br />
                                                                     {order.delivery_address || "No address provided"}
                                                                 </div>
+                                                                <div className="md:col-span-2 pt-2 mt-2 border-t">
+                                                                    <span className="font-bold block text-primary mb-1">Order Notes & Client Info:</span>
+                                                                    <div className="p-3 bg-muted/40 rounded-lg text-xs whitespace-pre-wrap font-mono border">
+                                                                        {order.notes || "No additional notes"}
+                                                                    </div>
+                                                                </div>
                                                                 <div className="md:col-span-2 pt-2 mt-2 border-t flex justify-between items-center">
                                                                     <div>
                                                                         <span className="font-bold block text-primary">Payment Information:</span>

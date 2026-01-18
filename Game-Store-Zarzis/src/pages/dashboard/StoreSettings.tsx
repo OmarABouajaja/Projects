@@ -1623,7 +1623,7 @@ const StoreSettings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Truck className="w-5 h-5 text-primary" />
-                    Delivery Settings
+                    {t('settings.delivery.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1631,9 +1631,9 @@ const StoreSettings = () => {
                   <div className="space-y-4 border-b pb-6">
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                       <div className="space-y-0.5">
-                        <Label className="text-base">Rapid Post Delivery</Label>
+                        <Label className="text-base">{t('settings.delivery.rapid_post.title')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Enable nationwide delivery via Rapid Post.
+                          {t('settings.delivery.rapid_post.desc')}
                         </p>
                       </div>
                       <Switch
@@ -1647,7 +1647,7 @@ const StoreSettings = () => {
                     </div>
                     {localSettings.delivery_settings.rapid_post_enabled && (
                       <div className="pl-4 border-l-2 border-primary/20">
-                        <Label>Delivery Cost (DT)</Label>
+                        <Label>{t('settings.delivery.cost_label')}</Label>
                         <Input
                           type="number"
                           step="0.100"
@@ -1666,9 +1666,9 @@ const StoreSettings = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                       <div className="space-y-0.5">
-                        <Label className="text-base">Local Delivery (Zarzis)</Label>
+                        <Label className="text-base">{t('settings.delivery.local.title')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Enable same-day local delivery service.
+                          {t('settings.delivery.local.desc')}
                         </p>
                       </div>
                       <Switch
@@ -1682,7 +1682,7 @@ const StoreSettings = () => {
                     </div>
                     {localSettings.delivery_settings.local_delivery_enabled && (
                       <div className="pl-4 border-l-2 border-primary/20">
-                        <Label>Delivery Cost (DT)</Label>
+                        <Label>{t('settings.delivery.cost_label')}</Label>
                         <Input
                           type="number"
                           step="0.100"
@@ -1705,7 +1705,7 @@ const StoreSettings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-primary" />
-                    Payment Methods Configuration
+                    {t('settings.payments.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1713,9 +1713,9 @@ const StoreSettings = () => {
                   <div className="space-y-4 border-b pb-6">
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                       <div className="space-y-0.5">
-                        <Label className="text-base">D17 (Mobile App)</Label>
+                        <Label className="text-base">{t('settings.payments.d17.title')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Accept payments via the D17 mobile app.
+                          {t('settings.payments.d17.desc')}
                         </p>
                       </div>
                       <Switch
@@ -1729,9 +1729,9 @@ const StoreSettings = () => {
                     {localSettings.payment_methods_config?.d17?.enabled && (
                       <div className="pl-4 border-l-2 border-primary/20 space-y-3 animate-in fade-in slide-in-from-top-2">
                         <div className="space-y-2">
-                          <Label>D17 Account Details</Label>
+                          <Label>{t('settings.payments.d17.title')}</Label>
                           <Textarea
-                            placeholder="e.g., Send to Number: 22 333 444 (Name: Store Owner)"
+                            placeholder={t('settings.payments.d17.placeholder')}
                             value={localSettings.payment_methods_config?.d17?.details || ''}
                             onChange={(e) => updateSetting('payment_methods_config', {
                               ...localSettings.payment_methods_config,
@@ -1739,7 +1739,7 @@ const StoreSettings = () => {
                             })}
                             className="bg-background"
                           />
-                          <p className="text-[10px] text-muted-foreground">These details will be shown to clients at checkout.</p>
+                          <p className="text-[10px] text-muted-foreground">{t('checkout.payment.ref_info')}</p>
                         </div>
                       </div>
                     )}
@@ -1749,9 +1749,9 @@ const StoreSettings = () => {
                   <div className="space-y-4 border-b pb-6">
                     <div className="flex items-center justify-between p-4 border rounded-lg bg-muted/20">
                       <div className="space-y-0.5">
-                        <Label className="text-base">Bank Transfer (Virement)</Label>
+                        <Label className="text-base">{t('settings.payments.bank.title')}</Label>
                         <p className="text-sm text-muted-foreground">
-                          Enable direct bank transfers (RIB/IBAN).
+                          {t('settings.payments.bank.desc')}
                         </p>
                       </div>
                       <Switch
@@ -1765,9 +1765,9 @@ const StoreSettings = () => {
                     {localSettings.payment_methods_config?.bank_transfer?.enabled && (
                       <div className="pl-4 border-l-2 border-primary/20 space-y-3 animate-in fade-in slide-in-from-top-2">
                         <div className="space-y-2">
-                          <Label>RIB / IBAN Details</Label>
+                          <Label>{t('settings.payments.bank.title')}</Label>
                           <Textarea
-                            placeholder="e.g., RIB: 00 111 222222222222 33 (Bank: BIAT)"
+                            placeholder={t('settings.payments.bank.placeholder')}
                             value={localSettings.payment_methods_config?.bank_transfer?.details || ''}
                             onChange={(e) => updateSetting('payment_methods_config', {
                               ...localSettings.payment_methods_config,
@@ -1787,9 +1787,9 @@ const StoreSettings = () => {
                         <Banknote className="w-4 h-4 text-green-600" />
                       </div>
                       <div className="space-y-1">
-                        <p className="font-bold text-sm">Default Payment: Cash / Store</p>
+                        <p className="font-bold text-sm">{t('settings.payments.default.title')}</p>
                         <p className="text-xs text-muted-foreground">
-                          "Pay at Store" (for pickups) and "Cash on Delivery" are always enabled to ensure maximum reliability for your clients.
+                          {t('settings.payments.default.desc')}
                         </p>
                       </div>
                     </div>
@@ -1803,14 +1803,14 @@ const StoreSettings = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <LayoutDashboard className="w-5 h-5 text-primary" />
-                    Display & Interface
+                    {t('settings.display.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Tariff Display Mode */}
                   <div className="space-y-3">
-                    <Label className="text-base">Tariff Display Mode</Label>
-                    <p className="text-sm text-muted-foreground mb-2">Choose how game prices are displayed on the Gaming Lounge page.</p>
+                    <Label className="text-base">{t('settings.display.tariff.title')}</Label>
+                    <p className="text-sm text-muted-foreground mb-2">{t('settings.display.tariff.desc')}</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div
                         className={`cursor-pointer border rounded-lg p-4 hover:border-primary transition-all ${localSettings.tariff_display_mode === 'cards' ? 'border-primary ring-1 ring-primary bg-primary/5' : ''}`}
@@ -1821,8 +1821,8 @@ const StoreSettings = () => {
                           <div className="w-1/3 h-8 bg-muted-foreground/20 rounded"></div>
                           <div className="w-1/3 h-8 bg-muted-foreground/20 rounded"></div>
                         </div>
-                        <h4 className="font-bold">Cards (Default)</h4>
-                        <p className="text-xs text-muted-foreground">Visual cards with images.</p>
+                        <h4 className="font-bold">{t('settings.display.tariff.cards')}</h4>
+                        <p className="text-xs text-muted-foreground">{t('settings.display.tariff.cards_desc')}</p>
                       </div>
 
                       <div
@@ -1834,8 +1834,8 @@ const StoreSettings = () => {
                           <div className="w-full h-2 bg-muted-foreground/20 rounded"></div>
                           <div className="w-full h-2 bg-muted-foreground/20 rounded"></div>
                         </div>
-                        <h4 className="font-bold">Table</h4>
-                        <p className="text-xs text-muted-foreground">Clean, data-dense table.</p>
+                        <h4 className="font-bold">{t('settings.display.tariff.table')}</h4>
+                        <p className="text-xs text-muted-foreground">{t('settings.display.tariff.table_desc')}</p>
                       </div>
 
                       <div
@@ -1846,17 +1846,17 @@ const StoreSettings = () => {
                           <div className="w-1/2 h-full bg-muted-foreground/20 rounded"></div>
                           <div className="w-1/2 h-full bg-muted-foreground/20 rounded"></div>
                         </div>
-                        <h4 className="font-bold">Comparison</h4>
-                        <p className="text-xs text-muted-foreground">Side-by-side pricing.</p>
+                        <h4 className="font-bold">{t('settings.display.tariff.comparison')}</h4>
+                        <p className="text-xs text-muted-foreground">{t('settings.display.tariff.comparison_desc')}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="border-t pt-6 flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label className="text-base">Enable Help Tooltips</Label>
+                      <Label className="text-base">{t('settings.display.tooltips.title')}</Label>
                       <p className="text-sm text-muted-foreground">
-                        Show helpful question mark icons (?) with explanations throughout the dashboard.
+                        {t('settings.display.tooltips.desc')}
                       </p>
                     </div>
                     <Switch

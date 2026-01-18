@@ -22,6 +22,7 @@ class TIMEOUTS:
 class SendCodeRequest(BaseModel):
     identifier: str # Email or Phone
     type: str # 'email' or 'sms'
+    lang: Optional[str] = "fr"
 
 class VerifyCodeRequest(BaseModel):
     identifier: str
@@ -83,7 +84,7 @@ def send_verification_code(request: Request, body: SendCodeRequest):
 
     elif effective_type == 'email':
         from email_service import send_otp_email_alternative
-        sent = send_otp_email_alternative(request_data.identifier, code)
+        sent = send_otp_email_alternative(request_data.identifier, code, lang=request_data.lang or "fr")
     
     if sent:
         return {"success": True, "message": "Verification code sent"}

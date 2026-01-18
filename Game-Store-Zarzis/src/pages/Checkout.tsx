@@ -128,6 +128,8 @@ const Checkout = () => {
                 client_name: formData.name,
                 client_phone: formData.phone,
                 client_email: formData.email,
+                subtotal: cartTotal,
+                delivery_cost: deliveryCost,
                 total_amount: total,
                 items: items.map(item => ({
                     product_id: item.id,

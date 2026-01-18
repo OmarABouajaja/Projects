@@ -69,7 +69,7 @@ const ClientAuth = () => {
     const res = await fetch(`${API_URL}/verify/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, type })
+      body: JSON.stringify({ identifier, type, lang: language })
     });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));

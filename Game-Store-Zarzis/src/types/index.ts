@@ -333,6 +333,8 @@ export interface OrderFormData {
   client_name: string;
   client_phone: string;
   client_email?: string;
+  subtotal: number;
+  delivery_cost: number;
   total_amount: number;
   items: OrderItem[];
   delivery_method: 'pickup' | 'rapid_post' | 'local_delivery';

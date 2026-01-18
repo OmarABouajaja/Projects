@@ -29,11 +29,21 @@ SMTP_PASS = os.getenv("SMTP_PASS", "")
 # Store email for receiving notifications
 STORE_EMAIL = "game.store.zarzis@gmail.com"
 
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Redirection Settings
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://gamestorezarzis.com.tn")
+
 # Initialize MailerSend Client
 mailer = MailerSendClient(MAILERSEND_API_KEY) if MAILERSEND_API_KEY else None
 
 def send_email_core(subject: str, recipient_email: str, recipient_name: str, html_content: str, text_content: str) -> bool:
     """Core sending logic: Tries SDK first, then SMTP"""
+    logger.info(f"Attempting to send email to {recipient_email} with subject: {subject}")
     
     # 1. Try MailerSend SDK if API key exists
     if mailer:
@@ -49,9 +59,10 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
                 text=text_content
             )
             mailer.email.send(email_request)
+            logger.info(f"Email sent successfully via MailerSend SDK to {recipient_email}")
             return True
         except Exception as sdk_error:
-            # print(f"MailerSend SDK Failed: {sdk_error}. Falling back to SMTP...")
+            logger.error(f"MailerSend SDK Failed for {recipient_email}: {sdk_error}")
             pass
 
     # 2. Try SMTP
@@ -71,12 +82,13 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
                 server.starttls()
                 server.login(SMTP_USER, SMTP_PASS)
                 server.sendmail(FROM_EMAIL, recipient_email, msg.as_string())
-            # print(f"Email sent via SMTP to {recipient_email}")
+            logger.info(f"Email sent successfully via SMTP to {recipient_email}")
             return True
         except Exception as smtp_error:
-            # print(f"SMTP Failed: {smtp_error}")
+            logger.error(f"SMTP Failed for {recipient_email}: {smtp_error}")
             return False
             
+    logger.warning(f"No email delivery method configured for {recipient_email}")
     return False
 
 
@@ -271,33 +283,145 @@ def send_session_receipt(
     )
 
 
+# Translation Dictionary for Emails
+EMAIL_TRANSLATIONS = {
+    "staff_invite": {
+        "subject": {
+            "fr": "Invitation Staff - Game Store Zarzis",
+            "en": "Staff Invitation - Game Store Zarzis",
+            "ar": "دعوة موظف - Game Store Zarzis"
+        },
+        "welcome": {
+            "fr": "Bienvenue dans l'Équipe!",
+            "en": "Welcome to the Team!",
+            "ar": "مرحباً بك في الفريق!"
+        },
+        "greeting": {
+            "fr": "Bonjour!",
+            "en": "Hello!",
+            "ar": "مرحباً!"
+        },
+        "invite_text": {
+            "fr": "Vous avez été invité à rejoindre l'équipe Game Store Zarzis en tant que",
+            "en": "You have been invited to join the Game Store Zarzis team as",
+            "ar": "لقد تمت دعوتك للانضمام إلى فريق Game Store Zarzis بصفتك"
+        },
+        "credentials": {
+            "fr": "Voici vos identifiants de connexion:",
+            "en": "Here are your login credentials:",
+            "ar": "إليك بيانات تسجيل الدخول الخاصة بك:"
+        },
+        "temp_password": {
+            "fr": "Mot de passe temporaire:",
+            "en": "Temporary password:",
+            "ar": "كلمة المرور المؤقتة:"
+        },
+        "action_required": {
+            "fr": "Veuillez vous connecter sur le tableau de bord et changer votre mot de passe dès que possible.",
+            "en": "Please log in to the dashboard and change your password as soon as possible.",
+            "ar": "يرجى تسجيل الدخول إلى لوحة التحكم وتغيير كلمة المرور الخاصة بك في أقرب وقت ممكن."
+        },
+        "button": {
+            "fr": "Accéder au Dashboard",
+            "en": "Access Dashboard",
+            "ar": "الدخول إلى لوحة التحكم"
+        },
+        "roles": {
+            "owner": {"fr": "Propriétaire", "en": "Owner", "ar": "مالك"},
+            "worker": {"fr": "Employé", "en": "Staff", "ar": "موظف"}
+        }
+    },
+    "otp": {
+        "subject": {
+            "fr": "Votre Code de Vérification - Game Store Zarzis",
+            "en": "Your Verification Code - Game Store Zarzis",
+            "ar": "رمز التحقق الخاص بك - Game Store Zarzis"
+        },
+        "title": {
+            "fr": "Code de Vérification",
+            "en": "Verification Code",
+            "ar": "رمز التحقق"
+        },
+        "instruction": {
+            "fr": "Voici votre code pour accéder à votre compte:",
+            "en": "Here is your code to access your account:",
+            "ar": "إليك الرمز الخاص بك للوصول إلى حسابك:"
+        },
+        "expiry": {
+            "fr": "Ce code expire dans 10 minutes.",
+            "en": "This code expires in 10 minutes.",
+            "ar": "تنتهي صلاحية هذا الرمز خلال 10 دقائق."
+        }
+    },
+    "login_code": {
+        "subject": {
+            "fr": "Code de Connexion - Game Store Zarzis",
+            "en": "Login Code - Game Store Zarzis",
+            "ar": "رمز الدخول - Game Store Zarzis"
+        },
+        "title": {
+            "fr": "Connexion Sécurisée",
+            "en": "Secure Login",
+            "ar": "تسجيل دخول آمن"
+        },
+        "request_text": {
+            "fr": "Vous avez demandé à vous connecter.",
+            "en": "You have requested to log in.",
+            "ar": "لقد طلبت تسجيل الدخول."
+        },
+        "instruction": {
+            "fr": "Utilisez ce code unique pour vérifier votre identité :",
+            "en": "Use this unique code to verify your identity:",
+            "ar": "استخدم هذا الرمز الفريد للتحقق من هويتك:"
+        },
+        "expiry": {
+            "fr": "Ce code expire dans 10 minutes.",
+            "en": "This code expires in 10 minutes.",
+            "ar": "تنتهي صلاحية هذا الرمز خلال 10 دقائق."
+        },
+        "ignore_text": {
+            "fr": "Si vous n'avez pas demandé ce code, ignorez cet email.",
+            "en": "If you did not request this code, please ignore this email.",
+            "ar": "إذا لم تطلب هذا الرمز، يرجى تجاهل هذا البريد الإلكتروني."
+        }
+    }
+}
+
+
 def send_otp_email(
     to_email: str,
     otp_code: str,
+    lang: str = "fr"
 ) -> bool:
-    """Send OTP verification code"""
+    """Send OTP verification code in specific language"""
+    lang = lang if lang in ["fr", "en", "ar"] else "fr"
+    t = EMAIL_TRANSLATIONS["otp"]
+    is_rtl = lang == "ar"
+    align = "right" if is_rtl else "left"
+    direction = "rtl" if is_rtl else "ltr"
+
     html_content = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: {direction};">
         <div style="background: #333; padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Game Store Zarzis</h1>
         </div>
         <div style="padding: 40px; background: #f9f9f9; text-align: center;">
-            <h2 style="color: #333;">Code de Verification</h2>
-            <p style="font-size: 16px; color: #666;">Voici votre code pour acceder a votre compte:</p>
+            <h2 style="color: #333;">{t["title"][lang]}</h2>
+            <p style="font-size: 16px; color: #666;">{t["instruction"][lang]}</p>
             <div style="background: white; padding: 15px; margin: 20px auto; border-radius: 5px; font-size: 32px; letter-spacing: 5px; font-weight: bold; color: #333; display: inline-block; border: 2px solid #ddd;">
                 {otp_code}
             </div>
-            <p style="font-size: 14px; color: #999;">Ce code expire dans 10 minutes.</p>
+            <p style="font-size: 14px; color: #999;">{t["expiry"][lang]}</p>
         </div>
         <div style="padding: 15px; text-align: center; background: #333; color: white;">
             <p style="margin: 0;">Zarzis, Tunisie | Tel: 23 290 065</p>
         </div>
     </div>
     """
-    text_content = f"Votre code de verification est: {otp_code}. Il expire dans 10 minutes."
+    text_content = f"{t['instruction'][lang]} {otp_code}. {t['expiry'][lang]}"
     
     return send_email_core(
-        subject="Votre Code de Verification - Game Store Zarzis",
+        subject=t["subject"][lang],
         recipient_email=to_email,
         recipient_name="User",
         html_content=html_content,
@@ -309,29 +433,35 @@ def send_staff_invitation(
     email: str,
     role: str,
     password: str,
+    lang: str = "fr"
 ) -> bool:
-    """Send invitation to new staff member"""
-    role_name = "Proprietaire" if role == "owner" else "Employe"
+    """Send invitation to new staff member in specific language"""
+    lang = lang if lang in ["fr", "en", "ar"] else "fr"
+    t = EMAIL_TRANSLATIONS["staff_invite"]
+    role_name = t["roles"].get(role, t["roles"]["worker"])[lang]
+    is_rtl = lang == "ar"
+    align = "right" if is_rtl else "left"
+    direction = "rtl" if is_rtl else "ltr"
     
     html_content = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: {direction}; text-align: {align};">
         <div style="background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%); padding: 20px; text-align: center;">
-            <h1 style="color: #333; margin: 0;">Bienvenue dans l'Equipe!</h1>
+            <h1 style="color: #333; margin: 0;">{t["welcome"][lang]}</h1>
         </div>
         <div style="padding: 20px; background: #f9f9f9;">
-            <h2 style="color: #333;">Bonjour!</h2>
-            <p>Vous avez ete invite a rejoindre l'equipe Game Store Zarzis en tant que <strong>{role_name}</strong>.</p>
+            <h2 style="color: #333;">{t["greeting"][lang]}</h2>
+            <p>{t["invite_text"][lang]} <strong>{role_name}</strong>.</p>
             
-            <div style="background: white; padding: 20px; border-radius: 5px; border-left: 5px solid #FDB931; margin: 20px 0;">
-                <p style="margin-top: 0;">Voici vos identifiants de connexion:</p>
+            <div style="background: white; padding: 20px; border-radius: 5px; border-{align}: 5px solid #FDB931; margin: 20px 0;">
+                <p style="margin-top: 0;">{t["credentials"][lang]}</p>
                 <p><strong>Email:</strong> {email}</p>
-                <p><strong>Mot de passe temporaire:</strong> {password}</p>
+                <p><strong>{t["temp_password"][lang]}</strong> {password}</p>
             </div>
             
-            <p>Veuillez vous connecter sur le tableau de bord et changer votre mot de passe des que possible.</p>
+            <p>{t["action_required"][lang]}</p>
             
             <div style="text-align: center; margin-top: 30px;">
-                <a href="http://localhost:5173/staff" style="background: #333; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Acceder au Dashboard</a>
+                <a href="{FRONTEND_URL}/staff-login" style="background: #333; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">{t["button"][lang]}</a>
             </div>
         </div>
         <div style="padding: 15px; text-align: center; background: #333; color: white;">
@@ -339,10 +469,10 @@ def send_staff_invitation(
         </div>
     </div>
     """
-    text_content = f"Bienvenue! Vous avez ete invite en tant que {role_name}. Login: {email}, Password: {password}"
+    text_content = f"{t['welcome'][lang]}! {t['invite_text'][lang]} {role_name}. Login: {email}, Password: {password}"
     
     return send_email_core(
-        subject="Invitation Staff - Game Store Zarzis",
+        subject=t["subject"][lang],
         recipient_email=email,
         recipient_name="Nouveau Staff",
         html_content=html_content,
@@ -353,34 +483,41 @@ def send_staff_invitation(
 def send_otp_email_alternative(
     to_email: str,
     otp_code: str,
+    lang: str = "fr"
 ) -> bool:
-    """Send enhanced OTP verification code (SMS Replacement)"""
+    """Send enhanced OTP verification code (SMS Replacement) in specific language"""
+    lang = lang if lang in ["fr", "en", "ar"] else "fr"
+    t = EMAIL_TRANSLATIONS["login_code"]
+    is_rtl = lang == "ar"
+    align = "right" if is_rtl else "left"
+    direction = "rtl" if is_rtl else "ltr"
+
     html_content = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: {direction}; text-align: {align};">
         <div style="background: #333; padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Game Store Zarzis</h1>
         </div>
         <div style="padding: 40px; background: #f9f9f9; text-align: center;">
-            <h2 style="color: #333;">Connexion Sécurisée</h2>
-            <p style="font-size: 16px; color: #666;">Vous avez demande a vous connecter.</p>
-            <p style="font-size: 16px; color: #666;">Utilisez ce code unique pour verifier votre identite :</p>
+            <h2 style="color: #333;">{t["title"][lang]}</h2>
+            <p style="font-size: 16px; color: #666;">{t["request_text"][lang]}</p>
+            <p style="font-size: 16px; color: #666;">{t["instruction"][lang]}</p>
             
             <div style="background: white; padding: 20px; margin: 30px auto; border-radius: 8px; font-size: 36px; letter-spacing: 8px; font-weight: bold; color: #333; display: inline-block; border: 2px solid #3366ff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                 {otp_code}
             </div>
             
-            <p style="font-size: 14px; color: #999; margin-top: 20px;">Ce code expire dans 10 minutes.</p>
-            <p style="font-size: 12px; color: #aaa;">Si vous n'avez pas demande ce code, ignorez cet email.</p>
+            <p style="font-size: 14px; color: #999; margin-top: 20px;">{t["expiry"][lang]}</p>
+            <p style="font-size: 12px; color: #aaa;">{t["ignore_text"][lang]}</p>
         </div>
         <div style="padding: 15px; text-align: center; background: #333; color: white;">
             <p style="margin: 0;">Zarzis, Tunisie | Tel: 23 290 065</p>
         </div>
     </div>
     """
-    text_content = f"Votre code de connexion Game Store Zarzis est: {otp_code}. Expire dans 10 min."
+    text_content = f"{t['title'][lang]}: {otp_code}. {t['expiry'][lang]}"
     
     return send_email_core(
-        subject="Code de Connexion - Game Store Zarzis",
+        subject=t["subject"][lang],
         recipient_email=to_email,
         recipient_name="Client",
         html_content=html_content,

@@ -18,6 +18,7 @@ import {
 import { UserPlus, Key } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { createStaffMember, deleteStaffMember } from "@/services/adminService";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface StaffMember {
   id: string;
@@ -34,6 +35,7 @@ interface StaffMember {
 
 const StaffManagement = () => {
   const { user, isOwner, session } = useAuth();
+  const { t, language } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<StaffMember | null>(null);
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
@@ -135,8 +137,8 @@ const StaffManagement = () => {
         <DashboardLayout>
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-              <p className="text-muted-foreground">Only owners can manage staff.</p>
+              <h2 className="text-2xl font-bold mb-2">{t("accessDenied.title")}</h2>
+              <p className="text-muted-foreground">{t("accessDenied.message")}</p>
             </div>
           </div>
         </DashboardLayout>
@@ -159,8 +161,8 @@ const StaffManagement = () => {
         if (error) throw error;
 
         toast({
-          title: "✅ Rôle mis à jour",
-          description: `Le rôle de ${editingUser.email} a été modifié.`
+          title: t("staff.role_updated"),
+          description: t("staff.role_updated_desc", { email: editingUser.email })
         });
 
         // Refresh the list
@@ -176,7 +178,8 @@ const StaffManagement = () => {
           role: formData.role,
           full_name: formData.full_name || "Staff Member",
           phone: formData.phone,
-          skip_email: skipEmail
+          skip_email: skipEmail,
+          lang: language
         }, session?.access_token || "");
 
         // Copy password to clipboard
@@ -187,26 +190,26 @@ const StaffManagement = () => {
         }
 
         toast({
-          title: apiEmailSent ? "✅ Invitation envoyée par email" : "✅ Compte créé (Email en attente)",
+          title: apiEmailSent ? t("staff.invitation_sent") : t("staff.account_created"),
           description: (
             <div className="space-y-2">
               <p>
                 {apiEmailSent
-                  ? `L'invitation personnalisée a été envoyée à ${formData.email}.`
-                  : `Le compte a été créé, mais l'envoi de l'email a échoué. Utilisez le mot de passe ci-dessous.`}
+                  ? t("staff.invitation_sent") + ` à ${formData.email}.`
+                  : t("staff.account_created") + `. Utilisez le mot de passe ci-dessous.`}
               </p>
               <div className="bg-black/20 p-3 rounded-lg border border-primary/20">
-                <p className="text-xs text-muted-foreground mb-1">Mot de passe temporaire à donner au staff :</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("staff.temp_password_label")}</p>
                 <div className="flex items-center gap-2">
                   <code className="text-sm font-mono bg-black/30 px-2 py-1 rounded flex-1">{tempPassword}</code>
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(tempPassword);
-                      toast({ title: "📋 Copié!", description: "Mot de passe copié" });
+                      toast({ title: t("staff.copied"), description: t("staff.temp_password_label") });
                     }}
                     className="px-2 py-1 text-xs bg-primary/20 hover:bg-primary/30 rounded"
                   >
-                    Copier
+                    {t("staff.copy_button")}
                   </button>
                 </div>
               </div>
@@ -249,8 +252,8 @@ const StaffManagement = () => {
     // Prevent deleting yourself
     if (userId === user?.id) {
       toast({
-        title: "Action impossible",
-        description: "Vous ne pouvez pas vous supprimer vous-même.",
+        title: t("dashboard.to_process"),
+        description: t("staff.error_delete_self"),
         variant: "destructive"
       });
       return;
@@ -260,14 +263,14 @@ const StaffManagement = () => {
     const ownerCount = staffMembers.filter(m => m.role === 'owner').length;
     if (member.role === 'owner' && ownerCount <= 1) {
       toast({
-        title: "Action impossible",
-        description: "Il doit y avoir au moins un propriétaire.",
+        title: t("dashboard.to_process"),
+        description: t("staff.error_last_owner"),
         variant: "destructive"
       });
       return;
     }
 
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer ${member.email} du personnel ? Cette action est irréversible.`)) {
+    if (!window.confirm(t("staff.delete_confirm", { email: member.email }))) {
       return;
     }
 
@@ -278,8 +281,8 @@ const StaffManagement = () => {
       await deleteStaffMember(userId, session?.access_token || '');
 
       toast({
-        title: "🗑️ Membre supprimé",
-        description: `${member.email} a été entièrement supprimé (auth + profil). L'email peut être réutilisé.`
+        title: t("staff.delete_success"),
+        description: t("staff.delete_success_desc", { email: member.email })
       });
 
       // Refresh the list
@@ -314,9 +317,9 @@ const StaffManagement = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-display text-3xl font-bold mb-2">Gestion du Personnel</h1>
+              <h1 className="font-display text-3xl font-bold mb-2">{t("staff.title")}</h1>
               <p className="text-muted-foreground">
-                Gérez les comptes employés et leurs permissions d'accès
+                {t("staff.subtitle")}
               </p>
             </div>
             <div className="flex gap-2">
@@ -341,19 +344,19 @@ const StaffManagement = () => {
                     const data = await res.json();
 
                     toast({
-                      title: "Synchronisation réussie",
+                      title: t("staff.sync_success"),
                       description: `${data.synced_count} profils mis à jour.`
                     });
                     await fetchStaffMembers();
                   } catch (e) {
-                    toast({ title: "Erreur", description: "Échec de la synchronisation", variant: "destructive" });
+                    toast({ title: t("staff.sync_error"), description: t("staff.sync_error"), variant: "destructive" });
                   } finally {
                     setIsLoading(false);
                   }
                 }}
               >
                 <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Sync Data
+                {t("staff.sync_data")}
               </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -373,10 +376,10 @@ const StaffManagement = () => {
 
                     <DialogHeader className="relative mb-6">
                       <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                        {editingUser ? "Modifier le Rôle" : "Nouvel Invité"}
+                        {editingUser ? t("common.edit") : t("staff.add_button")}
                       </DialogTitle>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {editingUser ? "Ajustez les accès de votre collaborateur" : "Ajoutez un membre à votre équipe de choc"}
+                        {editingUser ? t("staff.role_updated_desc", { email: editingUser.email }) : t("staff.subtitle")}
                       </p>
                     </DialogHeader>
 
@@ -384,7 +387,7 @@ const StaffManagement = () => {
                       {/* Basic Info Section */}
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Adresse Email Professionnelle</Label>
+                          <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("staff.email_label")}</Label>
                           <div className="relative group/field">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
                             <Input
@@ -403,7 +406,7 @@ const StaffManagement = () => {
                         {!editingUser && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="full_name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nom Complet</Label>
+                              <Label htmlFor="full_name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("staff.full_name_label")}</Label>
                               <div className="relative group/field">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-primary transition-all duration-300" />
                                 <Input
@@ -416,7 +419,7 @@ const StaffManagement = () => {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Téléphone</Label>
+                              <Label htmlFor="phone" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("staff.phone_label")}</Label>
                               <div className="relative group/field">
                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/field:text-secondary transition-all duration-300" />
                                 <Input
@@ -435,7 +438,7 @@ const StaffManagement = () => {
                       {/* Role Selection Section */}
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sélection du Rôle</Label>
+                          <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("staff.role_selection")}</Label>
                           <Select
                             value={formData.role}
                             onValueChange={(value: "owner" | "worker") =>
@@ -449,13 +452,13 @@ const StaffManagement = () => {
                               <SelectItem value="worker" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
                                 <div className="flex items-center gap-2">
                                   <Shield className="w-4 h-4 opacity-50" />
-                                  <span>Employé (Caissier)</span>
+                                  <span>{t("staff.role_worker")}</span>
                                 </div>
                               </SelectItem>
                               <SelectItem value="owner" className="focus:bg-primary/20 focus:text-primary transition-colors cursor-pointer">
                                 <div className="flex items-center gap-2">
                                   <Crown className="w-4 h-4 opacity-50" />
-                                  <span>Propriétaire (Admin)</span>
+                                  <span>{t("staff.role_owner")}</span>
                                 </div>
                               </SelectItem>
                             </SelectContent>
@@ -473,9 +476,9 @@ const StaffManagement = () => {
                                 <Zap className="w-4 h-4 text-secondary" />
                               </div>
                               <div>
-                                <p className="font-bold text-sm mb-1">Employé (Standard)</p>
+                                <p className="font-bold text-sm mb-1">{t("staff.role_worker")}</p>
                                 <p className="text-xs text-muted-foreground leading-relaxed">
-                                  Accès aux opérations quotidiennes : sessions, ventes, clients et pointage.
+                                  {t("staff.role_worker_desc")}
                                 </p>
                               </div>
                             </div>
@@ -490,9 +493,9 @@ const StaffManagement = () => {
                                 <ShieldCheck className="w-4 h-4 text-primary" />
                               </div>
                               <div>
-                                <p className="font-bold text-sm mb-1">Propriétaire (Total)</p>
+                                <p className="font-bold text-sm mb-1">{t("staff.role_owner")}</p>
                                 <p className="text-xs text-muted-foreground leading-relaxed">
-                                  Contrôle absolu : configuration du magasin, finances et gestion d'équipe.
+                                  {t("staff.role_owner_desc")}
                                 </p>
                               </div>
                             </div>
@@ -508,7 +511,7 @@ const StaffManagement = () => {
                               className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary bg-black/50"
                             />
                             <label htmlFor="skipEmail" className="text-xs text-yellow-500 cursor-pointer select-none">
-                              Créer sans envoyer d'email
+                              {t("staff.skip_email")}
                             </label>
                           </div>
                         )}
@@ -522,7 +525,7 @@ const StaffManagement = () => {
                           disabled={isSubmitting}
                           className="hover:bg-white/10 rounded-xl px-6"
                         >
-                          Annuler
+                          {t("common.cancel")}
                         </Button>
                         <Button
                           type="submit"
@@ -535,19 +538,19 @@ const StaffManagement = () => {
                           {isSubmitting ? (
                             <>
                               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              <span>Traitement...</span>
+                              <span>{t("password.updating")}</span>
                             </>
                           ) : (
                             <>
                               {editingUser ? (
                                 <>
                                   <Edit className="w-4 h-4 mr-2" />
-                                  <span>Mettre à jour</span>
+                                  <span>{t("common.save")}</span>
                                 </>
                               ) : (
                                 <>
                                   <Send className="w-4 h-4 mr-2" />
-                                  <span>Envoyer l'Explosion !</span>
+                                  <span>{t("staff.add_button")}</span>
                                 </>
                               )}
                             </>
@@ -571,7 +574,7 @@ const StaffManagement = () => {
                     <p className="text-2xl font-bold text-primary">
                       {staffMembers.filter(s => s.role === 'owner').length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Propriétaires</p>
+                    <p className="text-sm text-muted-foreground">{t("staff.stats_owners")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -585,7 +588,7 @@ const StaffManagement = () => {
                     <p className="text-2xl font-bold text-secondary">
                       {staffMembers.filter(s => s.role === 'worker').length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Employés</p>
+                    <p className="text-sm text-muted-foreground">{t("staff.stats_workers")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -599,7 +602,7 @@ const StaffManagement = () => {
                     <p className="text-2xl font-bold text-accent">
                       {staffMembers.length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Total Personnel</p>
+                    <p className="text-sm text-muted-foreground">{t("staff.stats_total")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -615,7 +618,7 @@ const StaffManagement = () => {
                     <p className="text-2xl font-bold text-green-600">
                       {staffMembers.filter(s => s.last_sign_in).length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Actifs</p>
+                    <p className="text-sm text-muted-foreground">{t("staff.stats_active")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -627,7 +630,7 @@ const StaffManagement = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
-                Permissions et Rôles
+                {t("staff.permissions_title")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -638,16 +641,16 @@ const StaffManagement = () => {
                       <Crown className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-primary">Propriétaire (Owner)</h4>
-                      <p className="text-sm text-muted-foreground">Accès complet à toutes les fonctionnalités</p>
+                      <h4 className="font-semibold text-primary">{t("staff.role_owner")}</h4>
+                      <p className="text-sm text-muted-foreground">{t("staff.perm_owner_full")}</p>
                     </div>
                   </div>
                   <ul className="text-sm text-muted-foreground space-y-1 ml-13">
-                    <li>• Gestion du personnel</li>
-                    <li>• Configuration de la boutique</li>
-                    <li>• Gestion des prix et services</li>
-                    <li>• Accès aux statistiques complètes</li>
-                    <li>• Gestion du blog</li>
+                    <li>• {t("staff.perm_owner_l1")}</li>
+                    <li>• {t("staff.perm_owner_l2")}</li>
+                    <li>• {t("staff.perm_owner_l3")}</li>
+                    <li>• {t("staff.perm_owner_l4")}</li>
+                    <li>• {t("staff.perm_owner_l5")}</li>
                   </ul>
                 </div>
 
@@ -657,16 +660,16 @@ const StaffManagement = () => {
                       <User className="w-5 h-5 text-secondary" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-secondary">Employé (Worker)</h4>
-                      <p className="text-sm text-muted-foreground">Accès aux opérations quotidiennes</p>
+                      <h4 className="font-semibold text-secondary">{t("staff.role_worker")}</h4>
+                      <p className="text-sm text-muted-foreground">{t("staff.perm_worker_daily")}</p>
                     </div>
                   </div>
                   <ul className="text-sm text-muted-foreground space-y-1 ml-13">
-                    <li>• Gestion des sessions de jeu</li>
-                    <li>• Traitement des demandes de service</li>
-                    <li>• Gestion des ventes et clients</li>
-                    <li>• Pointage des horaires</li>
-                    <li>• Accès en lecture aux statistiques</li>
+                    <li>• {t("staff.perm_worker_l1")}</li>
+                    <li>• {t("staff.perm_worker_l2")}</li>
+                    <li>• {t("staff.perm_worker_l3")}</li>
+                    <li>• {t("staff.perm_worker_l4")}</li>
+                    <li>• {t("staff.perm_worker_l5")}</li>
                   </ul>
                 </div>
               </div>
@@ -675,12 +678,12 @@ const StaffManagement = () => {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm">
-                    <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">Considérations importantes</p>
+                    <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">{t("staff.important_considerations")}</p>
                     <ul className="text-blue-700 dark:text-blue-300 space-y-1 text-xs">
-                      <li>• Il doit toujours y avoir au moins un propriétaire dans le système</li>
-                      <li>• Les nouveaux membres reçoivent un email d'invitation avec instructions</li>
-                      <li>• Les rôles peuvent être modifiés à tout moment par un propriétaire</li>
-                      <li>• La suppression d'un membre est irréversible</li>
+                      <li>• {t("staff.consideration_1")}</li>
+                      <li>• {t("staff.consideration_2")}</li>
+                      <li>• {t("staff.consideration_3")}</li>
+                      <li>• {t("staff.consideration_4")}</li>
                     </ul>
                   </div>
                 </div>
@@ -692,7 +695,7 @@ const StaffManagement = () => {
           <div className="space-y-4">
             <h2 className="font-display text-xl font-bold flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Membres du Personnel
+              {t("staff.title")}
             </h2>
 
             {isLoading ? (
@@ -707,14 +710,13 @@ const StaffManagement = () => {
                 <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-primary/50" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Aucun membre du personnel</h3>
+                <h3 className="text-xl font-bold mb-2">{t("staff.no_staff")}</h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Invitez vos premiers employés pour commencer à gérer votre équipe.
-                  Ils pourront accéder aux fonctionnalités selon leur rôle.
+                  {t("staff.subtitle")}
                 </p>
                 <Button onClick={() => setIsDialogOpen(true)} size="lg">
                   <Plus className="w-5 h-5 mr-2" />
-                  Inviter le premier employé
+                  {t("staff.add_button")}
                 </Button>
               </div>
             ) : (
@@ -737,13 +739,13 @@ const StaffManagement = () => {
                               {member.id === user?.id && (
                                 <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
                                   <User className="w-3 h-3 mr-1" />
-                                  C'est vous
+                                  {t("staff.is_you")}
                                 </Badge>
                               )}
                               {member.is_invited && (
                                 <Badge variant="outline" className="text-xs">
                                   <Mail className="w-3 h-3 mr-1" />
-                                  Invité
+                                  {t("staff.invited")}
                                 </Badge>
                               )}
                             </div>
@@ -752,12 +754,12 @@ const StaffManagement = () => {
                                 {member.role === 'owner' ? (
                                   <>
                                     <Crown className="w-3 h-3" />
-                                    Propriétaire
+                                    {t("staff.role_owner")}
                                   </>
                                 ) : (
                                   <>
                                     <User className="w-3 h-3" />
-                                    Employé
+                                    {t("staff.role_worker")}
                                   </>
                                 )}
                               </Badge>
@@ -767,28 +769,28 @@ const StaffManagement = () => {
                               ) ? (
                                 <Badge className="flex items-center gap-1 bg-green-500/20 text-green-400 border-green-500/30">
                                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                  En ligne
+                                  {t("staff.active_now")}
                                 </Badge>
                               ) : (
                                 <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
                                   <div className="w-2 h-2 bg-gray-500 rounded-full" />
-                                  Hors ligne
+                                  {t("staff.offline")}
                                 </Badge>
                               )}
                               <span className="text-xs text-muted-foreground hidden sm:inline">
-                                Inscrit le {formatDate(member.created_at)}
+                                {t("staff.joined")} {formatDate(member.created_at)}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
                               {member.last_sign_in ? (
                                 <div className="flex items-center gap-1">
                                   <CheckCircle className="w-3 h-3 text-green-500" />
-                                  <span>Dernière activité: {formatDate(member.last_sign_in)}</span>
+                                  <span>{t("staff.last_login")}: {formatDate(member.last_sign_in)}</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-1">
                                   <Clock className="w-3 h-3 text-orange-500" />
-                                  <span>Jamais connecté</span>
+                                  <span>{t("staff.never_connected")}</span>
                                 </div>
                               )}
                             </div>
@@ -813,7 +815,7 @@ const StaffManagement = () => {
                             className="hover:bg-blue-50 hover:border-blue-300"
                           >
                             <Edit className="w-4 h-4" />
-                            <span className="hidden sm:inline ml-1">Modifier</span>
+                            <span className="hidden sm:inline ml-1">{t("common.edit")}</span>
                           </Button>
 
                           {/* Don't allow deleting yourself or the last owner */}
@@ -826,7 +828,7 @@ const StaffManagement = () => {
                               className="hover:bg-red-50 hover:border-red-300 text-red-600 hover:text-red-700"
                             >
                               <Trash2 className="w-4 h-4" />
-                              <span className="hidden sm:inline ml-1">Supprimer</span>
+                              <span className="hidden sm:inline ml-1">{t("common.delete")}</span>
                             </Button>
                           )}
                         </div>

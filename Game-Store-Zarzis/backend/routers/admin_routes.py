@@ -130,6 +130,7 @@ class CreateStaffRequest(BaseModel):
     phone: Optional[str] = None
     full_name: Optional[str] = "Staff Member"
     skip_email: bool = False
+    lang: str = "fr"
 
 
 @router.post("/staff")
@@ -219,7 +220,8 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
             email_sent = send_staff_invitation(
                 email=request_data.email,
                 role=request_data.role,
-                password=request_data.password
+                password=request_data.password,
+                lang=request_data.lang
             )
         
         return {
