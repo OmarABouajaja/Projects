@@ -349,6 +349,12 @@
     transform: translateY(-2px);
   }
 
+  .glass-panel {
+    @apply bg-card/50 backdrop-blur-xl border border-white/10;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%), var(--gradient-card);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
   .glossy-reflection {
     @apply relative overflow-hidden;
   }

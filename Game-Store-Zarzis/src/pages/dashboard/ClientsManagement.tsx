@@ -127,119 +127,15 @@ const ClientsManagement = () => {
                 {t("client.manage_desc")}
               </p>
             </div>
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="hero" className="w-full sm:w-auto neon-cyan-glow group">
-                  <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" />
-                  {t("client.add")}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="glass-card border-primary/30 max-w-[95vw] sm:max-w-md overflow-hidden p-0">
-                <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
-                <div className="p-6">
-                  <DialogHeader className="mb-6">
-                    <DialogTitle className="text-2xl font-display font-bold flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Plus className="w-5 h-5 text-primary" />
-                      </div>
-                      {t("client.add")}
-                    </DialogTitle>
-                  </DialogHeader>
-
-                  <div className="space-y-5">
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white/70">{t("client.full_name")}</Label>
-                      <div className="relative">
-                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
-                        <Input
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Ahmed Mansour"
-                          className="pl-10 h-10 sm:h-12 text-base font-medium relative z-0"
-                          style={{
-                            backgroundColor: '#18181b',
-                            borderColor: '#52525b',
-                            color: '#ffffff',
-                            opacity: 1
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white/70">{t("client.phone_number")} *</Label>
-                      <div className="relative">
-                        <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
-                        <Input
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="23 290 065"
-                          className="pl-10 h-10 sm:h-12 text-base font-mono relative z-0"
-                          style={{
-                            backgroundColor: '#18181b',
-                            borderColor: '#52525b',
-                            color: '#ffffff',
-                            opacity: 1
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white/70">{t("client.email_address")} ({t("common.optional") || "Optional"})</Label>
-                      <Input
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="client@email.com"
-                        type="email"
-                        className="h-10 sm:h-12 text-base relative z-0"
-                        style={{
-                          backgroundColor: '#18181b',
-                          borderColor: '#52525b',
-                          color: '#ffffff',
-                          opacity: 1
-                        }}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium text-white/70">Notes ({t("common.optional") || "Optional"})</Label>
-                      <Input
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="e.g. Favorite game: FIFA"
-                        className="h-10 sm:h-12 text-base relative z-0"
-                        style={{
-                          backgroundColor: '#18181b',
-                          borderColor: '#52525b',
-                          color: '#ffffff',
-                          opacity: 1
-                        }}
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <Button
-                        type="button"
-                        variant="hero"
-                        className="w-full h-12 text-lg font-bold neon-cyan-glow"
-                        onClick={handleCreateClient}
-                        disabled={createClient.isPending}
-                      >
-                        {createClient.isPending ? (
-                          <span className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            {t("common.processing") || "Processing..."}
-                          </span>
-                        ) : (
-                          t("client.add")
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button
+              variant="hero"
+              onClick={() => setIsCreateDialogOpen(true)}
+              onMouseEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className="w-full sm:w-auto neon-cyan-glow group"
+            >
+              <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform" />
+              {t("client.add")}
+            </Button>
           </div>
 
           {/* Stats */}
@@ -370,9 +266,116 @@ const ClientsManagement = () => {
               <p className="text-xl text-muted-foreground font-medium">{t("common.no_clients") || "No clients found"}</p>
             </div>
           )}
+
+          {/* Create Client Dialog */}
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogContent className="glass-panel border-primary/30 max-w-[95vw] sm:max-w-md overflow-hidden p-0">
+              <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
+              <div className="p-6">
+                <DialogHeader className="mb-6">
+                  <DialogTitle className="text-2xl font-display font-bold flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Plus className="w-5 h-5 text-primary" />
+                    </div>
+                    {t("client.add")}
+                  </DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white/70">{t("client.full_name")}</Label>
+                    <div className="relative">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Ahmed Mansour"
+                        className="pl-10 h-10 sm:h-12 text-base font-medium relative z-0"
+                        style={{
+                          backgroundColor: '#18181b',
+                          borderColor: '#52525b',
+                          color: '#ffffff',
+                          opacity: 1
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white/70">{t("client.phone_number")} *</Label>
+                    <div className="relative">
+                      <Plus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 z-10" />
+                      <Input
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="23 290 065"
+                        className="pl-10 h-10 sm:h-12 text-base font-mono relative z-0"
+                        style={{
+                          backgroundColor: '#18181b',
+                          borderColor: '#52525b',
+                          color: '#ffffff',
+                          opacity: 1
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white/70">{t("client.email_address")} ({t("common.optional") || "Optional"})</Label>
+                    <Input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="client@email.com"
+                      type="email"
+                      className="h-10 sm:h-12 text-base relative z-0"
+                      style={{
+                        backgroundColor: '#18181b',
+                        borderColor: '#52525b',
+                        color: '#ffffff',
+                        opacity: 1
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-white/70">Notes ({t("common.optional") || "Optional"})</Label>
+                    <Input
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="e.g. Favorite game: FIFA"
+                      className="h-10 sm:h-12 text-base relative z-0"
+                      style={{
+                        backgroundColor: '#18181b',
+                        borderColor: '#52525b',
+                        color: '#ffffff',
+                        opacity: 1
+                      }}
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="hero"
+                      className="w-full h-12 text-lg font-bold neon-cyan-glow"
+                      onClick={handleCreateClient}
+                      disabled={createClient.isPending}
+                    >
+                      {createClient.isPending ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          {t("common.processing") || "Processing..."}
+                        </span>
+                      ) : (
+                        t("client.add")
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
-
-
 
         {/* Redeem Points Dialog */}
         <Dialog open={isRedeemDialogOpen} onOpenChange={setIsRedeemDialogOpen}>
