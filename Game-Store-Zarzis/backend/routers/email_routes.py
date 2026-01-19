@@ -3,10 +3,12 @@ Email Routes for Game Store Zarzis API
 Provides endpoints for sending emails via MailerSend
 """
 
+import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 import secrets
+from services.supabase_client import get_supabase
 from email_service import (
     send_booking_confirmation,
     send_contact_form_notification,
@@ -15,6 +17,9 @@ from email_service import (
     send_staff_invitation,
     send_password_reset_email,
 )
+
+# Initialize Supabase client
+supabase = get_supabase()
 
 router = APIRouter(prefix="/email", tags=["Email"])
 
