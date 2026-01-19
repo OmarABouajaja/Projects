@@ -206,21 +206,25 @@ async def api_send_password_reset(request: PasswordResetRequest):
 
         return {
             "success": True, 
-            "message": "Password reset email sent"
+            "message": "DEBUG SUCCESS: Password reset email sent",
+            "debug_info": {
+                "link_generated": bool(recovery_url),
+                "email_service_success": success,
+                "email_target": request.email
+            }
         }
         
     except Exception as e:
         error_msg = str(e)
         print(f"Password Reset Error: {error_msg}")
         
-        return {
-            "success": True, 
-            "message": "If this email exists, a password reset link has been sent."
-        }
-
-        # Security Practice: Always return success to prevent email enumeration
-        # match logic...
-        # return {
-        #     "success": True, 
-        #     "message": "If this email exists, a password reset link has been sent."
-        # }
+        # DEBUG MODE: Exposing error to help user info
+        # Security Practice: Normally we return fake success, but we need to debug.
+        if "security purposes" in error_msg or "429" in error_msg or "Too Many Requests" in error_msg:
+             raise HTTPException(
+                 status_code=429, 
+                 detail="Too many requests. Please wait a few minutes before trying again."
+             )
+             
+        # Expose the real error
+        raise HTTPException(status_code=400, detail=f"DEBUG ERROR: {error_msg}")

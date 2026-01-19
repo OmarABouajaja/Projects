@@ -357,6 +357,11 @@ export const translations: Translations = {
   "common.date": { fr: "Date", en: "Date", ar: "التاريخ" },
   "common.cancel": { fr: "Annuler", en: "Cancel", ar: "إلغاء" },
   "common.add": { fr: "Ajouter", en: "Add", ar: "إضافة" },
+  "common.edit": { fr: "Modifier", en: "Edit", ar: "تعديل" },
+  "common.delete": { fr: "Supprimer", en: "Delete", ar: "حذف" },
+  "common.save": { fr: "Enregistrer", en: "Save", ar: "حفظ" },
+  "common.update": { fr: "Mettre à jour", en: "Update", ar: "تحديث" },
+  "common.confirm": { fr: "Confirmer", en: "Confirm", ar: "تأكيد" },
   "common.example": { fr: "Exemple", en: "Example", ar: "مثال" },
   "common.days.monday": { fr: "Lundi", en: "Monday", ar: "الاثنين" },
   "common.days.tuesday": { fr: "Mardi", en: "Tuesday", ar: "الثلاثاء" },
@@ -773,9 +778,7 @@ export const translations: Translations = {
   "products.success_delete": { fr: "Produit supprimé", en: "Product deleted", ar: "تم حذف المنتج" },
   "products.delete_confirm": { fr: "Êtes-vous sûr de vouloir supprimer ce produit ?", en: "Are you sure you want to delete this product?", ar: "هل أنت متأكد من حذف هذا المنتج؟" },
   "products.no_products": { fr: "Aucun produit trouvé.", en: "No products found.", ar: "لم يتم العثور على منتجات." },
-  "products.stock": { fr: "En Stock", en: "In Stock", ar: "في المخزن" },
   "products.out_of_stock": { fr: "Rupture de stock", en: "Out of Stock", ar: "نفاذ الكمية" },
-  "products.category": { fr: "Catégorie", en: "Category", ar: "الفئة" },
 
   // Expenses Management
   "expenses.title": { fr: "Charges & Dépenses", en: "Charges & Expenses", ar: "المصاريف والتكاليف" },
