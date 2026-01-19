@@ -205,15 +205,12 @@ async def api_send_password_reset(request: PasswordResetRequest):
         error_msg = str(e)
         print(f"Password Reset Error: {error_msg}")
         
+        # DEBUGGING: Reveal the error to the user
+        raise HTTPException(status_code=500, detail=f"Debug Error: {error_msg}")
+
         # Security Practice: Always return success to prevent email enumeration
-        # We only log the actual error internally
-        # If it's a configuration error (e.g. missing keys), we might want to know,
-        # but for "User not found", we DEFINITELY want to return success.
-        
-        # Check if it's a "User not found" error from Supabase
-        # Supabase/GoTrue typically raises an error if user doesn't exist
-        
-        return {
-            "success": True, 
-            "message": "If this email exists, a password reset link has been sent."
-        }
+        # match logic...
+        # return {
+        #     "success": True, 
+        #     "message": "If this email exists, a password reset link has been sent."
+        # }
