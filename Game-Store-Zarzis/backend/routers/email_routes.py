@@ -195,27 +195,19 @@ async def api_send_password_reset(request: PasswordResetRequest):
         # Code typically:
         recovery_url = res.properties.action_link
         
-        # DEBUG TEST: Return link immediately WITHOUT sending email
-        # This checks if the Supabase part works and if imports are correct.
+        success = send_password_reset_email(
+            to_email=request.email,
+            recovery_url=recovery_url,
+            lang=request.lang or "fr",
+        )
+        
+        if not success:
+            raise Exception("Email service returned False (Failed to send)")
+
         return {
             "success": True, 
-            "message": "DEBUG MODE: Link Generated. Check debug_url.",
-            "debug_url": recovery_url
+            "message": "Password reset email sent"
         }
-
-        # success = send_password_reset_email(
-        #     to_email=request.email,
-        #     recovery_url=recovery_url,
-        #     lang=request.lang or "fr",
-        # )
-        
-        # if not success:
-        #    raise Exception("Email service returned False (Failed to send)")
-
-        # return {
-        #    "success": True, 
-        #    "message": "Password reset email sent"
-        # }
         
     except Exception as e:
         error_msg = str(e)
