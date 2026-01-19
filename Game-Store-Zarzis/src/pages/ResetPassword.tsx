@@ -93,7 +93,24 @@ const ResetPassword = () => {
     const isRTL = lang === 'ar';
 
     useEffect(() => {
-        // Check for error in URL hash (Supabase returns errors this way)
+        // Handle PKCE Flow (code in query params) - New Default
+        const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get('code');
+
+        if (code) {
+            supabase.auth.exchangeCodeForSession(code).then(({ data, error }) => {
+                if (error) {
+                    console.error('Exchange code error:', error);
+                    setLinkError(error.message);
+                } else if (data.session) {
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            });
+            return;
+        }
+
+        // Handle Implicit Flow (tokens in hash) - Legacy/Fallback
         const hash = window.location.hash;
 
         if (hash) {
