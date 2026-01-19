@@ -201,6 +201,14 @@ async def api_send_password_reset(request: PasswordResetRequest):
             lang=request.lang or "fr",
         )
         
+        if not success:
+            raise Exception("Email service returned False (Failed to send)")
+
+        return {
+            "success": True, 
+            "message": "Password reset email sent"
+        }
+        
     except Exception as e:
         error_msg = str(e)
         print(f"Password Reset Error: {error_msg}")
