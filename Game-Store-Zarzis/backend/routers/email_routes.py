@@ -213,8 +213,10 @@ async def api_send_password_reset(request: PasswordResetRequest):
         error_msg = str(e)
         print(f"Password Reset Error: {error_msg}")
         
-        # DEBUGGING: Reveal the error to the user
-        raise HTTPException(status_code=500, detail=f"Debug Error: {error_msg}")
+        return {
+            "success": True, 
+            "message": "If this email exists, a password reset link has been sent."
+        }
 
         # Security Practice: Always return success to prevent email enumeration
         # match logic...
