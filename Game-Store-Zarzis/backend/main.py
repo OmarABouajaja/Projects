@@ -18,7 +18,7 @@ load_dotenv()
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 # Import routers
-from routers.email import router as email_router
+from routers.email_routes import router as email_router
 from routers.verification_routes import router as verification_router
 from routers.expenses_routes import router as expenses_router
 from routers.admin_routes import router as admin_router, diag_router as diag_router
