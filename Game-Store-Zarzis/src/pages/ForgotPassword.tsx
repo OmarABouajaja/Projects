@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Gamepad2, Mail, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import PSBackground from "@/components/PSBackground";
 
-// API URL - use environment variable or fallback
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+// API URL - ensure https:// prefix
+const rawApiUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+const API_BASE_URL = rawApiUrl.startsWith('http') ? rawApiUrl : `https://${rawApiUrl}`;
 
 // Get current language from localStorage
 const getLanguage = (): 'fr' | 'en' | 'ar' => {
