@@ -638,7 +638,7 @@ PASSWORD_RESET_TRANSLATIONS = {
 
 def send_password_reset_email(
     to_email: str,
-    reset_token: str,
+    recovery_url: str,
     lang: str = "fr"
 ) -> bool:
     """Send password reset email with magic link in specific language"""
@@ -648,7 +648,8 @@ def send_password_reset_email(
     align = "right" if is_rtl else "left"
     direction = "rtl" if is_rtl else "ltr"
     
-    reset_url = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+    # recovery_url is now passed directly from Supabase Admin API
+    reset_url = recovery_url
 
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; direction: {direction}; text-align: {align};">

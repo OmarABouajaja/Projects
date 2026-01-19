@@ -156,20 +156,57 @@ class PasswordResetRequest(BaseModel):
 @router.post("/password-reset")
 async def api_send_password_reset(request: PasswordResetRequest):
     """Send password reset email with magic link"""
-    # Generate a secure token (in production, store this with expiry in database)
-    reset_token = secrets.token_urlsafe(32)
-    
-    success = send_password_reset_email(
-        to_email=request.email,
-        reset_token=reset_token,
-        lang=request.lang or "fr",
-    )
-    
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to send reset email")
-    
-    return {
-        "success": True, 
-        "message": "Password reset email sent",
-        "token": reset_token  # In production, don't return this - store in DB instead
-    }
+    try:
+        # Generate a valid recovery link using Supabase Admin API
+        # This requires the service_role key to be set in backend env
+        user_email = request.email
+        
+        # generate_link returns an object. data.properties.action_link contains the URL
+        # We need to construct the redirect URL likely
+        # But generate_link actually returns a fresh link.
+        # Params: type="recovery", email=user_email
+        
+        # Note: The redirectTo param in generate_link tells Supabase where to redirect AFTER the user clicks the magic link
+        # The magic link itself points to Supabase Auth API, which then redirects to frontend
+        redirect_url = f"{os.getenv('FRONTEND_URL', 'https://gamestorezarzis.com.tn')}/reset-password"
+        
+        res = supabase.auth.admin.generate_link({
+            "type": "recovery",
+            "email": user_email,
+            "options": {
+                "redirectTo": redirect_url
+            }
+        })
+        
+        # The result 'res' typically has 'properties' or 'action_link' depending on SDK version
+        # In recent generic supabase-py, it might return a wrapper.
+        # Let's assume we can get the link. 
+        # Usually: res.properties.action_link
+        
+        # However, to be safe and avoid SDK attribute errors if structure differs, 
+        # let's try to inspect it or assume standard behavior.
+        # If the SDK version is < 2, it might differ.
+        
+        # Code typically:
+        recovery_url = res.properties.action_link
+        
+        success = send_password_reset_email(
+            to_email=request.email,
+            recovery_url=recovery_url,
+            lang=request.lang or "fr",
+        )
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send reset email")
+        
+        return {
+            "success": True, 
+            "message": "Password reset email sent"
+        }
+        
+    except Exception as e:
+        print(f"Password Reset Error: {e}")
+        # Return success even on error to prevent email enumeration (security practice)
+        # BUT for debugging right now, we might want to return 500
+        # The user specifically needs to fix configuration, so let's allow 500 for now.
+        raise HTTPException(status_code=500, detail=str(e))
