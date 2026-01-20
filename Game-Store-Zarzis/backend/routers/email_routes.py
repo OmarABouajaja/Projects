@@ -223,6 +223,9 @@ async def api_send_password_reset(request: PasswordResetRequest):
                  status_code=429, 
                  detail="Too many requests. Please wait a few minutes before trying again."
              )
-             
-        # Expose the real error
-        raise HTTPException(status_code=400, detail=f"DEBUG ERROR: {error_msg}")
+        
+        # Security Practice: Always return success to prevent email enumeration
+        return {
+            "success": True, 
+            "message": "If this email exists, a password reset link has been sent."
+        }
