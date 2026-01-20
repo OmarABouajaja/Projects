@@ -63,7 +63,7 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
             return True
         except Exception as sdk_error:
             logger.error(f"MailerSend SDK Failed for {recipient_email}: {sdk_error}")
-            pass
+            raise sdk_error # DEBUG MODE: Raise error to see why it failed
 
     # 2. Try SMTP
     if SMTP_USER and SMTP_PASS:

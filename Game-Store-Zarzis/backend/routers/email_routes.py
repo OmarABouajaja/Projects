@@ -218,8 +218,6 @@ async def api_send_password_reset(request: PasswordResetRequest):
         error_msg = str(e)
         print(f"Password Reset Error: {error_msg}")
         
-        # DEBUG MODE: Exposing error to help user info
-        # Security Practice: Normally we return fake success, but we need to debug.
         if "security purposes" in error_msg or "429" in error_msg or "Too Many Requests" in error_msg:
              raise HTTPException(
                  status_code=429, 
