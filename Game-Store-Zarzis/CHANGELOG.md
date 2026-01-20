@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-01-20
+
+### Added
+- **Forgot Password Flow** - Secure password reset via email for staff accounts
+- **Expanded Localization** - Full trilingual support for Products, Expenses, and Services management
+- **Mobile Polish** - Comprehensive UI responsiveness updates across all dashboard modules
+- **SEO Enhancements** - Optimized meta tags, sitemap, and Open Graph data
+
+### Changed
+- **Performance** - Improved bundle size and removed unused session management code
+- **UI Guidelines** - Standardized glassmorphism effects on authentication pages
+
+---
+
 ## [1.0.0] - 2026-01-13
 
 ### Added

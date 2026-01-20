@@ -22,6 +22,20 @@ Access the system using your staff credentials.
 *   **Owners** have full access to settings, financial reports, and staff management.
 *   **Staff** have access to daily operations (sessions, sales, clients) but restricted access to critical settings.
 
+### Forgot Password
+If you cannot remember your password:
+1.  Click **"Forgot Password?"** on the login screen.
+2.  Enter your registered email address.
+3.  Check your email inbox for a **reset link**.
+4.  Click the link and enter your new password twice to confirm.
+*   *Note:* Reset links expire after 24 hours for security.
+
+### Language Settings
+You can switch between **English**, **Français**, and **العربية** at any time:
+*   **Desktop:** Use the language selector in the bottom left of the sidebar.
+*   **Mobile:** Open the menu and tap the flag icon at the bottom.
+*   The system automatically handles RTL (Right-to-Left) layout for Arabic.
+
 ### Dashboard Overview
 The main dashboard provides a real-time snapshot of the store:
 *   **Active Sessions:** Number of consoles currently in use.

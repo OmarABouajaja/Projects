@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -56,18 +57,36 @@ const ResetPassword = () => {
 
         if (error) {
             toast.error(errorDescription?.replace(/\+/g, " ") || error);
-            // Delay redirect so user can read the error
             setTimeout(() => navigate('/staff-login'), 4000);
             return;
         }
 
-        if (!accessToken || type !== 'recovery') {
-            // Only redirect if we are SURE it's not a valid recovery link
-            // But we should be careful not to redirect valid other states
-            console.log("No recovery token found", { accessToken, type });
-            toast.error("Invalid or expired reset link");
-            setTimeout(() => navigate('/staff-login'), 4000);
-        }
+        const setupSession = async () => {
+            if (accessToken && type === 'recovery') {
+                // Explicitly set the session to ensure we are authenticated
+                // We try to get the refresh_token if available (implicit flow usually just has access_token)
+                const refreshToken = params.get('refresh_token');
+
+                const { error: sessionError } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken || "",
+                });
+
+                if (sessionError) {
+                    console.error("Failed to set session", sessionError);
+                    toast.error("Session expired or invalid. Please request a new link.");
+                    setTimeout(() => navigate('/staff-login'), 4000);
+                } else {
+                    // Session established successfully
+                }
+            } else {
+                // No recovery token found
+                toast.error("Invalid or expired reset link");
+                setTimeout(() => navigate('/staff-login'), 4000);
+            }
+        };
+
+        setupSession();
     }, [navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {

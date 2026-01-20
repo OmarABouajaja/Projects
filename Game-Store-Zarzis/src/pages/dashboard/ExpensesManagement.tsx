@@ -30,6 +30,7 @@ const ExpensesManagement = () => {
     const updateExpense = useUpdateExpense();
     const deleteExpense = useDeleteExpense();
     const { toast } = useToast();
+    const { t } = useLanguage();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingExpense, setEditingExpense] = useState<any>(null);
@@ -83,10 +84,10 @@ const ExpensesManagement = () => {
 
             if (editingExpense) {
                 await updateExpense.mutateAsync({ id: editingExpense.id, ...payload });
-                toast({ title: "✅ Success", description: "Expense updated" });
+                toast({ title: "✅ Success", description: t('expenses.success_update') });
             } else {
                 await createExpense.mutateAsync(payload);
-                toast({ title: "✅ Success", description: "Expense added" });
+                toast({ title: "✅ Success", description: t('expenses.success_add') });
             }
             setIsDialogOpen(false);
         } catch (error) {
@@ -95,9 +96,9 @@ const ExpensesManagement = () => {
     };
 
     const handleDelete = async (id: string) => {
-        if (confirm("Are you sure you want to delete this expense?")) {
+        if (confirm(t('expenses.delete_confirm'))) {
             await deleteExpense.mutateAsync(id);
-            toast({ title: "✅ Deleted", description: "Expense removed" });
+            toast({ title: "✅ Deleted", description: t('expenses.success_delete') });
         }
     };
 
@@ -150,11 +151,11 @@ const ExpensesManagement = () => {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="font-display text-3xl font-bold mb-2">Charges & Expenses</h1>
-                            <p className="text-muted-foreground">Manage operating costs. View: {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</p>
+                            <h1 className="font-display text-3xl font-bold mb-2">{t('expenses.title')}</h1>
+                            <p className="text-muted-foreground">{t('expenses.subtitle')}</p>
                         </div>
                         <Button onClick={handleOpenAdd} className="gap-2">
-                            <Plus className="w-4 h-4" /> Add Expense
+                            <Plus className="w-4 h-4" /> {t('expenses.add_button')}
                         </Button>
                     </div>
 
@@ -167,7 +168,7 @@ const ExpensesManagement = () => {
                                         <Wallet className="w-6 h-6 text-red-600" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-muted-foreground">Daily (This Month)</p>
+                                        <p className="text-sm font-medium text-muted-foreground">{t('expenses.daily_month')}</p>
                                         <p className="text-2xl font-bold">{totalDaily.toFixed(3)} DT</p>
                                     </div>
                                 </div>
@@ -181,7 +182,7 @@ const ExpensesManagement = () => {
                                         <CreditCard className="w-6 h-6 text-orange-600" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-muted-foreground">Monthly Fixed</p>
+                                        <p className="text-sm font-medium text-muted-foreground">{t('expenses.monthly_fixed')}</p>
                                         <p className="text-2xl font-bold">{totalMonthly.toFixed(3)} DT</p>
                                     </div>
                                 </div>
@@ -195,7 +196,7 @@ const ExpensesManagement = () => {
                                         <TrendingDown className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-muted-foreground">Total Yearly (Pro)</p>
+                                        <p className="text-sm font-medium text-muted-foreground">{t('expenses.total_yearly')}</p>
                                         <p className="text-2xl font-bold">{totalYearly.toFixed(3)} DT</p>
                                     </div>
                                 </div>
@@ -208,13 +209,13 @@ const ExpensesManagement = () => {
                             <div className="flex items-center justify-between">
                                 <CardTitle className="flex items-center gap-2">
                                     <Receipt className="w-5 h-5 text-primary" />
-                                    Expense List
+                                    {t('expenses.list_title')}
                                 </CardTitle>
                                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-[400px]">
                                     <TabsList className="grid w-full grid-cols-3">
-                                        <TabsTrigger value="daily">Daily</TabsTrigger>
-                                        <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                                        <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                                        <TabsTrigger value="daily">{t('expenses.tab_daily')}</TabsTrigger>
+                                        <TabsTrigger value="monthly">{t('expenses.tab_monthly')}</TabsTrigger>
+                                        <TabsTrigger value="yearly">{t('expenses.tab_yearly')}</TabsTrigger>
                                     </TabsList>
                                 </Tabs>
                             </div>
@@ -222,11 +223,11 @@ const ExpensesManagement = () => {
                         <CardContent>
                             <div className="space-y-4">
                                 {isLoading ? (
-                                    <div className="py-8 text-center text-muted-foreground text-sm">Loading expenses...</div>
+                                    <div className="py-8 text-center text-muted-foreground text-sm">{t('expenses.loading')}</div>
                                 ) : filteredExpenses && filteredExpenses.length > 0 ? (
                                     <div className="grid grid-cols-1 gap-4">
                                         {filteredExpenses.map((expense) => (
-                                            <div key={expense.id} className="flex items-center justify-between p-4 rounded-lg bg-black/20 border border-white/5 hover:bg-black/40 transition-colors">
+                                            <div key={expense.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-black/20 border border-white/5 hover:bg-black/40 transition-colors gap-3 sm:gap-0">
                                                 <div className="flex items-center gap-4">
                                                     <div className={`p-2 rounded-lg ${expense.category === 'yearly' ? 'bg-purple-500/20 text-purple-500' :
                                                         expense.category === 'monthly' ? 'bg-orange-500/20 text-orange-500' :
@@ -246,14 +247,14 @@ const ExpensesManagement = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
+                                                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0">
                                                     <span className="text-lg font-bold text-red-500">-{expense.amount.toFixed(3)} DT</span>
                                                     <div className="flex items-center gap-1">
-                                                        <Button size="sm" variant="ghost" onClick={() => handleOpenEdit(expense)}>
-                                                            <Pencil className="w-3 h-3" />
+                                                        <Button variant="ghost" className="h-9 w-9" onClick={() => handleOpenEdit(expense)}>
+                                                            <Pencil className="w-5 h-5" />
                                                         </Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => handleDelete(expense.id)} className="text-red-500 hover:text-red-400">
-                                                            <Trash2 className="w-3 h-3" />
+                                                        <Button variant="ghost" onClick={() => handleDelete(expense.id)} className="text-red-500 hover:text-red-400 h-9 w-9">
+                                                            <Trash2 className="w-5 h-5" />
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -263,7 +264,7 @@ const ExpensesManagement = () => {
                                 ) : (
                                     <div className="py-12 text-center">
                                         <Receipt className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-                                        <p className="text-muted-foreground text-sm">No expenses found for this category.</p>
+                                        <p className="text-muted-foreground text-sm">{t('expenses.no_expenses')}</p>
                                     </div>
                                 )}
                             </div>
@@ -274,42 +275,44 @@ const ExpensesManagement = () => {
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>{editingExpense ? "Edit Expense" : "Add New Expense"}</DialogTitle>
+                            <DialogTitle>{editingExpense ? t('expenses.edit_title') : t('expenses.add_title')}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-2">
                             <div className="space-y-2">
-                                <Label>Description</Label>
+                                <Label>{t('expenses.description')}</Label>
                                 <Input
-                                    placeholder="e.g., Monthly Rent, Electricity, Repair Parts"
+                                    placeholder={t('expenses.description_placeholder')}
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    className="text-base md:text-sm"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label>Amount (DT)</Label>
+                                    <Label>{t('expenses.amount')}</Label>
                                     <Input
                                         type="number"
                                         step="0.5"
                                         value={formData.amount}
                                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
+                                        className="text-base md:text-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Category</Label>
+                                    <Label>{t('expenses.category')}</Label>
                                     <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v })}>
                                         <SelectTrigger><SelectValue /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="daily">Daily / Regular</SelectItem>
-                                            <SelectItem value="monthly">Monthly Fixed</SelectItem>
-                                            <SelectItem value="yearly">Yearly</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value="daily">{t('expenses.cat_daily')}</SelectItem>
+                                            <SelectItem value="monthly">{t('expenses.cat_monthly')}</SelectItem>
+                                            <SelectItem value="yearly">{t('expenses.cat_yearly')}</SelectItem>
+                                            <SelectItem value="other">{t('expenses.cat_other')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label>Date</Label>
+                                <Label>{t('expenses.date')}</Label>
                                 <Input
                                     type="date"
                                     value={formData.date}
@@ -318,8 +321,8 @@ const ExpensesManagement = () => {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleSubmit}>Save Expense</Button>
+                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t('expenses.cancel')}</Button>
+                            <Button onClick={handleSubmit}>{t('expenses.save')}</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

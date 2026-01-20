@@ -29,12 +29,15 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-500/20 text-red-500 border-red-500/50",
 };
 
-const statusLabels: Record<string, string> = {
-  pending: "Pending",
-  in_progress: "In Progress",
-  waiting_parts: "Waiting Parts",
-  completed: "Completed",
-  cancelled: "Cancelled",
+const getStatusLabel = (status: string, t: any) => {
+  const labels: Record<string, string> = {
+    pending: t('status.pending'),
+    in_progress: t('status.in_progress'),
+    waiting_parts: t('status.waiting_parts'),
+    completed: t('status.completed'),
+    cancelled: t('status.cancelled'),
+  };
+  return labels[status] || status;
 };
 
 const ServicesManagement = () => {
@@ -244,16 +247,16 @@ const ServicesManagement = () => {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-3xl font-bold mb-1">Service Requests</h1>
+                <h1 className="font-display text-3xl font-bold mb-1">{t('services.management.title')}</h1>
                 <HelpTooltip content={t('help.services')} />
               </div>
               <p className="text-muted-foreground text-sm">
-                Manage repair and service requests
+                {t('services.management.subtitle')}
               </p>
             </div>
             <Button variant="hero" onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="w-4 h-4" />
-              New Request
+              {t('services.management.new_request')}
             </Button>
           </div>
 
@@ -270,21 +273,21 @@ const ServicesManagement = () => {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="requests">Requests List</TabsTrigger>
-              <TabsTrigger value="catalog">Catalog Editor</TabsTrigger>
+              <TabsTrigger value="requests">{t('services.management.requests_list')}</TabsTrigger>
+              <TabsTrigger value="catalog">{t('services.management.catalog_editor')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="requests" className="space-y-6">
               <div className="flex gap-2 flex-wrap">
                 {[
-                  { key: "all", label: "All" },
-                  { key: "active", label: "Active" },
-                  { key: "my_work", label: "My Work" },
-                  { key: "simple", label: "Simple" },
-                  ...(isOwner ? [{ key: "complex", label: "Complex" }] : []),
-                  { key: "pending", label: "Pending" },
-                  { key: "in_progress", label: "In Progress" },
-                  { key: "completed", label: "Completed" }
+                  { key: "all", label: t('status.all') },
+                  { key: "active", label: t('status.active') },
+                  { key: "my_work", label: t('status.my_work') },
+                  { key: "simple", label: t('status.simple') },
+                  ...(isOwner ? [{ key: "complex", label: t('status.complex') }] : []),
+                  { key: "pending", label: t('status.pending') },
+                  { key: "in_progress", label: t('status.in_progress') },
+                  { key: "completed", label: t('status.completed') }
                 ].map(({ key, label }) => (
                   <Button
                     key={key}
@@ -305,12 +308,12 @@ const ServicesManagement = () => {
                     className="glass-card rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-all group"
                     onClick={() => setSelectedRequest(request)}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0 w-full">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-semibold truncate max-w-[200px]">{getServiceName(request)}</h3>
+                          <h3 className="font-semibold truncate max-w-[200px] text-base">{getServiceName(request)}</h3>
                           <Badge className={statusColors[request.status] || "bg-gray-500/20 text-gray-500 border-gray-500/50"}>
-                            {statusLabels[request.status] || request.status}
+                            {getStatusLabel(request.status, t)}
                           </Badge>
                           {request.is_complex && (
                             <Badge variant="outline" className="text-[10px] uppercase border-secondary text-secondary">
@@ -332,8 +335,8 @@ const ServicesManagement = () => {
                           </div>
                         )}
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-[10px] text-muted-foreground mb-1">
+                      <div className="text-right shrink-0 w-full sm:w-auto flex flex-row sm:flex-col justify-between sm:justify-end items-center sm:items-end mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10">
+                        <p className="text-[10px] text-muted-foreground mb-0 sm:mb-1">
                           {request.created_at ? new Date(request.created_at).toLocaleDateString() : 'No date'}
                         </p>
                         {request.estimated_cost && (
@@ -347,7 +350,7 @@ const ServicesManagement = () => {
                 {filteredRequests.length === 0 && !isLoading && (
                   <div className="text-center py-16 glass-card rounded-2xl opacity-60">
                     <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-lg font-medium">No services found</p>
+                    <p className="text-lg font-medium">{t('services.management.no_services')}</p>
                     <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
                   </div>
                 )}
@@ -367,24 +370,23 @@ const ServicesManagement = () => {
                     <div>
                       <h2 className="text-xl font-bold flex items-center gap-2">
                         <Wrench className="w-5 h-5 text-primary" />
-                        Catalog Management
+                        {t('services.management.catalog_title')}
                       </h2>
-                      <p className="text-sm text-muted-foreground mt-0.5">Configure standard service types and pricing</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{t('services.management.catalog_desc')}</p>
                     </div>
                     <Button variant="hero" onClick={() => {
-                      setEditingCatalogItem(null);
                       setCatalogFormData({ name: "", name_fr: "", price: "", is_complex: false, image_url: "", category: "console" });
                       setIsCatalogDialogOpen(true);
                     }}>
                       <Plus className="w-4 h-4" />
-                      Add Template
+                      {t('services.management.add_template')}
                     </Button>
                   </div>
 
                   {servicesCatalog.length === 0 ? (
                     <div className="text-center py-16 glass-card rounded-2xl border-dashed border-2 border-border/50">
                       <Wrench className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-                      <p className="text-lg font-medium text-muted-foreground">No service templates yet</p>
+                      <p className="text-lg font-medium text-muted-foreground">{t('services.management.no_templates')}</p>
                       <p className="text-sm text-muted-foreground/60 mt-1">Create your first template to get started</p>
                       <Button
                         variant="outline"
@@ -395,7 +397,7 @@ const ServicesManagement = () => {
                           setIsCatalogDialogOpen(true);
                         }}
                       >
-                        <Plus className="w-4 h-4 mr-2" /> Create Template
+                        <Plus className="w-4 h-4 mr-2" /> {t('services.management.create_template')}
                       </Button>
                     </div>
                   ) : (
@@ -411,8 +413,8 @@ const ServicesManagement = () => {
                                 <CardTitle className="text-base font-bold truncate group-hover:text-primary transition-colors">{item.name_fr || item.name}</CardTitle>
                                 <Badge variant="outline" className="text-[9px] mt-1 uppercase tracking-wider">{item.category}</Badge>
                               </div>
-                              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => {
                                   setEditingCatalogItem(item);
                                   setCatalogFormData({
                                     name: item.name || "",
@@ -424,12 +426,12 @@ const ServicesManagement = () => {
                                   });
                                   setIsCatalogDialogOpen(true);
                                 }}>
-                                  <Edit className="w-3.5 h-3.5" />
+                                  <Edit className="w-5 h-5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                  className="h-9 w-9 text-destructive hover:bg-destructive/10"
                                   onClick={async () => {
                                     if (confirm(`Remove "${item.name_fr || item.name}" from catalog?`)) {
                                       try {
@@ -441,7 +443,7 @@ const ServicesManagement = () => {
                                     }
                                   }}
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-5 h-5" />
                                 </Button>
                               </div>
                             </div>
@@ -459,7 +461,7 @@ const ServicesManagement = () => {
                               </div>
                               {item.is_complex && (
                                 <Badge variant="secondary" className="text-[9px] bg-amber-500/15 text-amber-500 border-amber-500/20">
-                                  ⚡ Complex
+                                  ⚡ {t('services.management.complex_service')}
                                 </Badge>
                               )}
                             </div>
@@ -478,17 +480,17 @@ const ServicesManagement = () => {
         <Dialog open={isCatalogDialogOpen} onOpenChange={setIsCatalogDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>{editingCatalogItem ? "Edit Template" : "New Template"}</DialogTitle>
+              <DialogTitle>{editingCatalogItem ? t('services.management.edit_template') : t('services.management.create_template')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-xs">Name (EN)</Label>
-                  <Input value={catalogFormData.name} onChange={e => setCatalogFormData({ ...catalogFormData, name: e.target.value })} />
+                  <Input value={catalogFormData.name} onChange={e => setCatalogFormData({ ...catalogFormData, name: e.target.value })} className="text-base md:text-sm" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs">Name (FR)</Label>
-                  <Input value={catalogFormData.name_fr} onChange={e => setCatalogFormData({ ...catalogFormData, name_fr: e.target.value })} />
+                  <Input value={catalogFormData.name_fr} onChange={e => setCatalogFormData({ ...catalogFormData, name_fr: e.target.value })} className="text-base md:text-sm" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -518,8 +520,8 @@ const ServicesManagement = () => {
               <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
                 <Checkbox id="cat-complex-fixed" checked={catalogFormData.is_complex} onCheckedChange={v => setCatalogFormData({ ...catalogFormData, is_complex: !!v })} />
                 <div className="grid gap-0.5 leading-none">
-                  <Label htmlFor="cat-complex-fixed" className="text-sm font-medium">Complex Service</Label>
-                  <p className="text-[10px] text-muted-foreground">Requires owner verification</p>
+                  <Label htmlFor="cat-complex-fixed" className="text-sm font-medium">{t('services.management.complex_service')}</Label>
+                  <p className="text-[10px] text-muted-foreground">{t('services.management.complex_desc')}</p>
                 </div>
               </div>
               <Button className="w-full mt-2" onClick={async () => {
@@ -543,7 +545,7 @@ const ServicesManagement = () => {
                   toast({ title: "Operation failed", description: e.message, variant: "destructive" });
                 }
               }} disabled={updateService.isPending || createService.isPending}>
-                {editingCatalogItem ? "Save Changes" : "Create Template"}
+                {editingCatalogItem ? t('common.save_changes') : t('services.management.create_template')}
               </Button>
             </div>
           </DialogContent>
@@ -553,7 +555,7 @@ const ServicesManagement = () => {
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>New Service Request</DialogTitle>
+              <DialogTitle>{t('services.management.new_request')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
               <div className="space-y-3">
@@ -585,7 +587,7 @@ const ServicesManagement = () => {
                   <div className="p-4 border-2 border-dashed border-primary/20 rounded-xl space-y-3 bg-primary/5">
                     <div className="space-y-2">
                       <Label className="text-xs">Service Name</Label>
-                      <Input placeholder="e.g. PS5 HDMI" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} />
+                      <Input placeholder="e.g. PS5 HDMI" value={newServiceName} onChange={(e) => setNewServiceName(e.target.value)} className="text-base md:text-sm" />
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="new-complex" checked={isNewServiceComplex} onCheckedChange={(c) => setIsNewServiceComplex(!!c)} />
@@ -598,11 +600,11 @@ const ServicesManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Client Name *</Label>
-                  <Input value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} />
+                  <Input value={formData.client_name} onChange={(e) => setFormData({ ...formData, client_name: e.target.value })} className="text-base md:text-sm" />
                 </div>
                 <div className="space-y-2">
                   <Label>Phone</Label>
-                  <Input value={formData.client_phone} onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })} />
+                  <Input value={formData.client_phone} onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })} className="text-base md:text-sm" />
                 </div>
               </div>
 
@@ -629,7 +631,7 @@ const ServicesManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Est. Cost (DT)</Label>
-                  <Input type="number" step="0.5" value={formData.estimated_cost} onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })} />
+                  <Input type="number" step="0.5" value={formData.estimated_cost} onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })} className="text-base md:text-sm" />
                 </div>
                 <div className="space-y-2">
                   <Label>Priority</Label>
@@ -646,7 +648,7 @@ const ServicesManagement = () => {
               </div>
 
               <Button variant="hero" className="w-full" onClick={handleCreateRequest} disabled={createRequest.isPending}>
-                Create Service Request
+                {t('services.management.new_request')}
               </Button>
             </div>
           </DialogContent>
@@ -656,7 +658,7 @@ const ServicesManagement = () => {
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Request Details</DialogTitle>
+              <DialogTitle>{t('services.management.request_details')}</DialogTitle>
             </DialogHeader>
             {selectedRequest && (
               <div className="space-y-6 pt-4">
@@ -667,23 +669,23 @@ const ServicesManagement = () => {
                       <p className="text-xs text-muted-foreground">ID: {selectedRequest.id.slice(0, 8)}</p>
                     </div>
                     <Badge className={statusColors[selectedRequest.status] || ""}>
-                      {statusLabels[selectedRequest.status] || selectedRequest.status}
+                      {getStatusLabel(selectedRequest.status, t)}
                     </Badge>
                   </div>
 
                   <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm pt-2">
                     <div className="space-y-1">
-                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Client</p>
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">{t('services.management.client')}</p>
                       <p className="font-medium">{selectedRequest.client_name}</p>
                       <p className="text-xs">{selectedRequest.client_phone}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Device</p>
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">{t('services.management.device')}</p>
                       <p className="font-medium">{selectedRequest.device_brand || '---'} {selectedRequest.device_model || ''}</p>
                       <p className="text-xs">{selectedRequest.device_type || 'General'}</p>
                     </div>
                     <div className="col-span-2 space-y-1">
-                      <p className="text-muted-foreground text-[10px] uppercase font-bold">Problem</p>
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold">{t('services.management.problem')}</p>
                       <p className="italic underline decoration-primary/30 underline-offset-4">{selectedRequest.issue_description}</p>
                     </div>
                   </div>
@@ -691,7 +693,7 @@ const ServicesManagement = () => {
 
                 {!["completed", "cancelled"].includes(selectedRequest.status) && (
                   <div className="space-y-4">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Update Status</Label>
+                    <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('services.management.update_status')}</Label>
 
                     {selectedRequest.is_complex && !isOwner && (
                       <div className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 text-[10px] font-medium leading-tight">
@@ -706,7 +708,7 @@ const ServicesManagement = () => {
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                           disabled={selectedRequest.is_complex && !isOwner}
                         >
-                          {selectedRequest.is_complex && !isOwner ? "Awaiting Owner" : "Start Repair"}
+                          {selectedRequest.is_complex && !isOwner ? "Awaiting Owner" : t('services.management.start_repair')}
                         </Button>
                       )}
                       {selectedRequest.status === "in_progress" && (
@@ -715,14 +717,14 @@ const ServicesManagement = () => {
                             variant="outline"
                             onClick={() => handleStatusUpdate(selectedRequest.id, "waiting_parts")}
                           >
-                            Wait for Parts
+                            {t('services.management.wait_parts')}
                           </Button>
                           <Button
                             variant="hero"
                             onClick={() => handleStatusUpdate(selectedRequest.id, "completed", selectedRequest.estimated_cost)}
                             disabled={selectedRequest.is_complex && !isOwner}
                           >
-                            Complete Repair
+                            {t('services.management.complete_repair')}
                           </Button>
                         </>
                       )}
@@ -731,7 +733,7 @@ const ServicesManagement = () => {
                           className="col-span-2"
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                         >
-                          Resume Repair
+                          {t('services.management.resume_repair')}
                         </Button>
                       )}
                       <Button
@@ -739,7 +741,7 @@ const ServicesManagement = () => {
                         className="text-destructive hover:bg-destructive/10"
                         onClick={() => handleStatusUpdate(selectedRequest.id, "cancelled")}
                       >
-                        Cancel Request
+                        {t('services.management.cancel_request')}
                       </Button>
                     </div>
                   </div>

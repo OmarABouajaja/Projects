@@ -811,6 +811,44 @@ export const translations: Translations = {
   "expenses.delete_confirm": { fr: "Êtes-vous sûr de vouloir supprimer cette dépense ?", en: "Are you sure you want to delete this expense?", ar: "هل أنت متأكد من حذف هذا المصروف؟" },
   "expenses.description_placeholder": { fr: "Ex: Loyer mensuel, Électricité, Pièces de réparation", en: "e.g., Monthly Rent, Electricity, Repair Parts", ar: "مثال: الإيجار الشهري، الكهرباء، قطع الغيار" },
 
+  // Services Management
+  "services.management.title": { fr: "Demandes de Service", en: "Service Requests", ar: "طلبات الخدمة" },
+  "services.management.new_request": { fr: "Nouvelle Demande", en: "New Request", ar: "طلب جديد" },
+  "services.management.catalog_editor": { fr: "Éditeur Catalogue", en: "Catalog Editor", ar: "محرر الكتالوج" },
+  "services.management.requests_list": { fr: "Liste des Demandes", en: "Requests List", ar: "قائمة الطلبات" },
+  "services.management.catalog_title": { fr: "Gestion du Catalogue", en: "Catalog Management", ar: "إدارة الكتالوج" },
+  "services.management.catalog_desc": { fr: "Configurez les types de services standards et la tarification", en: "Configure standard service types and pricing", ar: "تكوين أنواع الخدمات القياسية والتسعير" },
+  "services.management.add_template": { fr: "Ajouter un Modèle", en: "Add Template", ar: "إضافة نموذج" },
+  "services.management.no_templates": { fr: "Aucun modèle de service pour le moment", en: "No service templates yet", ar: "لا توجد نماذج خدمات بعد" },
+  "services.management.create_template": { fr: "Créer un Modèle", en: "Create Template", ar: "إنشاء نموذج" },
+  "services.management.edit_template": { fr: "Modifier le Modèle", en: "Edit Template", ar: "تعديل النموذج" },
+  "services.management.complex_service": { fr: "Service Complexe", en: "Complex Service", ar: "خدمة معقدة" },
+  "services.management.complex_desc": { fr: "Nécessite une vérification par le propriétaire", en: "Requires owner verification", ar: "يتطلب تحقق من المالك" },
+  "services.management.subtitle": { fr: "Gérer les demandes de réparation et de service", en: "Manage repair and service requests", ar: "إدارة طلبات الإصلاح والخدمة" },
+  "services.management.no_services": { fr: "Aucun service trouvé", en: "No services found", ar: "لم يتم العثور على خدمات" },
+  "services.management.request_details": { fr: "Détails de la Demande", en: "Request Details", ar: "تفاصيل الطلب" },
+  "services.management.client": { fr: "Client", en: "Client", ar: "العميل" },
+  "services.management.device": { fr: "Appareil", en: "Device", ar: "الجهاز" },
+  "services.management.problem": { fr: "Problème", en: "Problem", ar: "المشكلة" },
+  "services.management.update_status": { fr: "Mettre à jour le statut", en: "Update Status", ar: "تحديث الحالة" },
+  "services.management.start_repair": { fr: "Commencer la réparation", en: "Start Repair", ar: "بدء الإصلاح" },
+  "services.management.complete_repair": { fr: "Terminer la réparation", en: "Complete Repair", ar: "إتمام الإصلاح" },
+  "services.management.wait_parts": { fr: "Attente de pièces", en: "Wait for Parts", ar: "انتظار قطع الغيار" },
+  "services.management.resume_repair": { fr: "Reprendre la réparation", en: "Resume Repair", ar: "استئناف الإصلاح" },
+  "services.management.cancel_request": { fr: "Annuler la demande", en: "Cancel Request", ar: "إلغاء الطلب" },
+
+  // Statuses
+  "status.all": { fr: "Tout", en: "All", ar: "الكل" },
+  "status.active": { fr: "Actif", en: "Active", ar: "نشط" },
+  "status.my_work": { fr: "Mon Travail", en: "My Work", ar: "عملي" },
+  "status.simple": { fr: "Simple", en: "Simple", ar: "بسيط" },
+  "status.complex": { fr: "Complexe", en: "Complex", ar: "معقد" },
+  "status.pending": { fr: "En attente", en: "Pending", ar: "قيد الانتظار" },
+  "status.in_progress": { fr: "En cours", en: "In Progress", ar: "جاري التنفيذ" },
+  "status.waiting_parts": { fr: "Attente pièces", en: "Waiting Parts", ar: "انتظار قطع" },
+  "status.completed": { fr: "Terminé", en: "Completed", ar: "مكتمل" },
+  "status.cancelled": { fr: "Annulé", en: "Cancelled", ar: "ملغى" },
+
   ...helpTranslations
 };
 

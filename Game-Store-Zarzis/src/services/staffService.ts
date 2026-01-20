@@ -1,7 +1,7 @@
-"""
-Alternative Staff Creation Service
-Uses client - side Supabase calls as fallback when backend admin API is unavailable
-"""
+/**
+ * Alternative Staff Creation Service
+ * Uses client-side Supabase calls as fallback when backend admin API is unavailable
+ */
 
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/hooks/use-toast';

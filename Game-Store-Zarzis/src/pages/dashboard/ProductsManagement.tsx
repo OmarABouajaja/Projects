@@ -166,7 +166,7 @@ const ProductsManagement = () => {
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingProduct ? "Edit Product" : "Add New Product"}
+                    {editingProduct ? t('products.edit_title') : t('products.add_title')}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -178,6 +178,7 @@ const ProductsManagement = () => {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder={t('products.name')}
                       required
+                      className="text-base md:text-sm"
                     />
                   </div>
                   <div>
@@ -186,13 +187,13 @@ const ProductsManagement = () => {
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Product description"
+                      placeholder={t('products.description_placeholder')}
                       rows={3}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="price">Price (DT)</Label>
+                      <Label htmlFor="price">{t('products.price_label')}</Label>
                       <Input
                         id="price"
                         type="number"
@@ -201,10 +202,11 @@ const ProductsManagement = () => {
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                         placeholder="0.000"
                         required
+                        className="text-base md:text-sm"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="stock">Stock Quantity</Label>
+                      <Label htmlFor="stock">{t('products.stock_label')}</Label>
                       <Input
                         id="stock"
                         type="number"
@@ -212,13 +214,14 @@ const ProductsManagement = () => {
                         onChange={(e) => setFormData({ ...formData, stock_quantity: e.target.value })}
                         placeholder="0"
                         required
+                        className="text-base md:text-sm"
                       />
                     </div>
                   </div>
 
                   {/* Product Type Selector */}
                   <div>
-                    <Label htmlFor="product_type">Product Type</Label>
+                    <Label htmlFor="product_type">{t('products.product_type')}</Label>
                     <Select
                       value={formData.product_type}
                       onValueChange={(value: 'physical' | 'consumable' | 'digital') =>
@@ -229,17 +232,17 @@ const ProductsManagement = () => {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="physical">🎮 Physical (E-commerce)</SelectItem>
-                        <SelectItem value="consumable">🍔 Consumable (In-Store Only)</SelectItem>
-                        <SelectItem value="digital">💾 Digital (Future)</SelectItem>
+                        <SelectItem value="physical">{t('products.type_physical')}</SelectItem>
+                        <SelectItem value="consumable">{t('products.type_consumable')}</SelectItem>
+                        <SelectItem value="digital">{t('products.type_digital')}</SelectItem>
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-1">
                       {formData.product_type === 'consumable'
-                        ? "🔒 Won't appear in online shop"
+                        ? t('products.type_desc_consumable')
                         : formData.product_type === 'digital'
-                          ? "📧 Delivered via email / dashboard"
-                          : "🌐 Available for e-commerce"}
+                          ? t('products.type_desc_digital')
+                          : t('products.type_desc_physical')}
                     </p>
                   </div>
 
@@ -322,16 +325,18 @@ const ProductsManagement = () => {
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       placeholder="e.g., Consumables, Gaming Accessories"
+                      className="text-base md:text-sm"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="image_url">Image URL</Label>
+                    <Label htmlFor="image_url">{t('products.image_url')}</Label>
                     <Input
                       id="image_url"
                       value={formData.image_url}
                       onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                       placeholder="https://example.com/image.jpg"
+                      className="text-base md:text-sm"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
@@ -339,7 +344,7 @@ const ProductsManagement = () => {
                       Cancel
                     </Button>
                     <Button type="submit">
-                      {editingProduct ? "Update" : "Create"} Product
+                      {editingProduct ? t('products.success_update') : t('products.success_create')}
                     </Button>
                   </div>
                 </form>
@@ -379,11 +384,11 @@ const ProductsManagement = () => {
             ) : products?.length === 0 ? (
               <div className="col-span-full text-center py-12">
                 <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-medium mb-2">No products yet</h3>
-                <p className="text-muted-foreground mb-4">Add your first product to get started</p>
+                <h3 className="text-lg font-medium mb-2">{t('products.no_products')}</h3>
+                <p className="text-muted-foreground mb-4">{t('products.add')} to get started</p>
                 <Button onClick={() => setIsDialogOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add First Product
+                  {t('products.add')}
                 </Button>
               </div>
             ) : (
@@ -421,8 +426,8 @@ const ProductsManagement = () => {
                       </div>
                       <div className="flex gap-1">
                         <Button
-                          size="sm"
                           variant="ghost"
+                          className="h-9 w-9"
                           onClick={() => {
                             setEditingProduct(product);
                             setFormData({
@@ -441,14 +446,14 @@ const ProductsManagement = () => {
                             setIsDialogOpen(true);
                           }}
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-5 h-5" />
                         </Button>
                         <Button
-                          size="sm"
                           variant="ghost"
+                          className="h-9 w-9 text-destructive hover:text-destructive/80"
                           onClick={() => handleDelete(product.id)}
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </Button>
                       </div>
                     </div>

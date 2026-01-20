@@ -882,25 +882,24 @@ const SessionsManagement = () => {
                     )}
                   </div>
 
-                  {/* Session Actions - Floating Absolute Position to ensure visibility */}
                   {isActive && session && (
-                    <div className="absolute bottom-2 left-2 right-2 py-1 px-2 bg-black/90 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-around shadow-2xl z-30 animate-in slide-in-from-bottom-2">
+                    <div className="absolute bottom-2 left-2 right-2 py-2 px-4 bg-black/95 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-around shadow-2xl z-30 animate-in slide-in-from-bottom-2">
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="ghost"
-                        className="h-8 w-8 p-0 rounded-full text-primary hover:bg-primary/20 hover:text-primary transition-colors"
+                        className="h-12 w-12 rounded-full text-primary hover:bg-primary/20 hover:text-primary transition-colors"
                         onClick={(e) => { e.stopPropagation(); openExtendDialog(session); }}
                         title="Extend Session"
                       >
-                        <Plus className="w-5 h-5" />
+                        <Plus className="w-6 h-6" />
                       </Button>
 
-                      <div className="w-px h-4 bg-white/20" />
+                      <div className="w-px h-8 bg-white/20" />
 
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="ghost"
-                        className="h-8 w-8 p-0 rounded-full text-secondary hover:bg-secondary/20 hover:text-secondary transition-colors"
+                        className="h-12 w-12 rounded-full text-secondary hover:bg-secondary/20 hover:text-secondary transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSessionForConsumption(session);
@@ -908,19 +907,19 @@ const SessionsManagement = () => {
                         }}
                         title="Add Consumption"
                       >
-                        <Utensils className="w-4 h-4" />
+                        <Utensils className="w-5 h-5" />
                       </Button>
 
-                      <div className="w-px h-4 bg-white/20" />
+                      <div className="w-px h-8 bg-white/20" />
 
                       <Button
-                        size="sm"
+                        size="icon"
                         variant="ghost"
-                        className="h-8 w-8 p-0 rounded-full text-destructive hover:bg-destructive/20 hover:text-destructive transition-colors"
+                        className="h-12 w-12 rounded-full text-destructive hover:bg-destructive/20 hover:text-destructive transition-colors"
                         onClick={(e) => { e.stopPropagation(); openEndDialog(session); }}
                         title="End Session"
                       >
-                        <Square className="w-4 h-4 fill-current" />
+                        <Square className="w-5 h-5 fill-current" />
                       </Button>
                     </div>
                   )}
@@ -967,6 +966,7 @@ const SessionsManagement = () => {
                   placeholder="e.g. FIFA 24, Maintenance check..."
                   value={gameNotes}
                   onChange={(e) => setGameNotes(e.target.value)}
+                  className="text-base md:text-sm"
                 />
               </div>
 
@@ -1251,11 +1251,13 @@ const SessionsManagement = () => {
                           placeholder="Client Name"
                           value={newClientName}
                           onChange={(e) => setNewClientName(e.target.value)}
+                          className="text-base md:text-sm"
                         />
                         <Input
                           placeholder="Phone Number"
                           value={newClientPhone}
                           onChange={(e) => setNewClientPhone(e.target.value)}
+                          className="text-base md:text-sm"
                         />
                       </div>
                     </div>

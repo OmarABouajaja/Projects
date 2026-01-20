@@ -278,7 +278,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">
                             {timeRange === 'today' ? t("dashboard.chart.net_profit_today") :
                               timeRange === 'weekly' ? t("dashboard.chart.net_profit_weekly") :
                                 timeRange === 'monthly' ? t("dashboard.chart.net_profit_monthly") : t("dashboard.chart.net_profit_yearly")}
@@ -308,7 +308,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.profit_margin")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.profit_margin")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-blue-600">
                             {summary.profit.margin.toFixed(1)}%
                           </p>
@@ -334,7 +334,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.active_clients")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.active_clients")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-purple-600">{clients?.length || 0}</p>
                           <div className="flex items-center mt-1">
                             <Users className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 mr-1" />
@@ -358,7 +358,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.top_product")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.top_product")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-orange-600 truncate">
                             {topProducts[0]?.name || t("common.cancel")}
                           </p>
@@ -386,7 +386,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.today_revenue")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.today_revenue")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-green-600">
                             {(todayStats?.total_revenue || 0).toFixed(3)} DT
                           </p>
@@ -412,7 +412,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.gaming_revenue")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.gaming_revenue")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-blue-600">
                             {(todayStats?.gaming_revenue || 0).toFixed(3)} DT
                           </p>
@@ -438,7 +438,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.available_consoles")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.available_consoles")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-purple-600">
                             {availableConsoles}/{totalConsoles}
                           </p>
@@ -466,7 +466,7 @@ Game Store Zarzis - Intelligence Business
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{t("dashboard.pending_services")}</p>
+                          <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.pending_services")}</p>
                           <p className="text-xl sm:text-2xl font-bold text-orange-600">
                             {pendingServices}
                           </p>

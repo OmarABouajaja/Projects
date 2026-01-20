@@ -148,5 +148,10 @@
         "fr": "Trop de tentatives. Veuillez réessayer dans quelques minutes.",
         "en": "Too many requests. Please try again in a few minutes.",
         "ar": "طلبات كثيرة جدا. يرجى المحاولة مرة أخرى في غضون دقائق قليلة."
+    },
+    "staff.processing": {
+        "fr": "Traitement en cours...",
+        "en": "Processing...",
+        "ar": "جار المعالجة..."
     }
 }

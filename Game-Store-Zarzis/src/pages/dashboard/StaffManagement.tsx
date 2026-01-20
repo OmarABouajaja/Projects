@@ -398,7 +398,7 @@ const StaffManagement = () => {
                               placeholder="employe@exemple.com"
                               required
                               disabled={!!editingUser}
-                              className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
+                              className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20 text-base md:text-sm"
                             />
                           </div>
                         </div>
@@ -414,7 +414,7 @@ const StaffManagement = () => {
                                   value={formData.full_name}
                                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                   placeholder="John Doe"
-                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20"
+                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 transition-all rounded-xl placeholder:text-white/20 text-base md:text-sm"
                                 />
                               </div>
                             </div>
@@ -427,7 +427,7 @@ const StaffManagement = () => {
                                   value={formData.phone}
                                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                   placeholder="23 456 789"
-                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-secondary/50 focus:ring-secondary/20 transition-all rounded-xl placeholder:text-white/20"
+                                  className="pl-10 h-12 bg-white/5 border-white/10 focus:border-secondary/50 focus:ring-secondary/20 transition-all rounded-xl placeholder:text-white/20 text-base md:text-sm"
                                 />
                               </div>
                             </div>
@@ -812,7 +812,7 @@ const StaffManagement = () => {
                               setIsDialogOpen(true);
                             }}
                             disabled={isSubmitting}
-                            className="hover:bg-blue-50 hover:border-blue-300"
+                            className="hover:bg-blue-50 hover:border-blue-300 h-10 sm:h-9"
                           >
                             <Edit className="w-4 h-4" />
                             <span className="hidden sm:inline ml-1">{t("common.edit")}</span>
@@ -825,7 +825,7 @@ const StaffManagement = () => {
                               variant="outline"
                               onClick={() => handleDelete(member.id)}
                               disabled={isSubmitting}
-                              className="hover:bg-red-50 hover:border-red-300 text-red-600 hover:text-red-700"
+                              className="hover:bg-red-50 hover:border-red-300 text-red-600 hover:text-red-700 h-10 sm:h-9"
                             >
                               <Trash2 className="w-4 h-4" />
                               <span className="hidden sm:inline ml-1">{t("common.delete")}</span>
