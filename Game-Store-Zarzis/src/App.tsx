@@ -25,8 +25,6 @@ const StaffAuth = lazyWithRetry(() => import("./pages/StaffAuth"));
 const ClientAuth = lazyWithRetry(() => import("./pages/ClientAuth"));
 const UserGuide = lazyWithRetry(() => import("./pages/UserGuide"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
-const ForgotPassword = lazyWithRetry(() => import("./pages/ForgotPassword"));
-const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const Checkout = lazyWithRetry(() => import("./pages/Checkout"));
 const TermsOfService = lazyWithRetry(() => import("./pages/TermsOfService"));
 const DeliveryConditions = lazyWithRetry(() => import("./pages/DeliveryConditions"));
@@ -139,8 +137,7 @@ const App = () => {
                             <Route path="/admin-portal" element={<StaffAuth />} />
                             {/* Keep legacy for internal ease but hidden from UI */}
                             <Route path="/staff-login" element={<StaffAuth />} />
-                            <Route path="/forgot-password" element={<ForgotPassword />} />
-                            <Route path="/reset-password" element={<ResetPassword />} />
+                            <Route path="/staff-login" element={<StaffAuth />} />
 
                             {/* Staff Dashboard Routes */}
                             {/* Hidden User Guide */}

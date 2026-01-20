@@ -366,12 +366,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors rounded-xl mb-1",
-                  collapsed && "justify-center px-0"
+                  "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors rounded-xl gap-3 px-3 py-2.5 h-auto",
+                  collapsed && "justify-center px-2"
                 )}
               >
-                <Key className={cn("w-4 h-4", !collapsed && "mr-2")} />
-                {!collapsed && t("password.security")}
+                <Key className="w-5 h-5 shrink-0" />
+                {(!collapsed || mobileOpen) && (
+                  <span className="text-sm tracking-wide">{t("password.security")}</span>
+                )}
               </Button>
             }
           />
@@ -379,13 +381,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors rounded-xl",
-              collapsed && "justify-center px-0"
+              "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors rounded-xl gap-3 px-3 py-2.5 h-auto",
+              collapsed && "justify-center px-2"
             )}
             onClick={handleSignOut}
           >
-            <LogOut className={cn("w-4 h-4", !collapsed && "mr-2")} />
-            {!collapsed && t("sidebar.sign_out")}
+            <LogOut className="w-5 h-5 shrink-0" />
+            {(!collapsed || mobileOpen) && (
+              <span className="text-sm tracking-wide">{t("sidebar.sign_out")}</span>
+            )}
           </Button>
         </div>
       </aside>

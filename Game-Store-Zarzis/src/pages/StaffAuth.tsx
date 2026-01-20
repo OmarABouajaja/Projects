@@ -123,14 +123,6 @@ const StaffAuth = () => {
                   )}
                 </button>
               </div>
-              <div className="flex justify-end mt-1">
-                <span
-                  onClick={() => navigate("/forgot-password")}
-                  className="text-xs text-primary hover:underline cursor-pointer"
-                >
-                  Forgot password?
-                </span>
-              </div>
             </div>
 
             <Button

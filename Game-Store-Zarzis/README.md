@@ -127,10 +127,12 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ### 3. Setup Database
 
 **Option A: Fresh Install (Recommended)**
-```sql
--- In Supabase SQL Editor, run:
-backend/migrations/CLEAN_INSTALL.sql
-```
+1. Open your project in the [Supabase Dashboard](https://supabase.com).
+2. Go to the **SQL Editor**.
+3. Copy and run the content of: [docs/database_schema.sql](docs/database_schema.sql)
+
+> [!TIP]
+> This script automatically sets up all 15 tables, RLS policies, and core functions. It also includes **Seed Data** (default consoles, pricing, and settings) so you can start testing immediately.
 
 ### 4. Create Owner Account
 
