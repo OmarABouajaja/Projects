@@ -363,34 +363,34 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           <PasswordChangeDialog
             trigger={
-              <Button
-                variant="ghost"
+              <button
                 className={cn(
-                  "w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors rounded-xl gap-3 px-3 py-2.5 h-auto",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden w-full text-left",
+                  "text-muted-foreground hover:bg-muted/60 hover:text-foreground hover:shadow-sm",
                   collapsed && "justify-center px-2"
                 )}
               >
-                <Key className="w-5 h-5 shrink-0" />
+                <Key className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
                 {(!collapsed || mobileOpen) && (
                   <span className="text-sm tracking-wide">{t("password.security")}</span>
                 )}
-              </Button>
+              </button>
             }
           />
 
-          <Button
-            variant="ghost"
+          <button
             className={cn(
-              "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors rounded-xl gap-3 px-3 py-2.5 h-auto",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative overflow-hidden w-full text-left",
+              "text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:shadow-sm",
               collapsed && "justify-center px-2"
             )}
             onClick={handleSignOut}
           >
-            <LogOut className="w-5 h-5 shrink-0" />
+            <LogOut className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
             {(!collapsed || mobileOpen) && (
               <span className="text-sm tracking-wide">{t("sidebar.sign_out")}</span>
             )}
-          </Button>
+          </button>
         </div>
       </aside>
 

@@ -244,6 +244,21 @@ CREATE TABLE public.store_settings (
     updated_by UUID REFERENCES auth.users
 );
 
+-- orders: Online and physical orders for products/services
+CREATE TABLE public.orders (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users, -- Optional for guest checkout
+    items JSONB NOT NULL, -- Array of items with qty, price, etc.
+    total_amount DECIMAL(12,3) NOT NULL,
+    delivery_method TEXT NOT NULL, -- 'pickup', 'rapid_post', 'local_delivery'
+    payment_method TEXT NOT NULL, -- 'cash', 'bank_transfer', 'd17', 'card'
+    payment_reference TEXT,
+    status TEXT DEFAULT 'pending' NOT NULL, -- 'pending', 'processing', 'completed', 'cancelled'
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+);
+
 -- daily_stats: Cached stats for reporting
 CREATE TABLE public.daily_stats (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -349,6 +364,7 @@ ALTER TABLE public.staff_shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_stats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Simple "everyone can read, staff can write" policies (Baseline)
 CREATE POLICY "Public Read" ON public.consoles FOR SELECT USING (true);
@@ -362,6 +378,11 @@ CREATE POLICY "Staff Full Access" ON public.clients FOR ALL USING (public.is_sta
 CREATE POLICY "Staff Full Access" ON public.gaming_sessions FOR ALL USING (public.is_staff(auth.uid()));
 CREATE POLICY "Staff Full Access" ON public.sales FOR ALL USING (public.is_staff(auth.uid()));
 CREATE POLICY "Staff Full Access" ON public.service_requests FOR ALL USING (public.is_staff(auth.uid()));
+CREATE POLICY "Staff Full Access" ON public.orders FOR ALL USING (public.is_staff(auth.uid()));
+
+-- Orders specific for clients: can read their own if user_id matches, anyone can place an order
+CREATE POLICY "Enable insert for everyone" ON public.orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "Clients can view own orders" ON public.orders FOR SELECT USING (auth.uid() = user_id);
 
 -- Owner Exclusive
 CREATE POLICY "Owner Full Access" ON public.expenses FOR ALL USING (public.has_role(auth.uid(), 'owner'));
