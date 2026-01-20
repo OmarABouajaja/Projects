@@ -68,69 +68,92 @@ const PasswordChangeDialog = ({ trigger }: PasswordChangeDialogProps) => {
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[400px] glass-card">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Key className="w-5 h-5 text-primary" />
-                        {t("password.change_title")}
-                    </DialogTitle>
-                </DialogHeader>
+            <DialogContent className="glass-panel border-primary/30 max-w-[95vw] sm:max-w-[400px] overflow-hidden p-0 !translate-x-[-50%] !translate-y-[-50%]">
+                <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
+                <div className="p-6">
+                    <DialogHeader className="mb-6">
+                        <DialogTitle className="text-2xl font-display font-bold flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                                <Key className="w-5 h-5 text-primary" />
+                            </div>
+                            {t("password.change_title")}
+                        </DialogTitle>
+                    </DialogHeader>
 
-                <form onSubmit={handlePasswordChange} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="new-password">{t("password.new_password")}</Label>
-                        <Input
-                            id="new-password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            className="bg-white/5"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="confirm-password">{t("password.confirm_password")}</Label>
-                        <Input
-                            id="confirm-password"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="••••••••"
-                            required
-                            className="bg-white/5"
-                        />
-                    </div>
-
-                    {error && (
-                        <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            {error}
+                    <form onSubmit={handlePasswordChange} className="space-y-5">
+                        <div className="space-y-2">
+                            <Label htmlFor="new-password" className="text-sm font-medium text-white/70">{t("password.new_password")}</Label>
+                            <Input
+                                id="new-password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className="h-10 sm:h-12 text-base relative z-0"
+                                style={{
+                                    backgroundColor: '#18181b',
+                                    borderColor: '#52525b',
+                                    color: '#ffffff',
+                                    opacity: 1
+                                }}
+                            />
                         </div>
-                    )}
 
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setIsOpen(false)}
-                            disabled={isLoading}
-                        >
-                            {t("common.cancel")}
-                        </Button>
-                        <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90">
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                    {t("password.updating")}
-                                </>
-                            ) : (
-                                t("settings.saveShort")
-                            )}
-                        </Button>
-                    </div>
-                </form>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirm-password" className="text-sm font-medium text-white/70">{t("password.confirm_password")}</Label>
+                            <Input
+                                id="confirm-password"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                className="h-10 sm:h-12 text-base relative z-0"
+                                style={{
+                                    backgroundColor: '#18181b',
+                                    borderColor: '#52525b',
+                                    color: '#ffffff',
+                                    opacity: 1
+                                }}
+                            />
+                        </div>
+
+                        {error && (
+                            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" />
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setIsOpen(false)}
+                                disabled={isLoading}
+                                className="flex-1"
+                            >
+                                {t("common.cancel")}
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="hero"
+                                disabled={isLoading}
+                                className="flex-1 h-11 neon-cyan-glow"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        {t("password.updating")}
+                                    </>
+                                ) : (
+                                    t("settings.saveShort")
+                                )}
+                            </Button>
+                        </div>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     );
