@@ -3,9 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Gamepad2, Monitor } from "lucide-react";
 import { memo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ConsoleCounter = () => {
   const { consoles } = useData();
+  const { dir } = useLanguage();
+  const isRTL = dir === 'rtl';
 
   const ps4Available = consoles.filter(c => c.console_type.toLowerCase() === 'ps4' && c.status === 'available').length;
   const ps5Available = consoles.filter(c => c.console_type.toLowerCase() === 'ps5' && c.status === 'available').length;
@@ -15,7 +18,7 @@ const ConsoleCounter = () => {
   if (totalConsoles === 0) return null;
 
   return (
-    <div className="fixed top-20 right-4 z-50 hidden md:block">
+    <div className={`fixed top-20 z-50 hidden md:block ${isRTL ? 'left-4' : 'right-4'}`}>
       <Card className="glass-card border-primary/30 shadow-[0_8px_24px_hsl(var(--primary)/0.2)]">
         <CardContent className="p-4">
           <div className="text-center space-y-3">
@@ -60,5 +63,6 @@ const ConsoleCounter = () => {
     </div>
   );
 };
+
 
 export default memo(ConsoleCounter);

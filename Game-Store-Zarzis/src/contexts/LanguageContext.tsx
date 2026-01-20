@@ -797,6 +797,14 @@ export const translations: Translations = {
   "expenses.edit_title": { fr: "Modifier la dépense", en: "Edit Expense", ar: "تعديل المصروف" },
   "expenses.description": { fr: "Description", en: "Description", ar: "الوصف" },
   "expenses.amount": { fr: "Montant (DT)", en: "Amount (DT)", ar: "المبلغ (د.ت)" },
+  // Common
+  "common.save_changes": { fr: "Enregistrer", en: "Save Changes", ar: "حفظ التغييرات" },
+  "common.cancel": { fr: "Annuler", en: "Cancel", ar: "إلغاء" },
+  "common.delete": { fr: "Supprimer", en: "Delete", ar: "حذف" },
+  "common.edit": { fr: "Modifier", en: "Edit", ar: "تعديل" },
+
+  // Expenses Management
+  "expenses.management.title": { fr: "Gestion des Dépenses", en: "Expenses Management", ar: "إدارة المصاريف" },
   "expenses.category": { fr: "Catégorie", en: "Category", ar: "الفئة" },
   "expenses.date": { fr: "Date", en: "Date", ar: "التاريخ" },
   "expenses.cat_daily": { fr: "Journalier / Régulier", en: "Daily / Regular", ar: "يومي / دوري" },
