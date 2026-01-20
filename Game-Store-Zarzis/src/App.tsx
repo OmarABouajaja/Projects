@@ -22,6 +22,7 @@ import OfflineIndicator from "@/components/OfflineIndicator";
 const Index = lazyWithRetry(() => import("./pages/Index"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const StaffAuth = lazyWithRetry(() => import("./pages/StaffAuth"));
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const ClientAuth = lazyWithRetry(() => import("./pages/ClientAuth"));
 const UserGuide = lazyWithRetry(() => import("./pages/UserGuide"));
 const AuthCallback = lazyWithRetry(() => import("./pages/AuthCallback"));
@@ -137,7 +138,7 @@ const App = () => {
                             <Route path="/admin-portal" element={<StaffAuth />} />
                             {/* Keep legacy for internal ease but hidden from UI */}
                             <Route path="/staff-login" element={<StaffAuth />} />
-                            <Route path="/staff-login" element={<StaffAuth />} />
+                            <Route path="/reset-password" element={<ResetPassword />} />
 
                             {/* Staff Dashboard Routes */}
                             {/* Hidden User Guide */}

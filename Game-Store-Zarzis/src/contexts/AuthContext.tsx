@@ -14,6 +14,8 @@ interface AuthContextType {
   isOwner: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
   clockIn: () => Promise<void>;
   clockOut: () => Promise<void>;
   isClockedIn: boolean;
@@ -428,6 +430,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error as Error | null };
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      return { error: error as Error | null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (!error) {
+        // Optionally sign out user to force re-login with new password
+        // await signOut();
+      }
+
+      return { error: error as Error | null };
+    } catch (err) {
+      return { error: err as Error };
+    }
+  };
+
   const signOut = async () => {
     await clockOut();
     await supabase.auth.signOut();
@@ -443,6 +474,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     isOwner: role === "owner",
     signIn,
     signOut,
+    resetPassword,
+    updatePassword,
     clockIn,
     clockOut,
     isClockedIn,

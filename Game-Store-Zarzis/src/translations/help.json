@@ -63,5 +63,90 @@
         "fr": "Commencer",
         "en": "Get Started",
         "ar": "يبدأ"
+    },
+    "auth.forgotPassword": {
+        "fr": "Mot de passe oublié ?",
+        "en": "Forgot Password?",
+        "ar": "هل نسيت كلمة السر؟"
+    },
+    "auth.resetPassword": {
+        "fr": "Réinitialiser le mot de passe",
+        "en": "Reset Password",
+        "ar": "إعادة تعيين كلمة المرور"
+    },
+    "auth.resetPasswordTitle": {
+        "fr": "Réinitialisation du mot de passe",
+        "en": "Password Reset",
+        "ar": "إعادة تعيين كلمة المرور"
+    },
+    "auth.resetPasswordDesc": {
+        "fr": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+        "en": "Enter your email address and we'll send you a link to reset your password.",
+        "ar": "أدخل عنوان بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور الخاصة بك."
+    },
+    "auth.sendResetLink": {
+        "fr": "Envoyer le lien",
+        "en": "Send Reset Link",
+        "ar": "إرسال رابط إعادة التعيين"
+    },
+    "auth.backToLogin": {
+        "fr": "← Retour à la connexion",
+        "en": "← Back to Login",
+        "ar": "→ العودة إلى تسجيل الدخول"
+    },
+    "auth.resetEmailSent": {
+        "fr": "E-mail envoyé !",
+        "en": "Email Sent!",
+        "ar": "تم إرسال البريد الإلكتروني!"
+    },
+    "auth.resetEmailSentDesc": {
+        "fr": "Si un compte existe avec cet e-mail, vous recevrez un lien de réinitialisation dans quelques minutes. Vérifiez votre boîte de réception.",
+        "en": "If an account exists with this email, you'll receive a password reset link within a few minutes. Please check your inbox.",
+        "ar": "إذا كان هناك حساب بهذا البريد الإلكتروني، فستتلقى رابط إعادة تعيين كلمة المرور في غضون دقائق قليلة. يرجى التحقق من صندوق الوارد الخاص بك."
+    },
+    "auth.newPassword": {
+        "fr": "Nouveau mot de passe",
+        "en": "New Password",
+        "ar": "كلمة المرور الجديدة"
+    },
+    "auth.confirmNewPassword": {
+        "fr": "Confirmer le mot de passe",
+        "en": "Confirm Password",
+        "ar": "تأكيد كلمة المرور"
+    },
+    "auth.updatePassword": {
+        "fr": "Mettre à jour le mot de passe",
+        "en": "Update Password",
+        "ar": "تحديث كلمة المرور"
+    },
+    "auth.passwordUpdated": {
+        "fr": "Mot de passe mis à jour avec succès !",
+        "en": "Password updated successfully!",
+        "ar": "تم تحديث كلمة المرور بنجاح!"
+    },
+    "auth.passwordsMustMatch": {
+        "fr": "Les mots de passe doivent correspondre",
+        "en": "Passwords must match",
+        "ar": "يجب أن تتطابق كلمات المرور"
+    },
+    "auth.invalidEmail": {
+        "fr": "Adresse e-mail invalide",
+        "en": "Invalid email address",
+        "ar": "عنوان بريد إلكتروني غير صالح"
+    },
+    "auth.emailRequired": {
+        "fr": "L'e-mail est requis",
+        "en": "Email is required",
+        "ar": "البريد الإلكتروني مطلوب"
+    },
+    "auth.passwordMinLength": {
+        "fr": "Le mot de passe doit contenir au moins 6 caractères",
+        "en": "Password must be at least 6 characters",
+        "ar": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل"
+    },
+    "auth.tooManyRequests": {
+        "fr": "Trop de tentatives. Veuillez réessayer dans quelques minutes.",
+        "en": "Too many requests. Please try again in a few minutes.",
+        "ar": "طلبات كثيرة جدا. يرجى المحاولة مرة أخرى في غضون دقائق قليلة."
     }
 }
