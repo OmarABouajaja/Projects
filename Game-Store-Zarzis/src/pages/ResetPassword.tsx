@@ -32,14 +32,41 @@ const ResetPassword = () => {
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        // Check if there's a valid recovery token in the URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = hashParams.get('access_token');
-        const type = hashParams.get('type');
+        // Parse hash fragment - handles both #access_token=... and #/reset-password?access_token=... usage
+        const hash = window.location.hash;
+
+        // Supabase puts tokens in the hash like #access_token=...&type=recovery
+        // But if routing is hash-based or mixed, it might be tricky.
+        // We look for the params wherever they are.
+
+        let params = new URLSearchParams(hash.substring(1)); // Remove leading #
+
+        // Sometimes the hash starts with a path like #/reset-password?access_token=...
+        if (hash.includes('?')) {
+            const split = hash.split('?');
+            if (split.length > 1) {
+                params = new URLSearchParams(split[1]);
+            }
+        }
+
+        const accessToken = params.get('access_token');
+        const type = params.get('type');
+        const error = params.get('error');
+        const errorDescription = params.get('error_description');
+
+        if (error) {
+            toast.error(errorDescription?.replace(/\+/g, " ") || error);
+            // Delay redirect so user can read the error
+            setTimeout(() => navigate('/staff-login'), 4000);
+            return;
+        }
 
         if (!accessToken || type !== 'recovery') {
+            // Only redirect if we are SURE it's not a valid recovery link
+            // But we should be careful not to redirect valid other states
+            console.log("No recovery token found", { accessToken, type });
             toast.error("Invalid or expired reset link");
-            setTimeout(() => navigate('/staff-login'), 2000);
+            setTimeout(() => navigate('/staff-login'), 4000);
         }
     }, [navigate]);
 

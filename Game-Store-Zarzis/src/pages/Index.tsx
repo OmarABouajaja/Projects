@@ -1,4 +1,6 @@
 import { lazy, Suspense, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import { ClientHomeStats } from "@/components/ClientHomeStats";
@@ -17,7 +19,36 @@ const Footer = lazy(() => import("@/components/Footer"));
 const NewsShowcase = lazy(() => import("@/components/NewsShowcase"));
 
 const Index = () => {
+  const navigate = useNavigate();
   const [isPhone, setIsPhone] = useState(false);
+
+  useEffect(() => {
+    // Handle Supabase auth redirects
+    const hash = window.location.hash;
+    const hashParams = new URLSearchParams(hash.substring(1));
+
+    // Check for errors
+    const error = hashParams.get("error");
+    const errorDescription = hashParams.get("error_description");
+
+    if (error || errorDescription) {
+      toast.error(errorDescription?.replace(/\+/g, " ") || error || "Authentication error");
+      window.history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+
+    // Handle Password Reset
+    if (hash.includes("type=recovery")) {
+      navigate(`/reset-password${hash}`);
+      return;
+    }
+
+    // Handle Magic Link
+    if (hash.includes("type=magiclink")) {
+      navigate("/dashboard");
+      toast.success("Authentifié avec succès !");
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const checkPhone = () => {
