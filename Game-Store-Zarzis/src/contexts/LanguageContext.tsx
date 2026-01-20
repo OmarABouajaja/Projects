@@ -780,14 +780,7 @@ export const translations: Translations = {
   "products.no_products": { fr: "Aucun produit trouvé.", en: "No products found.", ar: "لم يتم العثور على منتجات." },
   "products.out_of_stock": { fr: "Rupture de stock", en: "Out of Stock", ar: "نفاذ الكمية" },
 
-  // Common
-  "common.save_changes": { fr: "Enregistrer", en: "Save Changes", ar: "حفظ التغييرات" },
-  "common.cancel": { fr: "Annuler", en: "Cancel", ar: "إلغاء" },
-  "common.delete": { fr: "Supprimer", en: "Delete", ar: "حذف" },
-  "common.edit": { fr: "Modifier", en: "Edit", ar: "تعديل" },
-  "common.month": { fr: "Mois", en: "Month", ar: "شهر" },
-  "common.year": { fr: "Année", en: "Year", ar: "سنة" },
-  "common.weekday": { fr: "Semaine", en: "Week", ar: "أسبوع" },
+
 
   // Expenses Management
   "expenses.management.title": { fr: "Gestion des Dépenses", en: "Expenses Management", ar: "إدارة المصاريف" },
