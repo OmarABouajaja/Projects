@@ -25,7 +25,7 @@ import { format } from "date-fns";
 
 const ExpensesManagement = () => {
     const { role, user } = useAuth();
-    const { data: expenses, isLoading } = useExpenses();
+    const { data: expenses, isLoading, isError, error } = useExpenses();
     const createExpense = useCreateExpense();
     const updateExpense = useUpdateExpense();
     const deleteExpense = useDeleteExpense();
@@ -43,6 +43,26 @@ const ExpensesManagement = () => {
 
     if (role !== "owner") {
         return <div>Access Denied</div>;
+    }
+
+    if (isError) {
+        return (
+            <ProtectedRoute>
+                <DashboardLayout>
+                    <div className="p-8 text-center text-destructive">
+                        <h2 className="text-xl font-bold mb-2">Error Loading Expenses</h2>
+                        <p>{(error as Error)?.message || "Unknown error occurred"}</p>
+                        <Button
+                            variant="outline"
+                            className="mt-4"
+                            onClick={() => window.location.reload()}
+                        >
+                            Retry
+                        </Button>
+                    </div>
+                </DashboardLayout>
+            </ProtectedRoute>
+        );
     }
 
     const handleOpenAdd = () => {
