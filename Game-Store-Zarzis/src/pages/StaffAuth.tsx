@@ -212,69 +212,88 @@ const StaffAuth = () => {
           setResetEmail("");
         }
       }}>
-        <DialogContent className="glass-card border-white/10">
-          <DialogHeader>
-            <DialogTitle>{t("auth.resetPasswordTitle")}</DialogTitle>
-            <DialogDescription>
-              {!resetSuccess ? t("auth.resetPasswordDesc") : ""}
-            </DialogDescription>
-          </DialogHeader>
-
-          {resetSuccess ? (
-            <div className="text-center py-6 space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-2">
-                <CheckCircle2 className="w-8 h-8 text-green-500" />
-              </div>
-              <h3 className="text-lg font-semibold">{t("auth.resetEmailSent")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t("auth.resetEmailSentDesc")}
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setShowForgotPassword(false)}
-                className="mt-4"
-              >
-                {t("auth.backToLogin")}
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={handleForgotPassword} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">{t("client.email_address")}</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="reset-email"
-                    type="email"
-                    placeholder="staff@gamestore.tn"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    className="pl-10"
-                    required
-                  />
+        <DialogContent className="glass-panel border-primary/30 max-w-[95vw] sm:max-w-[400px] overflow-hidden p-0 !translate-x-[-50%] !translate-y-[-50%]">
+          <div className="h-1.5 bg-gradient-to-r from-cyan-500 via-primary to-purple-500" />
+          <div className="p-6">
+            {resetSuccess ? (
+              <div className="text-center py-6 space-y-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-2">
+                  <CheckCircle2 className="w-8 h-8 text-green-500" />
                 </div>
-              </div>
-
-              <div className="flex gap-2">
+                <h3 className="text-lg font-semibold">{t("auth.resetEmailSent")}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {t("auth.resetEmailSentDesc")}
+                </p>
                 <Button
-                  type="button"
                   variant="outline"
                   onClick={() => setShowForgotPassword(false)}
-                  className="flex-1"
+                  className="mt-4"
                 >
-                  {t("common.cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  variant="hero"
-                  className="flex-1"
-                  disabled={isResetLoading}
-                >
-                  {isResetLoading ? t("staff.processing") : t("auth.sendResetLink")}
+                  {t("auth.backToLogin")}
                 </Button>
               </div>
-            </form>
-          )}
+            ) : (
+              <>
+                <DialogHeader className="mb-6">
+                  <DialogTitle className="text-2xl font-display font-bold flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-primary" />
+                    </div>
+                    {t("auth.resetPasswordTitle")}
+                  </DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
+                    {t("auth.resetPasswordDesc")}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleForgotPassword} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email" className="text-sm font-medium text-white/70">
+                      {t("client.email_address")}
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                      <Input
+                        id="reset-email"
+                        type="email"
+                        placeholder="staff@gamestore.tn"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        className="pl-10 h-10 sm:h-12 text-base relative z-0"
+                        style={{
+                          backgroundColor: '#18181b',
+                          borderColor: '#52525b',
+                          color: '#ffffff',
+                          opacity: 1
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="flex-1"
+                      disabled={isResetLoading}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      className="flex-1 h-11 neon-cyan-glow"
+                      disabled={isResetLoading}
+                    >
+                      {isResetLoading ? t("staff.processing") : t("auth.sendResetLink")}
+                    </Button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
