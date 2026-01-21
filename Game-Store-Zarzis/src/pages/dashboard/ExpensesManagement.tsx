@@ -130,7 +130,9 @@ const ExpensesManagement = () => {
     const currentYear = now.getFullYear();
 
     const filteredExpenses = expenses?.filter(e => {
+        if (!e.date) return false;
         const d = new Date(e.date);
+        if (isNaN(d.getTime())) return false;
 
         // Basic Type Check
         if (activeTab === 'daily') {
@@ -151,7 +153,9 @@ const ExpensesManagement = () => {
 
     // Calculations
     const allCurrentMonth = expenses?.filter(e => {
+        if (!e.date) return false;
         const d = new Date(e.date);
+        if (isNaN(d.getTime())) return false;
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
     }) || [];
 
@@ -160,7 +164,9 @@ const ExpensesManagement = () => {
 
     // Yearly calculation (Total of all expenses this year)
     const allCurrentYear = expenses?.filter(e => {
+        if (!e.date) return false;
         const d = new Date(e.date);
+        if (isNaN(d.getTime())) return false;
         return d.getFullYear() === currentYear;
     }) || [];
     const totalYearly = allCurrentYear.reduce((sum, e) => sum + e.amount, 0);

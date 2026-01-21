@@ -89,10 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .from('profiles')
         .upsert({
           id: targetUser.id,
-          email: targetUser.email,
           full_name: targetUser.user_metadata?.full_name || "Staff Member",
-          last_sign_in_at: new Date().toISOString(),
-          last_active_at: new Date().toISOString(), // 🟢 Online status
           is_active: true,
           updated_at: new Date().toISOString()
         });
@@ -103,28 +100,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // 🟢 Heartbeat for Online Status (updates every 2 min)
+  // 🟢 Heartbeat removed because last_active_at doesn't exist in schema
   useEffect(() => {
-    if (!user) return;
-
-    const sendHeartbeat = async () => {
-      try {
-        await supabase
-          .from('profiles')
-          .update({ last_active_at: new Date().toISOString() })
-          .eq('id', user.id);
-      } catch (err) {
-        console.error("Heartbeat failed:", err);
-      }
-    };
-
-    // Send immediately on mount
-    sendHeartbeat();
-
-    // Then every 2 minutes
-    const interval = setInterval(sendHeartbeat, 2 * 60 * 1000);
-
-    return () => clearInterval(interval);
+    // Online status tracking is disabled until schema is updated
   }, [user]);
 
   useEffect(() => {
@@ -385,8 +363,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .from('profiles')
           .upsert({
             id: targetUser.id,
-            email: targetUser.email,
-            last_sign_in_at: new Date().toISOString()
+            full_name: targetUser.user_metadata?.full_name || "Staff Member",
+            updated_at: new Date().toISOString()
           })
       ];
 

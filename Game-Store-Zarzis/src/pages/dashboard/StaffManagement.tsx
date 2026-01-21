@@ -78,7 +78,7 @@ const StaffManagement = () => {
       const userIds = userRoles.map(r => r.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, created_at, is_active, phone, email, last_sign_in_at, last_active_at")
+        .select("id, full_name, created_at, is_active, phone")
         .in("id", userIds);
 
       if (profilesError) console.error("Error fetching profiles:", profilesError);
@@ -107,8 +107,6 @@ const StaffManagement = () => {
           full_name: profileData?.full_name || userFullName,
           phone: profileData?.phone,
           created_at: profileData?.created_at || role.created_at || new Date().toISOString(),
-          last_sign_in: role.user_id === user?.id ? user.last_sign_in_at : profileData?.last_sign_in_at,
-          last_active_at: profileData?.last_active_at,
           is_invited: (!profileData || !profileData.full_name) && role.user_id !== user?.id
         };
       });
@@ -763,36 +761,17 @@ const StaffManagement = () => {
                                   </>
                                 )}
                               </Badge>
-                              {/* 🟢 Online/Offline Badge */}
-                              {member.last_active_at && (
-                                new Date().getTime() - new Date(member.last_active_at).getTime() < 5 * 60 * 1000
-                              ) ? (
-                                <Badge className="flex items-center gap-1 bg-green-500/20 text-green-400 border-green-500/30">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                  {t("staff.active_now")}
-                                </Badge>
-                              ) : (
-                                <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
-                                  <div className="w-2 h-2 bg-gray-500 rounded-full" />
-                                  {t("staff.offline")}
-                                </Badge>
-                              )}
+                              {/* 🟢 Online/Offline Badge - Disabled until schema update */}
+                              <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full" />
+                                {t("staff.offline")}
+                              </Badge>
                               <span className="text-xs text-muted-foreground hidden sm:inline">
                                 {t("staff.joined")} {formatDate(member.created_at)}
                               </span>
                             </div>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              {member.last_sign_in ? (
-                                <div className="flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3 text-green-500" />
-                                  <span>{t("staff.last_login")}: {formatDate(member.last_sign_in)}</span>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3 text-orange-500" />
-                                  <span>{t("staff.never_connected")}</span>
-                                </div>
-                              )}
+                              <span>{t("staff.profiles_not_supported")}</span>
                             </div>
                           </div>
                         </div>
