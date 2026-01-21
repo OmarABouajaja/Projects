@@ -38,28 +38,10 @@ if RESEND_API_KEY:
 
 
 def send_email_core(subject: str, recipient_email: str, recipient_name: str, html_content: str, text_content: str) -> bool:
-    """Core email sending: Tries Resend API first, then SMTP fallback"""
+    """Core email sending: Tries SMTP first, then Resend API fallback"""
     logger.info(f"Sending email to {recipient_email}: {subject}")
     
-    # 1. Try Resend API if key is configured
-    if RESEND_API_KEY:
-        try:
-            params = {
-                "from": f"{FROM_NAME} <{FROM_EMAIL}>",
-                "to": [recipient_email],
-                "subject": subject,
-                "html": html_content,
-                "text": text_content
-            }
-            
-            response = resend.Emails.send(params)
-            logger.info(f"✅ Email sent via Resend to {recipient_email} (ID: {response.get('id', 'N/A')})")
-            return True
-        except Exception as e:
-            logger.error(f"❌ Resend API failed for {recipient_email}: {e}")
-            # Fall through to SMTP
-    
-    # 2. Try SMTP as fallback
+    # 1. Try SMTP as primary method
     if SMTP_USER and SMTP_PASS:
         try:
             msg = MIMEMultipart("alternative")
@@ -81,6 +63,24 @@ def send_email_core(subject: str, recipient_email: str, recipient_name: str, htm
             return True
         except Exception as e:
             logger.error(f"❌ SMTP failed for {recipient_email}: {e}")
+            # Fall through to Resend
+    
+    # 2. Try Resend API as fallback
+    if RESEND_API_KEY:
+        try:
+            params = {
+                "from": f"{FROM_NAME} <{FROM_EMAIL}>",
+                "to": [recipient_email],
+                "subject": subject,
+                "html": html_content,
+                "text": text_content
+            }
+            
+            response = resend.Emails.send(params)
+            logger.info(f"✅ Email sent via Resend to {recipient_email} (ID: {response.get('id', 'N/A')})")
+            return True
+        except Exception as e:
+            logger.error(f"❌ Resend API failed for {recipient_email}: {e}")
             return False
     
     logger.warning(f"⚠️ No email delivery method configured for {recipient_email}")

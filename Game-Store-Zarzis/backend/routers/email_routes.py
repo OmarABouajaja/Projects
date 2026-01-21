@@ -183,9 +183,8 @@ async def api_staff_password_reset(request: StaffPasswordResetRequest):
         
         supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
         
-        # Generate magic link for password reset
-        frontend_url = os.getenv("FRONTEND_URL", "https://www.gamestorezarzis.com.tn")
-        reset_redirect = f"{frontend_url}/reset-password"
+        # Use production frontend URL (hardcoded to avoid env dependency)
+        reset_redirect = "https://www.gamestorezarzis.com.tn/reset-password"
         
         # Use Supabase to generate recovery link
         response = supabase_admin.auth.generate_link({
