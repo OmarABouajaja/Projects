@@ -425,8 +425,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to send reset email');
+        console.warn("Custom password reset failed, falling back to Supabase default");
+        // Fallback to Supabase standard email if backend custom email fails
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
       }
 
       return { error: null };

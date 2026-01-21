@@ -14,10 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This marks the first official stable production release ready for deployment.
 
 ### Fixed
-- **Translation Keys** - Added missing `common.month` and `common.year` translation keys (fixes dashboard tab display)
-- **Expenses Page Crash** - Fixed missing `useLanguage` import causing ExpensesManagement page crash
-- **Email Service Migration** - Migrated from MailerSend to Resend for better deliverability and developer experience
-- **Client OTP CORS Errors** - Fixed environment variable mismatch (VITE_API_URL → VITE_BACKEND_URL) in ClientAuth.tsx
+- **Translation Keys** - Added missing `common.month`, `common.year`, `common.back`, `common.optional` and 15+ other translation keys
+- **Expenses Page Crash** - Fixed missing `useLanguage` import in ExpensesManagement.tsx
+- **Email Service Migration** - Migrated from MailerSend to Resend with SMTP as primary delivery method
+- **Client OTP Errors** - Fixed environment variable mismatch (VITE_API_URL → VITE_BACKEND_URL)
+- **Duplicate Route Decorators** - Removed duplicate @router.post decorators in verification_routes.py causing HTTP/2 errors
+- **Staff Password Reset** - Replaced plain Supabase email with custom beautiful template via backend endpoint
 
 ### Changed
 - **Email Templates** - Complete redesign with modern HTML, glassmorphism effects, vibrant gradients, and mobile-responsive layouts

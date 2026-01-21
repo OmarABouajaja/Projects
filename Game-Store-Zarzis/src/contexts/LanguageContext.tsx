@@ -372,6 +372,24 @@ export const translations: Translations = {
   "common.days.sunday": { fr: "Dimanche", en: "Sunday", ar: "الأحد" },
   "common.month": { fr: "Mois", en: "Month", ar: "شهر" },
   "common.year": { fr: "Année", en: "Year", ar: "سنة" },
+  "common.back": { fr: "Retour", en: "Back", ar: "رجوع" },
+  "common.optional": { fr: "Optionnel", en: "Optional", ar: "اختياري" },
+  "common.required": { fr: "Requis", en: "Required", ar: "مطلوب" },
+  "common.loading": { fr: "Chargement...", en: "Loading...", ar: "جاري التحميل..." },
+  "common.error": { fr: "Erreur", en: "Error", ar: "خطأ" },
+  "common.success": { fr: "Succès", en: "Success", ar: "نجاح" },
+  "common.warning": { fr: "Attention", en: "Warning", ar: "تحذير" },
+  "common.next": { fr: "Suivant", en: "Next", ar: "التالي" },
+  "common.previous": { fr: "Précédent", en: "Previous", ar: "السابق" },
+  "common.submit": { fr: "Soumettre", en: "Submit", ar: "إرسال" },
+  "common.reset": { fr: "Réinitialiser", en: "Reset", ar: "إعادة تعيين" },
+  "common.search": { fr: "Rechercher", en: "Search", ar: "بحث" },
+  "common.filter": { fr: "Filtrer", en: "Filter", ar: "تصفية" },
+  "common.sort": { fr: "Trier", en: "Sort", ar: "ترتيب" },
+  "common.all": { fr: "Tout", en: "All", ar: "الكل" },
+  "common.none": { fr: "Aucun", en: "None", ar: "لا شيء" },
+  "common.yes": { fr: "Oui", en: "Yes", ar: "نعم" },
+  "common.no": { fr: "Non", en: "No", ar: "لا" },
   "accessDenied.title": { fr: "Accès Refusé", en: "Access Denied", ar: "تم رفض الوصول" },
   "accessDenied.message": { fr: "Seuls les propriétaires peuvent gérer les paramètres.", en: "Only owners can manage store settings.", ar: "فقط المالكون يمكنهم إدارة إعدادات المتجر." },
   "pricing.title": { fr: "Gestion des Tarifs", en: "Pricing Management", ar: "إدارة التسعير" },
@@ -533,7 +551,7 @@ export const translations: Translations = {
   "contact.form.send": { fr: "Envoyer le Message", en: "Send Message", ar: "إرسال الرسالة" },
 
   // Footer
-  "footer.copyright": { fr: "© 2024 Game Store Zarzis. Tous droits réservés.", en: "© 2024 Game Store Zarzis. All rights reserved.", ar: "© 2024 متجر الألعاب جرجيس. جميع الحقوق محفوظة." },
+  "footer.copyright": { fr: "© 2026 Game Store Zarzis. Tous droits réservés.", en: "© 2026 Game Store Zarzis. All rights reserved.", ar: "© 2026 متجر الألعاب جرجيس. جميع الحقوق محفوظة." },
 
   // Products Showcase
   "products.special": { fr: "OFFRES SPÉCIALES", en: "SPECIAL OFFERS", ar: "عروض خاصة" },

@@ -268,7 +268,7 @@ def send_otp_email(to_email: str, otp_code: str, lang: str = "fr") -> bool:
             <!-- Footer -->
             <div style="background:#1a1a1a;padding:24px;text-align:center;">
                 <p style="margin:0;color:#999;font-size:13px;">Zarzis, Tunisie | Tel: 23 290 065</p>
-                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2024</p>
+                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2026</p>
             </div>
         </div>
     </body>
@@ -337,7 +337,7 @@ def send_staff_invitation(email: str, role: str, password: str, lang: str = "fr"
             <!-- Footer -->
             <div style="background:#1a1a1a;padding:24px;text-align:center;">
                 <p style="margin:0;color:#999;font-size:13px;">Zarzis, Tunisie | Tel: 23 290 065</p>
-                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2024</p>
+                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2026</p>
             </div>
         </div>
     </body>
@@ -409,7 +409,7 @@ def send_password_reset_email(to_email: str, recovery_url: str, lang: str = "fr"
             <!-- Footer -->
             <div style="background:#1a1a1a;padding:24px;text-align:center;">
                 <p style="margin:0;color:#999;font-size:13px;">Zarzis, Tunisie | Tel: 23 290 065</p>
-                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2024</p>
+                <p style="margin:8px 0 0;color:#666;font-size:12px;">Game Store Zarzis © 2026</p>
             </div>
         </div>
     </body>
