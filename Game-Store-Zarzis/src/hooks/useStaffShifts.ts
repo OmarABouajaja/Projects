@@ -21,7 +21,7 @@ export const useAllActiveShifts = () => {
 
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, email, avatar_url")
+        .select("id, full_name, email")
         .in("id", staffIds);
 
       if (profilesError) throw profilesError;
