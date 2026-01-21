@@ -106,7 +106,7 @@ async def health_check(request: Request):
         "status": "healthy",
         "services": {
             "api": "online",
-            "email": "configured" if os.getenv("MAILERSEND_API_KEY") else "not_configured"
+            "email": "configured" if os.getenv("RESEND_API_KEY") else "not_configured"
         }
     }
 

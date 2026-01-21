@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.00 STABLE] - 2026-01-21
+
+### STABLE RELEASE 🎉
+
+This marks the first official stable production release ready for deployment.
+
+### Fixed
+- **Translation Keys** - Added missing `common.month` and `common.year` translation keys (fixes dashboard tab display)
+- **Expenses Page Crash** - Fixed missing `useLanguage` import causing ExpensesManagement page crash
+- **Email Service Migration** - Migrated from MailerSend to Resend for better deliverability and developer experience
+
+### Changed
+- **Email Templates** - Complete redesign with modern HTML, glassmorphism effects, vibrant gradients, and mobile-responsive layouts
+- **Email Service** - Replaced MailerSend SDK with Resend API (simpler, more reliable, 3K emails/month free tier)
+- **Environment Variables** - Updated `.env.example` to reference `RESEND_API_KEY` instead of `MAILERSEND_API_KEY`
+- **Health Check** - Backend health endpoint now checks for Resend configuration
+- **Documentation** - Updated README badges to show V1.00 STABLE status
+- **Documentation** - Added Resend to tech stack table in README
+- **LinkedIn Content** - Created comprehensive project description for portfolio/recruiting
+
+### Technical Improvements
+- Modern OTP email with large monospace code display
+- Staff invitation emails with credentials box and CTA button
+- Password reset emails with magic link and backup URL
+- Full RTL (Right-to-Left) support for Arabic language emails
+- SMTP fallback for email delivery redundancy
+- Proper error handling and logging throughout email service
+
+### Infrastructure
+- **Email Service**: Resend API (primary) + SMTP (fallback)
+- **Backend Dependencies**: Updated `requirements.txt` with `resend>=0.8.0`
+
+---
+
 ## [1.1.0] - 2026-01-20
 
 ### Added

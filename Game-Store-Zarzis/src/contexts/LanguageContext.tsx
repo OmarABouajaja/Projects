@@ -370,6 +370,8 @@ export const translations: Translations = {
   "common.days.friday": { fr: "Vendredi", en: "Friday", ar: "الجمعة" },
   "common.days.saturday": { fr: "Samedi", en: "Saturday", ar: "السبت" },
   "common.days.sunday": { fr: "Dimanche", en: "Sunday", ar: "الأحد" },
+  "common.month": { fr: "Mois", en: "Month", ar: "شهر" },
+  "common.year": { fr: "Année", en: "Year", ar: "سنة" },
   "accessDenied.title": { fr: "Accès Refusé", en: "Access Denied", ar: "تم رفض الوصول" },
   "accessDenied.message": { fr: "Seuls les propriétaires peuvent gérer les paramètres.", en: "Only owners can manage store settings.", ar: "فقط المالكون يمكنهم إدارة إعدادات المتجر." },
   "pricing.title": { fr: "Gestion des Tarifs", en: "Pricing Management", ar: "إدارة التسعير" },

@@ -1,11 +1,11 @@
 # 🎮 Game Store Zarzis - Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/Version-1.00_STABLE-success)](https://github.com/OmarABouajaja/Projects)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb)](https://reactjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.0-3ecf8e)](https://supabase.com/)
 [![Vite](https://img.shields.io/badge/Vite-6.4-646cff)](https://vitejs.dev/)
-[![CI/CD](https://github.com/OmarABouajaja/Projects/actions/workflows/ci.yml/badge.svg)](https://github.com/OmarABouajaja/Projects/actions)
 
 **Modern, full-featured management system for gaming cafés and console rental stores.**
 
@@ -79,6 +79,7 @@ Built with React + TypeScript + Supabase. Features real-time session tracking, i
 | **Styling** | Tailwind CSS + Shadcn UI | Utility-first CSS + components |
 | **State** | TanStack Query + Context API | Server state + global state |
 | **Backend** | Supabase | PostgreSQL + Auth + Realtime |
+| **Email** | Resend | Transactional emails (3K/month free) |
 | **Animations** | Framer Motion | Smooth transitions |
 | **Routing** | React Router v6 | Client-side navigation |
 | **Forms** | React Hook Form + Zod | Type-safe form validation |
@@ -185,8 +186,9 @@ This project is deployed using:
 | Service | Purpose | URL |
 |---------|---------|-----|
 | **Cloudflare Pages** | Frontend Hosting | [gamestorezarzis.com.tn](https://www.gamestorezarzis.com.tn/) |
-| **Render** | Backend API | [bck.gamestorezarzis.com.tn](https://bck.gamestorezarzis.com.tn/) |
+| **Render** | Backend API (Python) | [bck.gamestorezarzis.com.tn](https://bck.gamestorezarzis.com.tn/) |
 | **Supabase** | Database + Auth | PostgreSQL + Realtime |
+| **Resend** | Email Service | Transactional emails |
 
 ---
 
