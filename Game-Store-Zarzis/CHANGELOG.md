@@ -17,6 +17,7 @@ This marks the first official stable production release ready for deployment.
 - **Translation Keys** - Added missing `common.month` and `common.year` translation keys (fixes dashboard tab display)
 - **Expenses Page Crash** - Fixed missing `useLanguage` import causing ExpensesManagement page crash
 - **Email Service Migration** - Migrated from MailerSend to Resend for better deliverability and developer experience
+- **Client OTP CORS Errors** - Fixed environment variable mismatch (VITE_API_URL → VITE_BACKEND_URL) in ClientAuth.tsx
 
 ### Changed
 - **Email Templates** - Complete redesign with modern HTML, glassmorphism effects, vibrant gradients, and mobile-responsive layouts
@@ -31,6 +32,8 @@ This marks the first official stable production release ready for deployment.
 - Modern OTP email with large monospace code display
 - Staff invitation emails with credentials box and CTA button
 - Password reset emails with magic link and backup URL
+- **Custom Staff Password Reset**: Replaced Supabase default plain emails with beautiful Resend template
+- Backend endpoint `/email/staff-password-reset` generates magic links and sends luxurious emails
 - Full RTL (Right-to-Left) support for Arabic language emails
 - SMTP fallback for email delivery redundancy
 - Proper error handling and logging throughout email service

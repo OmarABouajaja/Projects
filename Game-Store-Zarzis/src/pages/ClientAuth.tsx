@@ -16,7 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { isValidEmail, isValidPhone, isValidName } from '@/utils/validation';
 import { cn } from "@/lib/utils";
 
-const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
 const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 
 const ClientAuth = () => {

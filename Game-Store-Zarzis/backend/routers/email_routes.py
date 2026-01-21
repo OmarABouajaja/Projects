@@ -152,3 +152,71 @@ async def api_send_staff_invitation(request: StaffInvitationRequest):
     
     return {"success": True, "message": "Staff invitation sent"}
 
+
+class StaffPasswordResetRequest(BaseModel):
+    email: EmailStr
+    lang: Optional[str] = "fr"
+
+
+@router.post("/staff-password-reset")
+async def api_staff_password_reset(request: StaffPasswordResetRequest):
+    """
+    Send custom password reset email with beautiful Resend template.
+    Generates a Supabase magic link and sends it via our email service.
+    """
+    try:
+        # Generate password reset link through Supabase
+        from supabase import create_client
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+        SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+        
+        if not SUPABASE_SERVICE_KEY:
+            # Fallback: Use regular auth resetPasswordForEmail
+            # This will send Supabase's default email, but better than nothing
+            raise HTTPException(
+                status_code=500,
+                detail="Service role key not configured. Please use Supabase default reset."
+            )
+        
+        supabase_admin = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        
+        # Generate magic link for password reset
+        frontend_url = os.getenv("FRONTEND_URL", "https://www.gamestorezarzis.com.tn")
+        reset_redirect = f"{frontend_url}/reset-password"
+        
+        # Use Supabase to generate recovery link
+        response = supabase_admin.auth.generate_link({
+            "type": "recovery",
+            "email": request.email,
+            "options": {
+                "redirect_to": reset_redirect
+            }
+        })
+        
+        if not response or not hasattr(response, 'properties') or not response.properties.get('action_link'):
+            raise HTTPException(status_code=400, detail="Failed to generate reset link")
+        
+        recovery_url = response.properties['action_link']
+        
+        # Send beautiful custom email using Resend
+        success = send_password_reset_email(
+            to_email=request.email,
+            recovery_url=recovery_url,
+            lang=request.lang or "fr"
+        )
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to send email")
+        
+        return {
+            "success": True,
+            "message": "Password reset email sent with custom template"
+        }
+        
+    except Exception as e:
+        print(f"Password reset error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+

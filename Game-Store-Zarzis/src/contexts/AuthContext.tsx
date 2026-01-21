@@ -410,13 +410,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      // Use custom backend endpoint with beautiful Resend template
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
+
+      const response = await fetch(`${BACKEND_URL}/email/staff-password-reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          lang: 'fr' // Can be dynamic based on current language
+        }),
       });
 
-      return { error: error as Error | null };
-    } catch (err) {
-      return { error: err as Error };
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to send reset email');
+      }
+
+      return { error: null };
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      return { error: new Error(err.message || 'Failed to send reset email') };
     }
   };
 
