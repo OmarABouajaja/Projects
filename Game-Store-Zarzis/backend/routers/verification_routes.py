@@ -36,8 +36,6 @@ from fastapi import Request
 
 @router.post("/send")
 @limiter.limit("3/minute")
-@router.post("/send")
-@limiter.limit("3/minute")
 def send_verification_code(request: Request, body: SendCodeRequest):
     # Map body to original logic args
     request_data = body
@@ -91,8 +89,6 @@ def send_verification_code(request: Request, body: SendCodeRequest):
     else:
         raise HTTPException(status_code=500, detail="Failed to send verification code")
 
-@router.post("/check")
-@limiter.limit("5/minute")
 @router.post("/check")
 @limiter.limit("5/minute")
 def check_verification_code(request: Request, body: VerifyCodeRequest):
