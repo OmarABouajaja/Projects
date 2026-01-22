@@ -94,8 +94,6 @@ const StaffManagement = () => {
         // Get actual email
         if (role.user_id === user?.id) {
           userEmail = user.email || userEmail;
-        } else if (profileData?.email) {
-          userEmail = profileData.email;
         } else if (profileData?.full_name) {
           userFullName = profileData.full_name;
         }
@@ -528,7 +526,7 @@ const StaffManagement = () => {
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className={`rounded-xl px-8 h-11 transition-all duration-300 shadow-lg ${formData.role === 'owner'
+                          className={`rounded-xl px-8 h-12 text-lg font-bold transition-all duration-300 shadow-lg ${formData.role === 'owner'
                             ? 'bg-primary hover:bg-primary/90 shadow-primary/20'
                             : 'bg-secondary hover:bg-secondary/90 shadow-secondary/20'
                             }`}

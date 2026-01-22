@@ -194,8 +194,8 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
 
                         {/* Add New Section */}
                         {!isAdding && !isEditing && (
-                            <Button variant="hero" className="w-full" onClick={() => { setIsAdding(true); resetForm(); }}>
-                                <Plus className="w-4 h-4 mr-2" />
+                            <Button variant="hero" className="w-full h-12 text-lg font-bold" onClick={() => { setIsAdding(true); resetForm(); }}>
+                                <Plus className="w-5 h-5 mr-2" />
                                 Add New Game Shortcut
                             </Button>
                         )}
@@ -248,8 +248,8 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
                                             />
                                         </div>
                                     </div>
-                                    <Button className="w-full" variant="hero" onClick={() => isAdding ? handleCreate() : handleUpdate(isEditing!)}>
-                                        <Save className="w-4 h-4 mr-2" />
+                                    <Button className="w-full h-12 text-lg font-bold" variant="hero" onClick={() => isAdding ? handleCreate() : handleUpdate(isEditing!)}>
+                                        <Save className="w-5 h-5 mr-2" />
                                         {isAdding ? "Create Shortcut" : "Save Changes"}
                                     </Button>
                                 </div>

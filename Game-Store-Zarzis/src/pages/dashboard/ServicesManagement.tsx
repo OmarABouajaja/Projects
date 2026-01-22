@@ -524,7 +524,7 @@ const ServicesManagement = () => {
                   <p className="text-[10px] text-muted-foreground">{t('services.management.complex_desc')}</p>
                 </div>
               </div>
-              <Button className="w-full mt-2" onClick={async () => {
+              <Button className="w-full mt-2 h-12 text-lg font-bold" onClick={async () => {
                 const finalData = {
                   ...catalogFormData,
                   price: parseFloat(catalogFormData.price) || 0,
@@ -647,7 +647,7 @@ const ServicesManagement = () => {
                 </div>
               </div>
 
-              <Button variant="hero" className="w-full" onClick={handleCreateRequest} disabled={createRequest.isPending}>
+              <Button variant="hero" className="w-full h-12 text-lg font-bold" onClick={handleCreateRequest} disabled={createRequest.isPending}>
                 {t('services.management.new_request')}
               </Button>
             </div>
@@ -704,7 +704,7 @@ const ServicesManagement = () => {
                     <div className="grid grid-cols-2 gap-3">
                       {selectedRequest.status === "pending" && (
                         <Button
-                          className="col-span-2"
+                          className="col-span-2 h-12 text-lg font-bold"
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                           disabled={selectedRequest.is_complex && !isOwner}
                         >
@@ -715,12 +715,14 @@ const ServicesManagement = () => {
                         <>
                           <Button
                             variant="outline"
+                            className="h-12 text-lg font-bold"
                             onClick={() => handleStatusUpdate(selectedRequest.id, "waiting_parts")}
                           >
                             {t('services.management.wait_parts')}
                           </Button>
                           <Button
                             variant="hero"
+                            className="h-12 text-lg font-bold"
                             onClick={() => handleStatusUpdate(selectedRequest.id, "completed", selectedRequest.estimated_cost)}
                             disabled={selectedRequest.is_complex && !isOwner}
                           >
@@ -730,7 +732,7 @@ const ServicesManagement = () => {
                       )}
                       {selectedRequest.status === "waiting_parts" && (
                         <Button
-                          className="col-span-2"
+                          className="col-span-2 h-12 text-lg font-bold"
                           onClick={() => handleStatusUpdate(selectedRequest.id, "in_progress")}
                         >
                           {t('services.management.resume_repair')}
@@ -738,7 +740,7 @@ const ServicesManagement = () => {
                       )}
                       <Button
                         variant="ghost"
-                        className="text-destructive hover:bg-destructive/10"
+                        className="text-destructive h-12 text-lg font-medium hover:bg-destructive/10"
                         onClick={() => handleStatusUpdate(selectedRequest.id, "cancelled")}
                       >
                         {t('services.management.cancel_request')}

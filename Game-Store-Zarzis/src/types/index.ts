@@ -117,6 +117,21 @@ export interface StoreSettings {
   delivery_settings?: DeliverySettings;
   default_pricing_ps4?: string;
   default_pricing_ps5?: string;
+
+  // New UI & Notification Settings
+  daily_summary_time?: string;
+  theme_primary?: string;
+  theme_secondary?: string;
+  theme_accent?: string;
+  notify_new_order?: boolean;
+  notify_low_stock?: boolean;
+  notify_daily_summary?: boolean;
+  payment_methods_config?: {
+    bank_transfer?: { enabled: boolean; details: string };
+    d17?: { enabled: boolean; details: string };
+    direct_card?: { enabled: boolean };
+  };
+
   updated_at: string;
 }
 

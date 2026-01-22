@@ -1026,11 +1026,11 @@ const SessionsManagement = () => {
 
               <Button
                 variant="hero"
-                className="w-full"
+                className="w-full h-12 text-lg font-bold"
                 onClick={handleStartSession}
                 disabled={!selectedPricing || startSession.isPending}
               >
-                <Play className="w-4 h-4" />
+                <Play className="w-5 h-5 mr-2" />
                 Start Session
               </Button>
             </div>
@@ -1064,12 +1064,12 @@ const SessionsManagement = () => {
 
               <div className="grid grid-cols-1 gap-3">
                 <Button
-                  className="w-full"
+                  className="w-full h-14 text-lg font-bold uppercase tracking-wider"
                   size="lg"
                   onClick={handleExtendSession}
                   disabled={addGameToSession.isPending}
                 >
-                  <Plus className="w-5 h-5 mr-2" />
+                  <Plus className="w-6 h-6 mr-2" />
                   {selectedSession?.session_type === 'per_game' ? "Add Another Match" : "Confirm Extension"}
                 </Button>
 
@@ -1295,11 +1295,11 @@ const SessionsManagement = () => {
                   )}
                   <Button
                     variant={endSessionStep === 'confirm' ? "default" : "secondary"}
-                    className="flex-1 font-bold"
+                    className="flex-1 h-12 text-lg font-bold"
                     onClick={handleEndSession}
                     disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone)) || isConsumptionsLoading}
                   >
-                    {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : endSessionStep === 'confirm' ? <Square className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
+                    {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : endSessionStep === 'confirm' ? <Square className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2" />}
                     {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading..." : endSessionStep === 'confirm' ? "Confirm & Pay" : "Review Payment"}
                   </Button>
                 </div>

@@ -132,7 +132,7 @@ const PasswordChangeDialog = ({ trigger }: PasswordChangeDialogProps) => {
                                 variant="ghost"
                                 onClick={() => setIsOpen(false)}
                                 disabled={isLoading}
-                                className="flex-1"
+                                className="flex-1 h-12 text-lg font-medium"
                             >
                                 {t("common.cancel")}
                             </Button>
@@ -140,7 +140,7 @@ const PasswordChangeDialog = ({ trigger }: PasswordChangeDialogProps) => {
                                 type="submit"
                                 variant="hero"
                                 disabled={isLoading}
-                                className="flex-1 h-11 neon-cyan-glow"
+                                className="flex-1 h-12 text-lg font-bold neon-cyan-glow"
                             >
                                 {isLoading ? (
                                     <>

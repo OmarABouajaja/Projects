@@ -340,10 +340,10 @@ const ProductsManagement = () => {
                     />
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="h-12 px-6 text-base">
                       Cancel
                     </Button>
-                    <Button type="submit">
+                    <Button type="submit" className="h-12 px-8 text-lg font-bold">
                       {editingProduct ? t('products.success_update') : t('products.success_create')}
                     </Button>
                   </div>

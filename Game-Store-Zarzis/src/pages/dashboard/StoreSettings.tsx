@@ -1089,8 +1089,8 @@ const StoreSettings = () => {
                         <Button variant="outline" onClick={() => setShowSpecialHoursDialog(false)} className="w-full sm:w-auto">
                           {t('common.cancel')}
                         </Button>
-                        <Button onClick={addSpecialHour} className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto">
-                          <Calendar className="w-4 h-4 mr-2" />
+                        <Button onClick={addSpecialHour} className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto h-12 px-6 text-lg font-bold">
+                          <Calendar className="w-5 h-5 mr-2" />
                           {t('common.add')}
                         </Button>
                       </div>

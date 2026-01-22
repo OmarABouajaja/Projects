@@ -347,9 +347,9 @@ const ExpensesManagement = () => {
                                 />
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t('expenses.cancel')}</Button>
-                            <Button onClick={handleSubmit}>{t('expenses.save')}</Button>
+                        <DialogFooter className="gap-2 sm:gap-0">
+                            <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="h-12 px-6 text-base">{t('expenses.cancel')}</Button>
+                            <Button onClick={handleSubmit} className="h-12 px-8 text-lg font-bold">{t('expenses.save')}</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

@@ -388,11 +388,11 @@ const SalesManagement = () => {
 
                   <Button
                     variant="hero"
-                    className="w-full"
+                    className="w-full h-12 text-lg font-bold"
                     onClick={handleSell}
                     disabled={createSale.isPending || selectedProduct.stock_quantity < 1}
                   >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    <ShoppingCart className="w-5 h-5 mr-2" />
                     {paymentMethod === "cash" ? t('sales.complete') : t('sales.confirm')}
                   </Button>
                 </div>
@@ -463,11 +463,11 @@ const SalesManagement = () => {
 
                       <Button
                         variant="hero"
-                        className="w-full"
+                        className="w-full h-12 text-lg font-bold"
                         onClick={handleSell}
                         disabled={!staffConfirmed || !clientConfirmed}
                       >
-                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <CheckCircle className="w-5 h-5 mr-2" />
                         Confirm & Complete Sale
                       </Button>
                     </div>

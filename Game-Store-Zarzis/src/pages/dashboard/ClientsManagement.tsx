@@ -413,7 +413,7 @@ const ClientsManagement = () => {
 
                 <Button
                   variant="hero"
-                  className="w-full"
+                  className="w-full h-12 text-lg font-bold neon-cyan-glow"
                   onClick={handleRedeemPoints}
                   disabled={redeemPoints.isPending || !pointsToRedeem}
                 >
