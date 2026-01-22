@@ -110,11 +110,12 @@ const StaffManagement = () => {
       });
 
       setStaffMembers(staffData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching staff:", error);
+      const message = error instanceof Error ? error.message : "Impossible de charger la liste du personnel.";
       toast({
         title: "Erreur",
-        description: error?.message || "Impossible de charger la liste du personnel.",
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -176,7 +177,7 @@ const StaffManagement = () => {
           phone: formData.phone,
           skip_email: skipEmail,
           lang: language
-        }, session?.access_token || "");
+        }, session?.access_token || "") as { user_id: string; email_sent: boolean };
 
         // Copy password to clipboard
         try {
@@ -223,11 +224,14 @@ const StaffManagement = () => {
       setEditingUser(null);
       setFormData({ email: "", full_name: "", phone: "", role: "worker" });
 
-    } catch (error: any) {
+      setFormData({ email: "", full_name: "", phone: "", role: "worker" });
+
+    } catch (error: unknown) {
       console.error("Staff management error:", error);
+      const message = error instanceof Error ? error.message : "Une erreur s'est produite lors de la création du compte.";
       toast({
         title: "❌ Erreur",
-        description: error?.message || "Une erreur s'est produite lors de la création du compte.",
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -284,11 +288,12 @@ const StaffManagement = () => {
       // Refresh the list
       await fetchStaffMembers();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Delete staff error:", error);
+      const message = error instanceof Error ? error.message : "Impossible de supprimer le membre du personnel.";
       toast({
         title: "❌ Erreur",
-        description: error.message || "Impossible de supprimer le membre du personnel.",
+        description: message,
         variant: "destructive"
       });
     } finally {

@@ -29,6 +29,7 @@ import { toast } from "@/hooks/use-toast";
 import { Trash2, Search, ArrowLeft, ArrowRight, FileText, User, Calendar, ShoppingBag, Gamepad2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { Sale, GameSession } from "@/types";
 
 // Define a unified transaction type
 type Transaction = {
@@ -41,7 +42,7 @@ type Transaction = {
     clientName: string;
     staffName: string;
     paymentMethod: string;
-    raw: any; // Keep original object for actions like delete
+    raw: Sale | GameSession; // Keep original object for actions like delete
 };
 
 const TransactionsHistory = () => {
@@ -125,9 +126,10 @@ const TransactionsHistory = () => {
 
             setTransactions(allTransactions);
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error fetching transactions:", err);
-            toast({ title: "Error fetching data", description: err.message, variant: "destructive" });
+            const errorMessage = err instanceof Error ? err.message : "An unknown error occurred";
+            toast({ title: "Error fetching data", description: errorMessage, variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
@@ -152,8 +154,11 @@ const TransactionsHistory = () => {
 
             setDeleteId(null);
             setDeleteType(null);
-        } catch (err: any) {
-            toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+            setDeleteId(null);
+            setDeleteType(null);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : "Delete failed";
+            toast({ title: "Delete failed", description: errorMessage, variant: "destructive" });
         }
     };
 

@@ -1,17 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-
-export interface Client {
-  id: string;
-  phone: string;
-  name: string;
-  email?: string;
-  notes?: string;
-  points: number;
-  total_spent: number;
-  total_games_played: number;
-  created_at: string;
-}
+import { Client } from "@/types";
 
 export const useClients = () => {
   return useQuery({

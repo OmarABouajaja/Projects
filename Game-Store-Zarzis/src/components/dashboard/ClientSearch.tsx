@@ -16,16 +16,10 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { useClients } from "@/hooks/useClients"; // Assuming this hook exists and returns { data: clients, isLoading }
+import { Client } from "@/types";
+import { useClients } from "@/hooks/useClients";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-
-interface Client {
-    id: string;
-    name: string;
-    phone: string;
-    points: number;
-}
 
 interface ClientSearchProps {
     onSelect: (client: Client | null) => void;

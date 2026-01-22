@@ -36,8 +36,9 @@ const GameSettings = () => {
             setIsAddDialogOpen(false);
             resetForm();
             toast({ title: "Shortcut created" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to create shortcut";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 
@@ -47,8 +48,9 @@ const GameSettings = () => {
             setIsEditing(null);
             resetForm();
             toast({ title: "Shortcut updated" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to update shortcut";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 
@@ -57,8 +59,9 @@ const GameSettings = () => {
         try {
             await deleteGameShortcut(id);
             toast({ title: "Shortcut deleted" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to delete shortcut";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 

@@ -18,6 +18,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sendServiceRequestNotification } from "@/services/emailService";
+import { ServiceCatalog, ServiceRequest, ServiceStatus } from "@/types";
+
+interface ServiceFormData {
+  service_id: string;
+  client_name: string;
+  client_phone: string;
+  device_type: string;
+  device_brand: string;
+  device_model: string;
+  issue_description: string;
+  estimated_cost: string;
+  priority: string;
+}
 import { Wrench, Plus, Edit, AlertCircle, Trash2 } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
@@ -29,7 +42,8 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-500/20 text-red-500 border-red-500/50",
 };
 
-const getStatusLabel = (status: string, t: any) => {
+
+const getStatusLabel = (status: string, t: (key: string) => string) => {
   const labels: Record<string, string> = {
     pending: t('status.pending'),
     in_progress: t('status.in_progress'),
@@ -61,12 +75,12 @@ const ServicesManagement = () => {
   const serviceRequests = Array.isArray(serviceRequestsRaw) ? serviceRequestsRaw : [];
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [filter, setFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<string>("requests");
 
   // Catalog Edit State
-  const [editingCatalogItem, setEditingCatalogItem] = useState<any>(null);
+  const [editingCatalogItem, setEditingCatalogItem] = useState<ServiceCatalog | null>(null);
   const [isCatalogDialogOpen, setIsCatalogDialogOpen] = useState(false);
   const [catalogFormData, setCatalogFormData] = useState({
     name: "",
@@ -137,12 +151,13 @@ const ServicesManagement = () => {
       const reqResponse = await createRequest.mutateAsync({
         ...formData,
         service_id: finalServiceId,
-        estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : null,
+        estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : undefined,
         staff_id: user.id,
         is_complex: isComplex,
         assigned_to: isComplex ? null : user.id,
         status: "pending",
-      } as any);
+        updated_at: new Date().toISOString()
+      } as unknown as Omit<ServiceRequest, 'id' | 'created_at'>);
 
       // Send background notification
       sendServiceRequestNotification({
@@ -174,8 +189,9 @@ const ServicesManagement = () => {
       setIsCreatingNewService(false);
       setNewServiceName("");
       setIsNewServiceComplex(false);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error creating request";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -190,7 +206,7 @@ const ServicesManagement = () => {
         return;
       }
 
-      const updates: any = { id: requestId, status: newStatus };
+      const updates: Partial<ServiceRequest> & { id: string } = { id: requestId, status: newStatus as ServiceStatus };
 
       if (newStatus === "in_progress" && !request.started_at) {
         updates.started_at = new Date().toISOString();
@@ -217,8 +233,11 @@ const ServicesManagement = () => {
 
       toast({ title: "Status updated!" });
       setSelectedRequest(null);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "Status updated!" });
+      setSelectedRequest(null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Status update failed";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -234,7 +253,7 @@ const ServicesManagement = () => {
   });
 
   // Helper to extract service name safely (handles Join being an array or object)
-  const getServiceName = (request: any) => {
+  const getServiceName = (request: ServiceRequest & { service?: ServiceCatalog | ServiceCatalog[] }) => {
     const service = request?.service;
     if (Array.isArray(service)) return service[0]?.name_fr || "Service";
     return service?.name_fr || "Service";
@@ -266,7 +285,7 @@ const ServicesManagement = () => {
               <AlertTitle>Error Loading Data</AlertTitle>
               <AlertDescription>
                 We couldn't load your service requests.
-                {error && <p className="mt-2 text-xs font-mono">{(error as any).message || String(error)}</p>}
+                {error && <p className="mt-2 text-xs font-mono">{(error instanceof Error ? error.message : String(error))}</p>}
               </AlertDescription>
             </Alert>
           )}
@@ -437,8 +456,11 @@ const ServicesManagement = () => {
                                       try {
                                         await deleteService.mutateAsync(item.id);
                                         toast({ title: "Template removed" });
-                                      } catch (e: any) {
-                                        toast({ title: "Delete failed", description: e.message, variant: "destructive" });
+                                        await deleteService.mutateAsync(item.id);
+                                        toast({ title: "Template removed" });
+                                      } catch (e: unknown) {
+                                        const message = e instanceof Error ? e.message : "Delete failed";
+                                        toast({ title: "Delete failed", description: message, variant: "destructive" });
                                       }
                                     }
                                   }}
@@ -537,12 +559,14 @@ const ServicesManagement = () => {
                     await updateService.mutateAsync({ id: editingCatalogItem.id, ...finalData });
                     toast({ title: "Template updated" });
                   } else {
-                    await createService.mutateAsync(finalData as any);
+                    await createService.mutateAsync(finalData as Omit<ServiceCatalog, 'id' | 'created_at' | 'updated_at'>);
                     toast({ title: "Template created" });
                   }
                   setIsCatalogDialogOpen(false);
-                } catch (e: any) {
-                  toast({ title: "Operation failed", description: e.message, variant: "destructive" });
+                  setIsCatalogDialogOpen(false);
+                } catch (e: unknown) {
+                  const message = e instanceof Error ? e.message : "Operation failed";
+                  toast({ title: "Operation failed", description: message, variant: "destructive" });
                 }
               }} disabled={updateService.isPending || createService.isPending}>
                 {editingCatalogItem ? t('common.save_changes') : t('services.management.create_template')}

@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClients, useCreateClient, useClientByPhone } from "@/hooks/useClients";
 import { usePointsTransactions, useCreatePointsTransaction, useRedeemPoints } from "@/hooks/usePointsTransactions";
 import { useStoreSettings } from "@/hooks/useStoreSettings";
+import { Client } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +31,7 @@ const ClientsManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isRedeemDialogOpen, setIsRedeemDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -59,11 +60,13 @@ const ClientsManagement = () => {
       setPhone("");
       setEmail("");
       setNotes("");
-    } catch (err: any) {
-      if (err.message?.includes("duplicate")) {
+      setNotes("");
+    } catch (err: unknown) {
+      if ((err as Error).message?.includes("duplicate")) {
         toast({ title: "Phone number already exists", variant: "destructive" });
       } else {
-        toast({ title: "Error", description: err.message, variant: "destructive" });
+        const message = err instanceof Error ? err.message : "Error creating client";
+        toast({ title: "Error", description: message, variant: "destructive" });
       }
     }
   };
@@ -90,17 +93,19 @@ const ClientsManagement = () => {
       setSelectedClient(null);
       setPointsToRedeem("");
       setRedeemDescription("");
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setRedeemDescription("");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error redeeming points";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
-  const openHistoryDialog = (client: any) => {
+  const openHistoryDialog = (client: Client) => {
     setSelectedClient(client);
     setIsHistoryDialogOpen(true);
   };
 
-  const openRedeemDialog = (client: any) => {
+  const openRedeemDialog = (client: Client) => {
     setSelectedClient(client);
     setIsRedeemDialogOpen(true);
   };

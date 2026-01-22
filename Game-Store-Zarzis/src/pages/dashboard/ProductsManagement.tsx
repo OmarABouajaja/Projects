@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/useProducts";
+import { Product } from "@/types";
 
 const ProductsManagement = () => {
   const { isOwner } = useAuth();
@@ -26,7 +27,7 @@ const ProductsManagement = () => {
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -97,7 +98,7 @@ const ProductsManagement = () => {
         });
         toast({ title: "✅ Produit mis à jour", description: "Les modifications ont été enregistrées." });
       } else {
-        await createProduct.mutateAsync(productData as any);
+        await createProduct.mutateAsync(productData as Omit<Product, "id" | "created_at">);
         toast({ title: "✅ Produit créé", description: "Le nouveau produit a été ajouté au catalogue." });
       }
 
@@ -116,11 +117,12 @@ const ProductsManagement = () => {
         digital_content: "",
         is_digital_delivery: false
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving product:", error);
+      const message = error instanceof Error ? error.message : "Impossible d'enregistrer le produit. Vérifiez les champs obligatoires.";
       toast({
         title: "❌ Erreur",
-        description: error.message || "Impossible d'enregistrer le produit. Vérifiez les champs obligatoires.",
+        description: message,
         variant: "destructive"
       });
     }

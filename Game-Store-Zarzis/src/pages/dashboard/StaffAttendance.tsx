@@ -15,6 +15,22 @@ import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useData } from "@/contexts/DataContext";
+import { Profile } from "@/types";
+
+interface StaffSession {
+    id: string;
+    staff_id: string;
+    check_in: string;
+    check_out?: string;
+    duration_minutes?: number;
+    profile?: Profile;
+}
+
+interface AttendanceStats {
+    totalMinutes: number;
+    shifts: number;
+    days: string[];
+}
 
 const StaffAttendance = () => {
     const { user, isOwner } = useAuth();
@@ -110,7 +126,7 @@ const StaffAttendance = () => {
     }, [allSessions, selectedStaffId]);
 
     // Calculate Period Stats (Live) - Memoized for performance
-    const stats = useMemo(() => sessions.reduce((acc: any, session: any) => {
+    const stats = useMemo(() => sessions.reduce((acc: AttendanceStats, session: StaffSession) => {
         if (!session?.check_in) return acc;
 
         let duration = session.duration_minutes;
@@ -137,15 +153,18 @@ const StaffAttendance = () => {
     const avgHoursPerDay = stats.days.length > 0 ? (stats.totalMinutes / 60 / stats.days.length).toFixed(1) : "0.0";
 
     // Helper to extract profile data safely
-    const getStaffInfo = (session: any) => {
-        const profile = session?.profile;
+    const getStaffInfo = (session: StaffSession) => {
+        const profile = session?.profile as Profile | undefined;
+        // Handle case where profile might be returned as array from join
         if (Array.isArray(profile)) {
-            return profile[0]?.email || profile[0]?.full_name || 'Unknown Staff';
+            const first = profile[0] as Profile;
+            return first?.email || first?.full_name || 'Unknown Staff';
         }
         return profile?.email || profile?.full_name || 'Unknown Staff';
     };
 
-    const safeFormat = (date: any, formatStr: string) => {
+    const safeFormat = (date: string | Date | undefined, formatStr: string) => {
+        if (!date) return "---";
         const d = new Date(date);
         if (!isValid(d)) return "---";
         return format(d, formatStr);
@@ -169,7 +188,7 @@ const StaffAttendance = () => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All Staff</SelectItem>
-                                        {staffProfiles?.map((staff: any) => (
+                                        {staffProfiles?.map((staff: Pick<Profile, 'id' | 'full_name' | 'email'>) => (
                                             <SelectItem key={staff.id} value={staff.id}>
                                                 {staff.full_name || staff.email}
                                             </SelectItem>

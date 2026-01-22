@@ -67,7 +67,7 @@ export async function createStaffInvitation(data: StaffMemberData): Promise<bool
 
         return true;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Staff invitation error:', error);
         throw error;
     }
@@ -125,7 +125,7 @@ export async function createStaffDirectly(data: StaffMemberData, tempPassword: s
 
         return true;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Direct staff creation error:', error);
         throw error;
     }

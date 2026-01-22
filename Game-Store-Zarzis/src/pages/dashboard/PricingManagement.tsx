@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { usePricing, useUpdatePricing, useCreatePricing, useDeletePricing } from "@/hooks/usePricing";
+import { usePricing, useUpdatePricing, useCreatePricing, useDeletePricing, Pricing } from "@/hooks/usePricing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +23,7 @@ const PricingManagement = () => {
   const createPricing = useCreatePricing();
   const deletePricing = useDeletePricing();
 
-  const [editingPricing, setEditingPricing] = useState<any>(null);
+  const [editingPricing, setEditingPricing] = useState<Pricing | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // New Pricing State
@@ -58,7 +58,7 @@ const PricingManagement = () => {
     );
   }
 
-  const handleEditPrice = (price: any) => {
+  const handleEditPrice = (price: Pricing) => {
     setEditingPricing({ ...price });
     setIsEditDialogOpen(true);
   };
@@ -113,8 +113,9 @@ const PricingManagement = () => {
         sort_order: 0
       });
 
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error creating pricing";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   }
 
@@ -124,8 +125,9 @@ const PricingManagement = () => {
     try {
       await deletePricing.mutateAsync(id);
       toast({ title: "Deleted", description: "Pricing removed." });
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error deleting pricing";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   }
 
@@ -133,7 +135,7 @@ const PricingManagement = () => {
   const ps5Pricing = pricing?.filter(p => p.console_type === 'ps5') || [];
   const otherPricing = pricing?.filter(p => !['ps4', 'ps5'].includes(p.console_type)) || [];
 
-  const PricingCard = ({ price }: { price: any }) => (
+  const PricingCard = ({ price }: { price: Pricing }) => (
     <Card className="glass-card">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">

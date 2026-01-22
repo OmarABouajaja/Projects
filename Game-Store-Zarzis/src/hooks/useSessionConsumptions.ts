@@ -12,6 +12,7 @@ export interface SessionConsumption {
         name: string;
         name_fr: string;
         price: number;
+        points_earned: number;
     };
 }
 

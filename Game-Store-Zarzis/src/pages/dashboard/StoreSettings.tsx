@@ -94,7 +94,7 @@ const StoreSettings = () => {
       toast({ title: "Backup Started", description: "Fetching data from secure database..." });
 
       const tables = ['clients', 'products', 'sales', 'gaming_sessions', 'expenses', 'services_catalog', 'orders'];
-      const backupData: any = { timestamp: new Date().toISOString(), version: '1.0' };
+      const backupData: Record<string, unknown> = { timestamp: new Date().toISOString(), version: '1.0' };
 
       for (const table of tables) {
         const { data, error } = await supabase.from(table).select('*');
@@ -132,7 +132,7 @@ const StoreSettings = () => {
       const headers = Object.keys(data[0]);
       const csvContent = "data:text/csv;charset=utf-8,"
         + headers.join(",") + "\n"
-        + data.map((row: any) => headers.map(fieldName => {
+        + data.map((row: Record<string, unknown>) => headers.map(fieldName => {
           let val = row[fieldName];
           if (val === null || val === undefined) val = '';
           if (typeof val === 'object') val = JSON.stringify(val).replace(/"/g, '""'); // Escape quotes
@@ -258,7 +258,7 @@ const StoreSettings = () => {
   const handleSave = async () => {
     try {
       // Create a batch update object with all local settings
-      const settingsToUpdate: any = {
+      const settingsToUpdate: Partial<StoreSettings> = {
         opening_hours: localSettings.opening_hours,
         weekly_schedule: localSettings.weekly_schedule,
         special_hours: localSettings.special_hours,
@@ -299,7 +299,7 @@ const StoreSettings = () => {
     }
   };
 
-  const updateSetting = (key: string, value: any) => {
+  const updateSetting = (key: string, value: unknown) => {
     setLocalSettings(prev => ({
       ...prev,
       [key]: value
@@ -341,7 +341,7 @@ const StoreSettings = () => {
     const weekends = ['saturday', 'sunday'];
 
     switch (preset) {
-      case 'close-weekends':
+      case 'close-weekends': {
         const closeSchedule = { ...localSettings.weekly_schedule };
         weekends.forEach(day => {
           closeSchedule[day as keyof typeof closeSchedule].isOpen = false;
@@ -349,8 +349,9 @@ const StoreSettings = () => {
         updateSetting('weekly_schedule', closeSchedule);
         toast({ title: t('settings.presetAppliedTitle'), description: t('settings.closeWeekendsDescription') });
         break;
+      }
 
-      case 'standard-hours':
+      case 'standard-hours': {
         const standardSchedule = {
           ...localSettings.weekly_schedule,
           monday: { isOpen: true, open: "09:00", close: "18:00", breakStart: "12:00", breakEnd: "13:00", hasBreak: true },
@@ -364,8 +365,9 @@ const StoreSettings = () => {
         updateSetting('weekly_schedule', standardSchedule);
         toast({ title: t('settings.standardPresetAppliedTitle'), description: t('settings.standardPresetDescription') });
         break;
+      }
 
-      case '24-hours':
+      case '24-hours': {
         const twentyFourHourSchedule = {
           ...localSettings.weekly_schedule,
           monday: { isOpen: true, open: "08:00", close: "02:00", breakStart: "12:00", breakEnd: "13:30", hasBreak: true },
@@ -379,6 +381,7 @@ const StoreSettings = () => {
         updateSetting('weekly_schedule', twentyFourHourSchedule);
         toast({ title: t('settings.24hPresetAppliedTitle'), description: t('settings.24hPresetDescription') });
         break;
+      }
     }
   };
 
@@ -435,7 +438,8 @@ const StoreSettings = () => {
     }
     r /= 255; g /= 255; b /= 255;
     const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
     if (max !== min) {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);

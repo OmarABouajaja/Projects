@@ -13,13 +13,14 @@ import { format } from "date-fns";
 import { ShoppingBag, Truck, CheckCircle, XCircle, Clock, Search, Eye, Copy, Mail, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Order, OrderItem } from "@/types";
 
 const OrdersManagement = () => {
     const { data: orders, isLoading } = useOrders();
     const updateStatus = useUpdateOrderStatus();
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
-    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
     const filteredOrders = orders?.filter(order => {
         const matchesSearch = order.client_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -192,7 +193,7 @@ const OrdersManagement = () => {
                                                             <div className="border rounded-lg p-2 bg-muted/20">
                                                                 <span className="font-bold text-sm mb-2 block">Items:</span>
                                                                 <div className="space-y-2 max-h-40 overflow-y-auto">
-                                                                    {order.items && Array.isArray(order.items) && order.items.map((item: any, idx: number) => (
+                                                                    {order.items && Array.isArray(order.items) && order.items.map((item: OrderItem, idx: number) => (
                                                                         <div key={idx} className="flex justify-between items-center text-sm p-1 border-b last:border-0 border-muted/20">
                                                                             <div className="flex flex-col">
                                                                                 <span className="font-medium">{item.quantity}x {item.name}</span>

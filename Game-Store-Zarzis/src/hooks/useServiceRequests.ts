@@ -1,30 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-
-export interface ServiceRequest {
-  id: string;
-  service_id: string;
-  client_id: string | null;
-  client_name: string;
-  client_phone: string;
-  device_type: string | null;
-  device_brand: string | null;
-  device_model: string | null;
-  issue_description: string;
-  diagnosis: string | null;
-  estimated_cost: number | null;
-  final_cost: number | null;
-  status: string;
-  priority: string;
-  assigned_to: string | null;
-  is_complex: boolean;
-  started_at: string | null;
-  completed_at: string | null;
-  staff_id: string;
-  notes: string | null;
-  internal_notes: string | null;
-  created_at: string;
-}
+import { ServiceRequest } from "@/types";
 
 export const useServiceRequests = (status?: string) => {
   return useQuery({

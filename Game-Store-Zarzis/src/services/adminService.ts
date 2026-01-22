@@ -22,7 +22,7 @@ export interface CreateStaffData {
  * Create a new staff member (Admin only)
  * This creates the user in Auth, assigns role, creates profile, and sends invite
  */
-export async function createStaffMember(data: CreateStaffData, token: string): Promise<any> {
+export async function createStaffMember(data: CreateStaffData, token: string): Promise<unknown> {
     // Create AbortController for timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
@@ -53,18 +53,21 @@ export async function createStaffMember(data: CreateStaffData, token: string): P
         }
 
         return await response.json();
-    } catch (error: any) {
+        return await response.json();
+    } catch (error: unknown) {
         clearTimeout(timeoutId);
 
         console.error('❌ API Call Failed:', error);
 
-        // Handle specific error types
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout - Le serveur ne répond pas. Vérifiez que le backend est configuré correctement.');
-        }
+        // Handle specific error types safely
+        if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - Le serveur ne répond pas. Vérifiez que le backend est configuré correctement.');
+            }
 
-        if (error.message === 'Failed to fetch') {
-            throw new Error('Impossible de se connecter au serveur. Vérifiez que le backend est en cours d\'exécution sur http://localhost:8000');
+            if (error.message === 'Failed to fetch') {
+                throw new Error('Impossible de se connecter au serveur. Vérifiez que le backend est en cours d\'exécution sur http://localhost:8000');
+            }
         }
 
         throw error;
@@ -75,7 +78,7 @@ export async function createStaffMember(data: CreateStaffData, token: string): P
  * Delete a staff member completely (from Auth and database)
  * This allows the email to be reused.
  */
-export async function deleteStaffMember(userId: string, token: string): Promise<any> {
+export async function deleteStaffMember(userId: string, token: string): Promise<unknown> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
@@ -103,16 +106,19 @@ export async function deleteStaffMember(userId: string, token: string): Promise<
         }
 
         return await response.json();
-    } catch (error: any) {
+        return await response.json();
+    } catch (error: unknown) {
         clearTimeout(timeoutId);
         console.error('❌ Delete Staff API Call Failed:', error);
 
-        if (error.name === 'AbortError') {
-            throw new Error('Request timeout - Le serveur ne répond pas.');
-        }
+        if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout - Le serveur ne répond pas.');
+            }
 
-        if (error.message === 'Failed to fetch') {
-            throw new Error('Impossible de se connecter au serveur.');
+            if (error.message === 'Failed to fetch') {
+                throw new Error('Impossible de se connecter au serveur.');
+            }
         }
 
         throw error;

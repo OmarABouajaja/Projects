@@ -18,6 +18,7 @@ import { ShoppingCart, Plus, Package, Search, DollarSign, User, Star, CheckCircl
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Product, Client } from "@/types";
 
 const SalesManagement = () => {
   const { user } = useAuth();
@@ -29,9 +30,9 @@ const SalesManagement = () => {
 
   const [isSellDialogOpen, setIsSellDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedClientForSale, setSelectedClientForSale] = useState<any>(null);
+  const [selectedClientForSale, setSelectedClientForSale] = useState<Client | null>(null);
   const [isCreatingClient, setIsCreatingClient] = useState(false);
   const [newClientPhone, setNewClientPhone] = useState("");
   const [newClientName, setNewClientName] = useState("");
@@ -46,6 +47,7 @@ const SalesManagement = () => {
   const createPointsTransaction = useCreatePointsTransaction();
 
   const calculateTotal = () => {
+    if (!selectedProduct) return { total: 0, pointsUsed: 0, cashPaid: 0 };
     const subtotal = selectedProduct.price * quantity;
     if (paymentMethod === "points") {
       return { total: 0, pointsUsed: Math.min(subtotal * 1000, pointsToUse), cashPaid: 0 };
@@ -135,8 +137,11 @@ const SalesManagement = () => {
       setPointsToUse(0);
       setStaffConfirmed(false);
       setClientConfirmed(false);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setStaffConfirmed(false);
+      setClientConfirmed(false);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Sale failed";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -291,7 +296,7 @@ const SalesManagement = () => {
                   </div>
                   <div>
                     <Label>{t('sales.payment')}</Label>
-                    <Select value={paymentMethod} onValueChange={(value: any) => setPaymentMethod(value)}>
+                    <Select value={paymentMethod} onValueChange={(value: "cash" | "points" | "mixed") => setPaymentMethod(value)}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -309,7 +314,7 @@ const SalesManagement = () => {
                     <Label>Client (Optional)</Label>
                     {!isCreatingClient ? (
                       <ClientSearch
-                        onSelect={setSelectedClientForSale}
+                        onSelect={(client) => setSelectedClientForSale(client)}
                         selectedClient={selectedClientForSale}
                         onCreateNew={() => setIsCreatingClient(true)}
                       />

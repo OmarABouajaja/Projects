@@ -8,9 +8,10 @@ import { useClients, useCreateClient, useClientByPhone } from "@/hooks/useClient
 import { useStartSession, useEndSession, useTodaySessions, useActiveSessions, useAddGameToSession } from "@/hooks/useGamingSessions";
 import { useCreatePointsTransaction } from "@/hooks/usePointsTransactions";
 import { useCreateSale } from "@/hooks/useSales";
-import { useSessionConsumptions, useDeleteSessionConsumption } from "@/hooks/useSessionConsumptions";
+import { useSessionConsumptions, useDeleteSessionConsumption, SessionConsumption } from "@/hooks/useSessionConsumptions";
 import { useStoreSettings, useUpdateStoreSetting } from "@/hooks/useStoreSettings";
 import { useGameShortcuts, useCreateGameShortcut, useDeleteGameShortcut } from "@/hooks/useGameShortcuts";
+import { Client, GameSession, StoreSettings, Pricing } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,14 +45,14 @@ const SessionsManagement = () => {
   const [isExtendDialogOpen, setIsExtendDialogOpen] = useState(false);
   const [selectedConsole, setSelectedConsole] = useState<string | null>(null);
   const [selectedPricing, setSelectedPricing] = useState<string>("");
-  const [selectedClientForSession, setSelectedClientForSession] = useState<any>(null); // For start dialog
+  const [selectedClientForSession, setSelectedClientForSession] = useState<Client | null>(null); // For start dialog
   const [isCreatingClient, setIsCreatingClient] = useState(false);
   const [newClientPhone, setNewClientPhone] = useState("");
   const [newClientName, setNewClientName] = useState("");
   const [gameNotes, setGameNotes] = useState("");
   const [isShortcutsDialogOpen, setIsShortcutsDialogOpen] = useState(false);
   const [newShortcutName, setNewShortcutName] = useState("");
-  const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [selectedSession, setSelectedSession] = useState<GameSession & { pricing?: Pricing } | null>(null);
   const [gamesInSession, setGamesInSession] = useState(0);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
@@ -71,7 +72,7 @@ const SessionsManagement = () => {
 
   // New State for Consumption Dialog
   const [isConsumptionDialogOpen, setIsConsumptionDialogOpen] = useState(false);
-  const [selectedSessionForConsumption, setSelectedSessionForConsumption] = useState<any>(null);
+  const [selectedSessionForConsumption, setSelectedSessionForConsumption] = useState<GameSession & { pricing?: Pricing } | null>(null);
 
   // Mutations
   const startSession = useStartSession();
@@ -136,7 +137,7 @@ const SessionsManagement = () => {
           if (!applicablePricing && storeSettingsData) {
             const consoleType = (targetConsole.console_type || '').toUpperCase();
             const globalDefaultKey = consoleType === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
-            const globalDefaultId = (storeSettingsData as any)[globalDefaultKey];
+            const globalDefaultId = (storeSettingsData as StoreSettings)[globalDefaultKey as keyof StoreSettings];
 
             if (globalDefaultId && globalDefaultId !== 'none') {
               applicablePricing = pricing.find(p => p.id === globalDefaultId);
@@ -164,8 +165,9 @@ const SessionsManagement = () => {
               staff_id: user?.id || '',
               notes: "Quick Start via Shortcut"
             });
-          } catch (err: any) {
-            toast({ title: "Start Failed", description: err.message, variant: "destructive" });
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Start Failed";
+            toast({ title: "Start Failed", description: message, variant: "destructive" });
           }
         }
       }
@@ -238,6 +240,7 @@ const SessionsManagement = () => {
   const freeGameThreshold = storeSettingsData?.free_game_threshold?.games_required || 5;
 
   const getConsoleSession = (consoleId: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return activeSessions?.find((s: any) => s.console_id === consoleId);
   };
 
@@ -349,8 +352,9 @@ const SessionsManagement = () => {
       toast({ title: "Session started!" });
       setIsStartDialogOpen(false);
       resetForm();
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error starting session";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -379,8 +383,9 @@ const SessionsManagement = () => {
         toast({ title: "Extended", description: `Added ${minsToAdd} minutes to session.` });
       }
       setIsExtendDialogOpen(false);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error extending session";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   }
 
@@ -396,8 +401,9 @@ const SessionsManagement = () => {
       });
       toast({ title: "Prolongation Added", description: "Football extra time recorded." });
       setIsExtendDialogOpen(false);
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error adding prolongation";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -450,7 +456,7 @@ const SessionsManagement = () => {
     setPointsEarned(calculatedPoints);
 
     // 2. Calculate Consumption Total
-    const consumptionTotal = sessionConsumptions?.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0) || 0;
+    const consumptionTotal = sessionConsumptions?.reduce((sum: number, c: SessionConsumption) => sum + (c.unit_price * c.quantity), 0) || 0;
     const grandTotal = gamingTotal + consumptionTotal;
 
     try {
@@ -475,7 +481,7 @@ const SessionsManagement = () => {
             total_amount: item.unit_price * item.quantity,
             payment_method: "cash",
             points_used: 0,
-            points_earned: (item.product as any)?.points_earned ? ((item.product as any).points_earned * item.quantity) : 0,
+            points_earned: item.product?.points_earned ? (item.product.points_earned * item.quantity) : 0,
             client_id: clientId || null,
             staff_id: user?.id || '',
             notes: `Session Consumption #${session.id}`,
@@ -519,8 +525,9 @@ const SessionsManagement = () => {
       setIsEndDialogOpen(false);
       setSelectedSession(null);
       resetForm();
-    } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error ending session";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -1126,7 +1133,7 @@ const SessionsManagement = () => {
                     <div className="border-t border-white/10 mt-2 pt-2 flex justify-between font-bold text-sm">
                       <span>Subtotal Consumables:</span>
                       <span className="text-secondary">
-                        {sessionConsumptions.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0).toFixed(3)} DT
+                        {sessionConsumptions.reduce((sum: number, c: SessionConsumption) => sum + (c.unit_price * c.quantity), 0).toFixed(3)} DT
                       </span>
                     </div>
                   </div>
@@ -1282,7 +1289,7 @@ const SessionsManagement = () => {
                 <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center mt-4">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Total à Payer</p>
                   <p className="font-display text-4xl font-bold text-primary">
-                    {(estimatedRevenue + (sessionConsumptions?.reduce((sum: number, c: any) => sum + (c.unit_price * c.quantity), 0) || 0)).toFixed(3)}
+                    {(estimatedRevenue + (sessionConsumptions?.reduce((sum: number, c: SessionConsumption) => sum + (c.unit_price * c.quantity), 0) || 0)).toFixed(3)}
                     <span className="text-lg ml-1 text-muted-foreground">DT</span>
                   </p>
                 </div>

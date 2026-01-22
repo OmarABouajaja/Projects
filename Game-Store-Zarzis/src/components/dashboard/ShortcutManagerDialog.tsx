@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Gamepad2, Plus, Trash2, Edit2, Save, Keyboard, Monitor } from "lucide-react";
-import { GameShortcut } from "@/types";
+import { GameShortcut, Console } from "@/types";
 
 interface ShortcutManagerDialogProps {
     isOpen: boolean;
@@ -49,9 +49,11 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
             });
             setIsAdding(false);
             resetForm();
+            resetForm();
             toast({ title: "Shortcut created" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Creation failed";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 
@@ -60,9 +62,11 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
             await updateGameShortcut(id, formData);
             setIsEditing(null);
             resetForm();
+            resetForm();
             toast({ title: "Shortcut updated" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Update failed";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 
@@ -70,9 +74,11 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
         if (!window.confirm("Are you sure you want to delete this shortcut?")) return;
         try {
             await deleteGameShortcut(id);
+            await deleteGameShortcut(id);
             toast({ title: "Shortcut deleted" });
-        } catch (err: any) {
-            toast({ title: "Error", description: err.message, variant: "destructive" });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Deletion failed";
+            toast({ title: "Error", description: message, variant: "destructive" });
         }
     };
 
@@ -100,12 +106,13 @@ export const ShortcutManagerDialog = ({ isOpen, onOpenChange }: ShortcutManagerD
     };
 
     // Console Update Handler
-    const handleConsoleUpdate = async (consoleId: string, updates: any) => {
+    const handleConsoleUpdate = async (consoleId: string, updates: Partial<Console>) => {
         try {
             await updateConsole.mutateAsync({ id: consoleId, ...updates });
             toast({ title: "Console config updated" });
-        } catch (err: any) {
-            toast({ title: "Failed to update", description: err.message, variant: 'destructive' });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Update failed";
+            toast({ title: "Failed to update", description: message, variant: 'destructive' });
         }
     };
 

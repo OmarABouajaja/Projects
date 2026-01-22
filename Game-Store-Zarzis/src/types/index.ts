@@ -82,6 +82,7 @@ export interface Console {
 export interface Profile {
   id: string;
   full_name: string;
+  email?: string;
   phone?: string;
   avatar_url?: string;
   is_active: boolean;
@@ -100,6 +101,41 @@ export interface UserRoleRecord {
   created_at: string;
 }
 
+export interface DailySchedule {
+  isOpen: boolean;
+  open: string;
+  close: string;
+  breakStart?: string;
+  breakEnd?: string;
+  hasBreak: boolean;
+}
+
+export interface WeeklySchedule {
+  monday: DailySchedule;
+  tuesday: DailySchedule;
+  wednesday: DailySchedule;
+  thursday: DailySchedule;
+  friday: DailySchedule;
+  saturday: DailySchedule;
+  sunday: DailySchedule;
+}
+
+export interface OpeningHours {
+  open: string;
+  close: string;
+}
+
+export interface PricingConfig {
+  hourly_rate: number;
+  ps5_hourly_rate?: number;
+  currency?: string;
+}
+
+export interface AuthConfig {
+  enable_sms_verification: boolean;
+  allow_guest_checkout?: boolean;
+}
+
 // Store Settings
 export interface StoreSettings {
   id: string;
@@ -111,9 +147,10 @@ export interface StoreSettings {
   help_tooltips_enabled: boolean;
   tariff_display_mode: 'cards' | 'table' | 'comparison';
   data_limit_mb: number;
-  opening_hours: any;
-  pricing_config: any;
-  auth_config: any;
+  opening_hours: OpeningHours;
+  pricing_config: PricingConfig;
+  auth_config: AuthConfig;
+  weekly_schedule?: WeeklySchedule;
   delivery_settings?: DeliverySettings;
   default_pricing_ps4?: string;
   default_pricing_ps5?: string;
@@ -146,6 +183,7 @@ export interface Client {
   total_games_played: number;
   games_since_free?: number;
   created_by?: string;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
@@ -359,6 +397,8 @@ export interface OrderFormData {
   notes?: string;
 }
 // Service Requests
+export type ServiceStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
+
 export interface ServiceRequest {
   id: string;
   service_id: string;
@@ -377,6 +417,10 @@ export interface ServiceRequest {
   parts_cost?: number;
   notes?: string;
   staff_id?: string;
+  assigned_to?: string;
+  is_complex: boolean;
+  started_at?: string;
+  completed_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -424,5 +468,5 @@ export interface Sale {
   payment_method: string;
   staff_id: string;
   created_at: string;
-  items?: any[];
+  items?: OrderItem[];
 }

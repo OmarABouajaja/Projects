@@ -1,28 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-
-export interface Product {
-  id: string;
-  name: string;
-  name_fr: string;
-  name_ar: string;
-  description: string | null;
-  description_fr: string | null;
-  description_ar: string | null;
-  category: string;
-  price: number;
-  cost_price: number | null;
-  stock_quantity: number;
-  points_earned: number;
-  points_price: number | null;
-  image_url: string | null;
-  is_active: boolean;
-  product_type?: 'physical' | 'consumable' | 'digital';
-  subcategory?: string;
-  is_quick_sale?: boolean;
-  digital_content?: string;
-  is_digital_delivery?: boolean;
-}
+import { Product } from "@/types";
 
 export const useProducts = (activeOnly = true) => {
   return useQuery({
