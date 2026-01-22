@@ -204,23 +204,7 @@ const Navbar = () => {
               );
             })}
 
-            {/* News Link for Mobile */}
-            {(() => {
-              return (
-                <a
-                  href="#news"
-                  className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-200 touch-manipulation min-w-[64px] text-muted-foreground`}
-                  title={t("nav.blog")}
-                >
-                  <div className="relative transition-transform duration-200">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <span className={`text-[10px] font-medium leading-tight opacity-70`}>
-                    {t("nav.blog")}
-                  </span>
-                </a>
-              );
-            })()}
+
 
             {/* Added Cart Link for Mobile */}
             {(() => {
