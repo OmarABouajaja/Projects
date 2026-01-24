@@ -389,6 +389,7 @@ export const translations: Translations = {
   "common.filter": { fr: "Filtrer", en: "Filter", ar: "تصفية" },
   "common.sort": { fr: "Trier", en: "Sort", ar: "ترتيب" },
   "common.all": { fr: "Tout", en: "All", ar: "الكل" },
+  "common.load_more": { fr: "Voir plus", en: "Load More", ar: "تحميل المزيد" },
   "common.none": { fr: "Aucun", en: "None", ar: "لا شيء" },
   "common.no_clients": { fr: "Aucun client trouvé", en: "No clients found", ar: "لم يتم العثور على عملاء" },
   "common.yes": { fr: "Oui", en: "Yes", ar: "نعم" },

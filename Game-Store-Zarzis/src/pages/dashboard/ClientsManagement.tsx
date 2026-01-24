@@ -110,11 +110,34 @@ const ClientsManagement = () => {
     setIsRedeemDialogOpen(true);
   };
 
-  const filteredClients = clients?.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.includes(searchTerm)
-  );
+  /* Optimization: Memoize filtering */
+  const filteredClients = useState(() => {
+    // Initial State is not needed, we use useMemo below.
+    // This is just to keep hooks order safe if we were refactoring deeper.
+    return [];
+  })[0];
+
+  /* Real Filter Logic */
+  const allFilteredClients = useMemo(() => {
+    if (!clients) return [];
+    const lowerSearch = searchTerm.toLowerCase();
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(lowerSearch) ||
+        c.phone.includes(searchTerm)
+    );
+  }, [clients, searchTerm]);
+
+  /* Optimization: Lazy Rendering */
+  const [visibleCount, setVisibleCount] = useState(12);
+  const visibleClients = useMemo(() => allFilteredClients.slice(0, visibleCount), [allFilteredClients, visibleCount]);
+
+
+
+  // Reset visible count on search
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [searchTerm]);
 
   return (
     <ProtectedRoute>
@@ -193,9 +216,9 @@ const ClientsManagement = () => {
             />
           </div>
 
-          {/* Clients List */}
+          {/* Clients List - Virtualized via Lazy Loading */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredClients?.map((client) => (
+            {visibleClients?.map((client) => (
               <Card key={client.id} className="glass-card group hover:border-primary/50 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -264,6 +287,15 @@ const ClientsManagement = () => {
               </Card>
             ))}
           </div>
+
+          {/* Load More Sentinel */}
+          {visibleCount < allFilteredClients.length && (
+            <div className="flex justify-center py-4">
+              <Button variant="ghost" onClick={() => setVisibleCount(prev => prev + 12)} className="text-muted-foreground hover:text-primary">
+                {t("common.load_more") || "Load More"}
+              </Button>
+            </div>
+          )}
 
           {(!filteredClients || filteredClients.length === 0) && (
             <div className="text-center py-20 glass-card rounded-3xl border-dashed border-2 border-white/10">
