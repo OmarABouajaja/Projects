@@ -78,7 +78,7 @@ const StaffManagement = () => {
       const userIds = userRoles.map(r => r.user_id);
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, created_at, is_active, phone")
+        .select("id, full_name, email, created_at, is_active, phone")
         .in("id", userIds);
 
       if (profilesError) console.error("Error fetching profiles:", profilesError);
@@ -88,21 +88,19 @@ const StaffManagement = () => {
       const staffData: StaffMember[] = userRoles.map(role => {
         const profileData = profilesMap.get(role.user_id);
 
-        let userEmail = "Email non disponible";
-        let userFullName = "Nom non disponible";
+        // Priority logic for Email: Context User > Profile Table
+        const userEmail = (role.user_id === user?.id ? user.email : profileData?.email) || "Email non disponible";
 
-        // Get actual email
-        if (role.user_id === user?.id) {
-          userEmail = user.email || userEmail;
-        } else if (profileData?.full_name) {
-          userFullName = profileData.full_name;
-        }
+        // Priority logic for Name: Profile Table > Context User Metadata > Fallback
+        const userFullName = profileData?.full_name ||
+          (role.user_id === user?.id ? user.user_metadata?.full_name : null) ||
+          "Nom non disponible";
 
         return {
           id: role.user_id,
           email: userEmail,
           role: role.role as "owner" | "worker",
-          full_name: profileData?.full_name || userFullName,
+          full_name: userFullName,
           phone: profileData?.phone,
           created_at: profileData?.created_at || role.created_at || new Date().toISOString(),
           is_invited: (!profileData || !profileData.full_name) && role.user_id !== user?.id
@@ -735,8 +733,12 @@ const StaffManagement = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-medium text-sm sm:text-base truncate">{member.email}</h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-base sm:text-lg tracking-tight">
+                                {member.full_name && member.full_name !== "Nom non disponible"
+                                  ? member.full_name
+                                  : member.email}
+                              </h3>
                               {member.id === user?.id && (
                                 <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
                                   <User className="w-3 h-3 mr-1" />
@@ -773,8 +775,22 @@ const StaffManagement = () => {
                                 {t("staff.joined")} {formatDate(member.created_at)}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>{t("staff.profiles_not_supported")}</span>
+                            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                              {(member.full_name && member.full_name !== "Nom non disponible") && (
+                                <div className="flex items-center gap-1">
+                                  <Mail className="w-3 h-3 opacity-60" />
+                                  <span>{member.email}</span>
+                                </div>
+                              )}
+                              {member.phone && (
+                                <div className="flex items-center gap-1 border-white/10">
+                                  <Phone className="w-3 h-3 opacity-60" />
+                                  <span>{member.phone}</span>
+                                </div>
+                              )}
+                              {(!member.full_name || member.full_name === "Nom non disponible") && (
+                                <span>{t("staff.profiles_not_supported")}</span>
+                              )}
                             </div>
                           </div>
                         </div>
