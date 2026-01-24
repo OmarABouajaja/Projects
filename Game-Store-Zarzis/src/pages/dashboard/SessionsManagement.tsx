@@ -11,7 +11,7 @@ import { useCreateSale } from "@/hooks/useSales";
 import { useSessionConsumptions, useDeleteSessionConsumption, SessionConsumption } from "@/hooks/useSessionConsumptions";
 import { useStoreSettings, useUpdateStoreSetting } from "@/hooks/useStoreSettings";
 import { useGameShortcuts, useCreateGameShortcut, useDeleteGameShortcut } from "@/hooks/useGameShortcuts";
-import { Client, GameSession, StoreSettings, Pricing } from "@/types";
+import { Client, GameSession, StoreSettings, Pricing, Console } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,7 +52,7 @@ const SessionsManagement = () => {
   const [gameNotes, setGameNotes] = useState("");
   const [isShortcutsDialogOpen, setIsShortcutsDialogOpen] = useState(false);
   const [newShortcutName, setNewShortcutName] = useState("");
-  const [selectedSession, setSelectedSession] = useState<GameSession & { pricing?: Pricing } | null>(null);
+  const [selectedSession, setSelectedSession] = useState<GameSession & { pricing?: Pricing; console?: Console } | null>(null);
   const [gamesInSession, setGamesInSession] = useState(0);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [pointsEarned, setPointsEarned] = useState(0);
@@ -72,7 +72,7 @@ const SessionsManagement = () => {
 
   // New State for Consumption Dialog
   const [isConsumptionDialogOpen, setIsConsumptionDialogOpen] = useState(false);
-  const [selectedSessionForConsumption, setSelectedSessionForConsumption] = useState<GameSession & { pricing?: Pricing } | null>(null);
+  const [selectedSessionForConsumption, setSelectedSessionForConsumption] = useState<GameSession & { pricing?: Pricing; console?: Console } | null>(null);
 
   // Mutations
   const startSession = useStartSession();
@@ -137,7 +137,7 @@ const SessionsManagement = () => {
           if (!applicablePricing && storeSettingsData) {
             const consoleType = (targetConsole.console_type || '').toUpperCase();
             const globalDefaultKey = consoleType === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
-            const globalDefaultId = (storeSettingsData as StoreSettings)[globalDefaultKey as keyof StoreSettings];
+            const globalDefaultId = (storeSettingsData as unknown as StoreSettings)[globalDefaultKey as keyof StoreSettings];
 
             if (globalDefaultId && globalDefaultId !== 'none') {
               applicablePricing = pricing.find(p => p.id === globalDefaultId);
@@ -240,8 +240,7 @@ const SessionsManagement = () => {
   const freeGameThreshold = storeSettingsData?.free_game_threshold?.games_required || 5;
 
   const getConsoleSession = (consoleId: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return activeSessions?.find((s: any) => s.console_id === consoleId);
+    return activeSessions?.find((s: GameSession) => s.console_id === consoleId);
   };
 
   // Alarm State (Now handled globally in DashboardLayout)
@@ -252,7 +251,7 @@ const SessionsManagement = () => {
     const now = new Date().getTime();
     const newOverdue: string[] = [];
 
-    activeSessions.forEach((session: any) => {
+    activeSessions.forEach((session: GameSession) => {
       if (!session.start_time) return;
       const startTime = new Date(session.start_time).getTime();
       const elapsedMinutes = (now - startTime) / (1000 * 60);
@@ -651,11 +650,11 @@ const SessionsManagement = () => {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 mb-1">
                 <Gamepad2 className="w-6 h-6 text-primary" />
-                Gaming Sessions
+                {t('sessions.title')}
                 <HelpTooltip content={t('help.sessions')} />
               </h1>
               <p className="text-muted-foreground text-sm">
-                Manage PS4/PS5 sessions real-time.
+                {t('sessions.subtitle')}
               </p>
             </div>
 
@@ -666,38 +665,34 @@ const SessionsManagement = () => {
                 size="icon"
                 onClick={toggleSound}
                 className={isSoundMuted ? "text-muted-foreground bg-background/50" : "text-primary border-primary/20 bg-primary/10 shadow-[0_0_10px_rgba(var(--primary),0.2)]"}
-                title={isSoundMuted ? "Unmute Alarms" : "Mute Alarms"}
+                title={isSoundMuted ? t('sessions.unmute_alarms') : t('sessions.mute_alarms')}
               >
                 {isSoundMuted ? <BellOff className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
               </Button>
 
-              <Sheet open={isCafeMenuOpen} onOpenChange={setIsCafeMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10">
-                    <Coffee className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Café Menu</span>
-                  </Button>
-                </SheetTrigger>
-              </Sheet>
+              <Button variant="outline" size="sm" className="border-primary/30 text-primary hover:bg-primary/10" onClick={() => setIsCafeMenuOpen(true)}>
+                <Coffee className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t('sessions.cafe_menu')}</span>
+              </Button>
 
               <Sheet open={isQuickRefOpen} onOpenChange={setIsQuickRefOpen}>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className="border-secondary/30 text-secondary hover:bg-secondary/10">
                     <Zap className="w-4 h-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Tarifs & Raccourcis</span>
+                    <span className="hidden sm:inline">{t('sessions.pricing_shortcuts')}</span>
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="glass-modal border-white/10 w-full sm:max-w-[540px] overflow-y-auto">
                   <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2 text-2xl">
                       <Zap className="w-6 h-6 text-secondary fill-secondary" />
-                      Référence Rapide Tarifs
+                      {t('sessions.quick_reference')}
                     </SheetTitle>
                     <SheetDescription>
-                      Consultez vos tarifs et configurez les raccourcis par défaut (Auto-Start).
+                      {t('sessions.quick_reference_desc')}
                       <br />
                       <span className="text-xs text-muted-foreground mt-2 block">
-                        Cliquez sur <Zap className="w-3 h-3 inline text-secondary" /> pour définir le tarif par défaut.
+                        {t('sessions.set_default_hint')}
                       </span>
                     </SheetDescription>
                   </SheetHeader>
@@ -709,7 +704,7 @@ const SessionsManagement = () => {
                         <div className="flex items-center justify-between border-b border-white/10 pb-2">
                           <h3 className="font-bold text-lg flex items-center gap-2">
                             <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20">{type}</Badge>
-                            Tarifs disponibles
+                            {t('sessions.available_rates')}
                           </h3>
                         </div>
 
@@ -726,10 +721,10 @@ const SessionsManagement = () => {
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-2">
                                     <span className="font-bold text-white">{p.name}</span>
-                                    {isDefault && <Badge className="bg-secondary text-black text-[10px] h-4">DÉFAUT</Badge>}
+                                    {isDefault && <Badge className="bg-secondary text-black text-[10px] h-4">{t('sessions.default')}</Badge>}
                                   </div>
                                   <div className="flex items-center gap-3 text-xs text-muted-foreground uppercase tracking-wider">
-                                    <span>{p.price_type === 'hourly' ? '⏱️ Temps' : '🎮 Par Jeu'}</span>
+                                    <span>{p.price_type === 'hourly' ? t('sessions.time_type') : t('sessions.game_type')}</span>
                                     <span>•</span>
                                     <span className="font-bold text-primary">{p.price.toFixed(3)} DT</span>
                                   </div>
@@ -745,7 +740,7 @@ const SessionsManagement = () => {
                                   {isDefault ? <Star className="w-4 h-4 fill-current" /> : (
                                     <>
                                       <Zap className="w-4 h-4 mr-2" />
-                                      <span className="text-xs">Définir défaut</span>
+                                      <span className="text-xs">{t('sessions.set_default')}</span>
                                     </>
                                   )}
                                 </Button>
@@ -762,7 +757,7 @@ const SessionsManagement = () => {
               {user?.role === 'owner' && (
                 <Button variant="outline" size="sm" onClick={() => setIsManagerOpen(true)}>
                   <Edit className="w-4 h-4 mr-2" />
-                  Gérer Raccourcis
+                  {t('sessions.manage_shortcuts')}
                 </Button>
               )}
             </div>
@@ -785,14 +780,14 @@ const SessionsManagement = () => {
                         <Zap className="w-6 h-6 text-primary fill-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-1">Quick Launch {type}</h3>
+                        <h3 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-1">{t('sessions.quick_launch')} {type}</h3>
                         {defaultPricing ? (
                           <div className="flex items-center gap-2">
                             <p className="font-black text-lg group-hover:text-primary transition-colors">{defaultPricing.name}</p>
-                            <Badge variant="outline" className="text-[9px] h-4 px-1 bg-background/30">Auto</Badge>
+                            <Badge variant="outline" className="text-[9px] h-4 px-1 bg-background/30">{t('sessions.auto')}</Badge>
                           </div>
                         ) : (
-                          <p className="text-sm italic text-muted-foreground">Not configured</p>
+                          <p className="text-sm italic text-muted-foreground">{t('sessions.not_configured')}</p>
                         )}
                       </div>
                     </div>
@@ -800,7 +795,7 @@ const SessionsManagement = () => {
                       {defaultPricing && (
                         <>
                           <p className="font-black text-2xl text-primary drop-shadow-sm">{defaultPricing.price.toFixed(3)} <span className="text-sm font-bold text-muted-foreground">DT</span></p>
-                          <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground/60">{defaultPricing.price_type === 'hourly' ? 'PER HOUR' : 'PER GAME'}</p>
+                          <p className="text-[9px] uppercase font-bold tracking-widest text-muted-foreground/60">{defaultPricing.price_type === 'hourly' ? t('sessions.per_hour') : t('sessions.per_game')}</p>
                         </>
                       )}
                     </div>
@@ -872,13 +867,13 @@ const SessionsManagement = () => {
                         </p>
 
                         {isOverdue && (
-                          <p className="text-[10px] text-red-500 font-bold uppercase animate-pulse">TIME UP!</p>
+                          <p className="text-[10px] text-red-500 font-bold uppercase animate-pulse">{t('sessions.time_up')}</p>
                         )}
                       </div>
                     ) : isMaintenance ? (
-                      <span className="text-xs text-muted-foreground font-bold italic uppercase">Maintenance</span>
+                      <span className="text-xs text-muted-foreground font-bold italic uppercase">{t('sessions.maintenance')}</span>
                     ) : (
-                      <span className="text-xs text-green-500 font-bold">AVAILABLE</span>
+                      <span className="text-xs text-green-500 font-bold">{t('sessions.available')}</span>
                     )}
 
                     {/* Games Count Badge (Absolute Top Right) */}
@@ -940,13 +935,13 @@ const SessionsManagement = () => {
         <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Start New Session</DialogTitle>
+              <DialogTitle>{t('sessions.start_new')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {/* Game Shortcuts - Desktop Only per request */}
               {gameShortcuts && gameShortcuts.length > 0 && (
                 <div className="hidden md:block">
-                  <Label className="mb-2 block">Quick Start (Keys 1-9)</Label>
+                  <Label className="mb-2 block">{t('sessions.quick_start')}</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {gameShortcuts.filter(s => s.is_active).map(shortcut => (
                       <div
@@ -968,9 +963,9 @@ const SessionsManagement = () => {
               )}
 
               <div>
-                <Label>Game Title / Notes</Label>
+                <Label>{t('sessions.game_notes')}</Label>
                 <Input
-                  placeholder="e.g. FIFA 24, Maintenance check..."
+                  placeholder={t('sessions.game_notes_placeholder')}
                   value={gameNotes}
                   onChange={(e) => setGameNotes(e.target.value)}
                   className="text-base md:text-sm"
@@ -978,7 +973,7 @@ const SessionsManagement = () => {
               </div>
 
               <div>
-                <Label className="mb-2 block">Pricing Configuration</Label>
+                <Label className="mb-2 block">{t('sessions.pricing_config')}</Label>
 
                 {/* 🚀 Quick Pricing Reference Grid */}
                 {selectedConsole && (
@@ -1004,7 +999,7 @@ const SessionsManagement = () => {
                         )}
                         <span className={`text-[10px] uppercase font-black px-2 py-0.5 rounded ${p.price_type === 'hourly' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'
                           }`}>
-                          {p.price_type === 'hourly' ? '⏱️ TEMPS' : '🎮 PAR JEU'}
+                          {p.price_type === 'hourly' ? t('sessions.time_type') : t('sessions.game_type')}
                         </span>
                         <span className="text-lg font-bold text-white leading-tight">{p.price.toFixed(3)} <span className="text-xs">DT</span></span>
                         <span className="text-[10px] text-muted-foreground truncate w-full px-1">{p.name}</span>
@@ -1015,7 +1010,7 @@ const SessionsManagement = () => {
 
                 <Select value={selectedPricing} onValueChange={setSelectedPricing}>
                   <SelectTrigger className="bg-black/40 border-white/10 h-11">
-                    <SelectValue placeholder="Choisir un tarif..." />
+                    <SelectValue placeholder={t('sessions.choose_rate')} />
                   </SelectTrigger>
                   <SelectContent className="glass-modal border-white/10">
                     {pricing?.filter(p => !selectedConsole || (consoles?.find(c => c.id === selectedConsole)?.console_type && p.console_type === consoles?.find(c => c.id === selectedConsole)?.console_type))
@@ -1038,7 +1033,7 @@ const SessionsManagement = () => {
                 disabled={!selectedPricing || startSession.isPending}
               >
                 <Play className="w-5 h-5 mr-2" />
-                Start Session
+                {t('sessions.start_session')}
               </Button>
             </div>
           </DialogContent>
@@ -1048,23 +1043,23 @@ const SessionsManagement = () => {
         <Dialog open={isExtendDialogOpen} onOpenChange={setIsExtendDialogOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Extend Session</DialogTitle>
+              <DialogTitle>{t('sessions.extend_session')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="flex items-center justify-center p-6 bg-secondary/10 rounded-xl mb-4">
                 {selectedSession?.session_type === 'per_game' ? (
                   <div className="text-center">
                     <Gamepad2 className="w-10 h-10 text-secondary mx-auto mb-2" />
-                    <p className="text-lg font-bold">Add Another Game</p>
-                    <p className="text-sm text-muted-foreground">Rate: +{selectedSession.pricing?.price?.toFixed(3)} DT</p>
-                    <p className="text-sm text-muted-foreground mt-1">Current: {selectedSession.games_played} Games</p>
+                    <p className="text-lg font-bold">{t('sessions.add_game')}</p>
+                    <p className="text-sm text-muted-foreground">{t('sessions.rate')}: +{selectedSession.pricing?.price?.toFixed(3)} DT</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t('sessions.current_games')}: {selectedSession.games_played}</p>
                   </div>
                 ) : (
                   <div className="text-center">
                     <Timer className="w-10 h-10 text-secondary mx-auto mb-2" />
-                    <p className="text-lg font-bold">Add {selectedSession?.pricing?.game_duration_minutes || 30} Minutes</p>
-                    <p className="text-sm text-muted-foreground">Rate: +{selectedSession?.pricing?.extra_time_price?.toFixed(3) || '0.000'} DT</p>
-                    <p className="text-sm text-muted-foreground mt-1">Current Duration: {getSessionDuration(selectedSession?.start_time || new Date().toISOString())}</p>
+                    <p className="text-lg font-bold">{t('sessions.add_minutes', { minutes: selectedSession?.pricing?.game_duration_minutes || 30 })}</p>
+                    <p className="text-sm text-muted-foreground">{t('sessions.rate')}: +{selectedSession?.pricing?.extra_time_price?.toFixed(3) || '0.000'} DT</p>
+                    <p className="text-sm text-muted-foreground mt-1">{t('sessions.current_duration')}: {getSessionDuration(selectedSession?.start_time || new Date().toISOString())}</p>
                   </div>
                 )}
               </div>
@@ -1077,7 +1072,7 @@ const SessionsManagement = () => {
                   disabled={addGameToSession.isPending}
                 >
                   <Plus className="w-6 h-6 mr-2" />
-                  {selectedSession?.session_type === 'per_game' ? "Add Another Match" : "Confirm Extension"}
+                  {selectedSession?.session_type === 'per_game' ? t('sessions.add_match') : t('sessions.confirm_extension')}
                 </Button>
 
                 {selectedSession?.session_type === 'per_game' && (
@@ -1089,7 +1084,7 @@ const SessionsManagement = () => {
                     disabled={addGameToSession.isPending}
                   >
                     <Timer className="w-5 h-5 mr-2" />
-                    Add Prolongation (+{selectedSession.pricing?.extra_time_price?.toFixed(3) || '0.000'} DT)
+                    {t('sessions.add_prolongation')} (+{selectedSession.pricing?.extra_time_price?.toFixed(3) || '0.000'} DT)
                   </Button>
                 )}
               </div>

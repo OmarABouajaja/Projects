@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, BlogPost } from "@/hooks/useBlogPosts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import { supabase } from "@/lib/supabase";
 
 const BlogManagement = () => {
   const { user, isOwner } = useAuth();
+  const { t } = useLanguage();
   const { data: blogPosts, isLoading } = useBlogPosts(false); // Get all posts including drafts
   const createPost = useCreateBlogPost();
   const updatePost = useUpdateBlogPost();
@@ -362,14 +364,14 @@ const BlogManagement = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-display text-3xl font-bold mb-2">Blog Management</h1>
+              <h1 className="font-display text-3xl font-bold mb-2">{t("blog.management.title")}</h1>
               <p className="text-muted-foreground">
-                Share repair stories, gaming tips, and store updates with customers
+                {t("blog.management.subtitle")}
               </p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={testDatabaseConnection}>
-                Test DB
+                {t("blog.btn.test_db")}
               </Button>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -395,7 +397,7 @@ const BlogManagement = () => {
                     setImageLoading(false);
                   }}>
                     <Plus className="w-4 h-4 mr-2" />
-                    New Post
+                    {t("blog.btn.new")}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
@@ -406,60 +408,60 @@ const BlogManagement = () => {
                   </DialogHeader>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <Label htmlFor="title">Titre (Anglais)</Label>
+                      <Label htmlFor="title">{t("blog.form.title_en")}</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        placeholder="Post title in English"
+                        placeholder={t("blog.placeholder.title_en")}
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="title_fr">Titre (Français)</Label>
+                      <Label htmlFor="title_fr">{t("blog.form.title_fr")}</Label>
                       <Input
                         id="title_fr"
                         value={formData.title_fr}
                         onChange={(e) => setFormData({ ...formData, title_fr: e.target.value })}
-                        placeholder="Titre en français"
+                        placeholder={t("blog.placeholder.title_fr")}
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="title_ar">Titre (Arabe)</Label>
+                      <Label htmlFor="title_ar">{t("blog.form.title_ar")}</Label>
                       <Input
                         id="title_ar"
                         value={formData.title_ar}
                         onChange={(e) => setFormData({ ...formData, title_ar: e.target.value })}
-                        placeholder="العنوان بالعربية"
+                        placeholder={t("blog.placeholder.title_ar")}
                         dir="rtl"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="category">Catégorie</Label>
+                      <Label htmlFor="category">{t("blog.form.category")}</Label>
                       <select
                         id="category"
                         value={formData.category}
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                         className="w-full px-3 py-2 border border-border rounded-md bg-background"
                       >
-                        <option value="">Sélectionner une catégorie</option>
-                        <option value="repair">Réparations</option>
-                        <option value="tips">Conseils Gaming</option>
-                        <option value="news">Actualités</option>
-                        <option value="maintenance">Maintenance</option>
+                        <option value="">{t("blog.placeholder.category")}</option>
+                        <option value="repair">{t("blog.category.repair")}</option>
+                        <option value="tips">{t("blog.category.tips")}</option>
+                        <option value="news">{t("blog.category.news")}</option>
+                        <option value="maintenance">{t("blog.category.maintenance")}</option>
                       </select>
                     </div>
 
                     <div>
-                      <Label htmlFor="tags">Tags (séparés par des virgules)</Label>
+                      <Label htmlFor="tags">{t("blog.form.tags")}</Label>
                       <Input
                         id="tags"
                         value={formData.tags}
                         onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                        placeholder="ps5, réparation, gaming, conseils"
+                        placeholder={t("blog.placeholder.tags")}
                       />
                     </div>
 
@@ -571,35 +573,35 @@ const BlogManagement = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="content">Contenu (Anglais)</Label>
+                      <Label htmlFor="content">{t("blog.form.content_en")}</Label>
                       <Textarea
                         id="content"
                         value={formData.content}
                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                        placeholder="Write your blog post content here in English..."
+                        placeholder={t("blog.placeholder.content_en")}
                         rows={6}
                         required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="content_fr">Contenu (Français)</Label>
+                      <Label htmlFor="content_fr">{t("blog.form.content_fr")}</Label>
                       <Textarea
                         id="content_fr"
                         value={formData.content_fr}
                         onChange={(e) => setFormData({ ...formData, content_fr: e.target.value })}
-                        placeholder="Écrivez le contenu de votre article en français..."
+                        placeholder={t("blog.placeholder.content_fr")}
                         rows={4}
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="content_ar">Contenu (Arabe)</Label>
+                      <Label htmlFor="content_ar">{t("blog.form.content_ar")}</Label>
                       <Textarea
                         id="content_ar"
                         value={formData.content_ar}
                         onChange={(e) => setFormData({ ...formData, content_ar: e.target.value })}
-                        placeholder="اكتب محتوى مقالتك بالعربية..."
+                        placeholder={t("blog.placeholder.content_ar")}
                         rows={4}
                         dir="rtl"
                       />
@@ -694,17 +696,17 @@ const BlogManagement = () => {
 
                     <div className="flex justify-end gap-2 border-t pt-4">
                       <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                        Cancel
+                        {t("common.cancel")}
                       </Button>
                       {editingPost ? (
                         <Button type="submit">
-                          Update Post
+                          {t("common.update")}
                         </Button>
                       ) : (
                         <>
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="secondary"
                             onClick={async (e) => {
                               e.preventDefault();
                               // Save as draft
@@ -715,7 +717,7 @@ const BlogManagement = () => {
                               }
                             }}
                           >
-                            Save Draft
+                            {t("blog.btn.save_draft")}
                           </Button>
                           <Button
                             type="button"
@@ -735,26 +737,24 @@ const BlogManagement = () => {
                             }}
                           >
                             <Send className="w-4 h-4 mr-2" />
-                            Post Now
+                            {t("blog.btn.post_now")}
                           </Button>
-                          {formData.scheduled_at && (
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              onClick={async (e) => {
-                                e.preventDefault();
-                                // Schedule post
-                                setFormData({ ...formData, is_published: true });
-                                const form = e.currentTarget.closest('form');
-                                if (form) {
-                                  form.requestSubmit();
-                                }
-                              }}
-                            >
-                              <Clock className="w-4 h-4 mr-2" />
-                              Schedule Post
-                            </Button>
-                          )}
+                          <Button
+                            type="button"
+                            variant="primary"
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              // Schedule post
+                              setFormData({ ...formData, is_published: true });
+                              const form = e.currentTarget.closest('form');
+                              if (form) {
+                                form.requestSubmit();
+                              }
+                            }}
+                          >
+                            <Clock className="w-4 h-4 mr-2" />
+                            {t("blog.btn.schedule_post")}
+                          </Button>
                         </>
                       )}
                     </div>
@@ -1005,7 +1005,7 @@ const BlogManagement = () => {
           </div>
         </div>
       </DashboardLayout>
-    </ProtectedRoute>
+    </ProtectedRoute >
   );
 };
 

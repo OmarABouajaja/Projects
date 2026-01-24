@@ -42,6 +42,8 @@ const ExpensesManagement = () => {
         date: new Date().toISOString().split('T')[0]
     });
 
+    const [activeTab, setActiveTab] = useState("daily");
+
     if (role !== "owner") {
         return <div>Access Denied</div>;
     }
@@ -123,7 +125,7 @@ const ExpensesManagement = () => {
         }
     };
 
-    const [activeTab, setActiveTab] = useState("daily");
+
 
     // Filter Logic
     const now = new Date();

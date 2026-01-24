@@ -397,7 +397,7 @@ export interface OrderFormData {
   notes?: string;
 }
 // Service Requests
-export type ServiceStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'rejected';
+// ServiceStatus enum is defined at the top of the file
 
 export interface ServiceRequest {
   id: string;
@@ -469,4 +469,38 @@ export interface Sale {
   staff_id: string;
   created_at: string;
   items?: OrderItem[];
+  sale_items?: {
+    id: string;
+    sale_id: string;
+    product_id: string;
+    quantity: number;
+    unit_price: number;
+    total_price: number;
+    product_name?: string; // Joined or derived
+    product?: Product;
+  }[];
+}
+
+export interface Pricing {
+  id: string;
+  name: string;
+  price: number;
+  duration_minutes?: number;
+  console_type: string;
+  price_type: 'hourly' | 'per_game';
+  extra_time_price?: number;
+  game_duration_minutes?: number;
+  is_active: boolean;
+  created_at?: string;
+}
+
+export interface StaffShift {
+  id: string;
+  staff_id: string;
+  check_in: string;
+  check_out?: string;
+  total_hours?: number;
+  status: 'active' | 'completed';
+  profile?: Profile;
+  created_at: string;
 }

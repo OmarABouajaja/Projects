@@ -14,6 +14,7 @@ import { useCreateSale } from '@/hooks/useSales';
 import { useAddSessionConsumption } from '@/hooks/useSessionConsumptions';
 import { useCreatePointsTransaction } from '@/hooks/usePointsTransactions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
     Sheet,
     SheetContent,
@@ -32,7 +33,6 @@ import type { Product } from '@/types';
 interface QuickSaleMenuProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onOpenChange: (open: boolean) => void;
     clientId?: string | null; // Optional: Link sale to client
     sessionId?: string | null; // Optional: Link to running session
 }
@@ -44,6 +44,7 @@ interface CartItem {
 
 export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: QuickSaleMenuProps) => {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { data: groupedConsumables, isLoading } = useConsumablesByCategory();
     const createSale = useCreateSale();
     const addSessionConsumption = useAddSessionConsumption();
@@ -104,8 +105,8 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
     const handleCompleteSale = async () => {
         if (cart.length === 0) {
             toast({
-                title: 'Cart Empty',
-                description: 'Add items before completing sale',
+                title: t('quicksale.cart_empty'),
+                description: t('quicksale.add_items'),
                 variant: 'destructive',
             });
             return;
@@ -124,8 +125,8 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                 }
 
                 toast({
-                    title: 'Added to Session',
-                    description: `${getTotalItems()} items added to session tab.`,
+                    title: t('quicksale.added_to_session'),
+                    description: t('quicksale.items_added', { count: getTotalItems() }),
                 });
             } else {
                 // OTHERWISE, PROCESS AS DIRECT SALE
@@ -157,8 +158,8 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                 }
 
                 toast({
-                    title: 'Sale Complete!',
-                    description: `Sold ${getTotalItems()} item(s) for ${getTotalAmount().toFixed(3)} DT`,
+                    title: t('quicksale.sale_complete'),
+                    description: t('quicksale.sold_items', { count: getTotalItems(), total: getTotalAmount().toFixed(3) }),
                 });
             }
 
@@ -166,14 +167,24 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
             onOpenChange(false);
         } catch (error: any) {
             toast({
-                title: 'Operation Failed',
-                description: error.message || 'Could not complete action',
+                title: t('quicksale.operation_failed'),
+                description: error.message || t('quicksale.could_not_complete'),
                 variant: 'destructive',
             });
         }
     };
 
-    const categories = Object.keys(groupedConsumables || {}).sort();
+    // Add "All" as first category, then sorted original categories
+    const originalCategories = Object.keys(groupedConsumables || {}).sort();
+    const categories = originalCategories.length > 0 ? [t('quicksale.category_all'), ...originalCategories] : [];
+
+    // Helper to get products for a category (including "All")
+    const getProductsForCategory = (category: string): Product[] => {
+        if (category === t('quicksale.category_all')) {
+            return Object.values(groupedConsumables || {}).flat();
+        }
+        return groupedConsumables?.[category] || [];
+    };
 
     return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -181,10 +192,10 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                 <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2 text-2xl">
                         <Coffee className="w-6 h-6 text-primary" />
-                        Café Menu - Quick Sale
+                        {t('quicksale.title')}
                     </SheetTitle>
                     <SheetDescription>
-                        Select snacks and drinks for in-store purchase
+                        {t('quicksale.subtitle')}
                     </SheetDescription>
                 </SheetHeader>
 
@@ -195,8 +206,8 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                 ) : categories.length === 0 ? (
                     <div className="text-center py-12 text-muted-foreground">
                         <Coffee className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                        <p>No consumables available</p>
-                        <p className="text-xs mt-2">Add products with type "Consumable" in Product Management</p>
+                        <p>{t('quicksale.no_consumables')}</p>
+                        <p className="text-xs mt-2">{t('quicksale.add_consumables_hint')}</p>
                     </div>
                 ) : (
                     <div className="space-y-6">
@@ -213,7 +224,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                             {categories.map((category) => (
                                 <TabsContent key={category} value={category} className="space-y-3 mt-4">
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {groupedConsumables?.[category]?.map((product) => (
+                                        {getProductsForCategory(category).map((product) => (
                                             <Card
                                                 key={product.id}
                                                 className="glass-card hover:border-primary/50 cursor-pointer transition-all group"
@@ -240,11 +251,11 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
 
                                                         {/* Stock Badge */}
                                                         {(product.stock_quantity || product.stock || 0) === 0 ? (
-                                                            <Badge variant="destructive" className="text-[10px]">Out of Stock</Badge>
+                                                            <Badge variant="destructive" className="text-[10px]">{t('quicksale.out_of_stock')}</Badge>
                                                         ) : (product.stock_quantity || product.stock || 0) <= (product.low_stock_threshold || 5) ? (
-                                                            <Badge variant="outline" className="text-[10px] bg-yellow-500/20">Low: {product.stock_quantity || product.stock}</Badge>
+                                                            <Badge variant="outline" className="text-[10px] bg-yellow-500/20">{t('quicksale.low_stock', { count: product.stock_quantity || product.stock })}</Badge>
                                                         ) : (
-                                                            <Badge variant="outline" className="text-[10px]">{product.stock_quantity || product.stock} in stock</Badge>
+                                                            <Badge variant="outline" className="text-[10px]">{t('quicksale.in_stock', { count: product.stock_quantity || product.stock })}</Badge>
                                                         )}
 
                                                         {/* Add Button */}
@@ -259,7 +270,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                                                             }}
                                                         >
                                                             <Plus className="w-3 h-3 mr-1" />
-                                                            Add
+                                                            {t('quicksale.add')}
                                                         </Button>
                                                     </div>
                                                 </CardContent>
@@ -314,7 +325,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                                 {/* Total & Actions */}
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm text-muted-foreground">{getTotalItems()} item(s)</p>
+                                        <p className="text-sm text-muted-foreground">{getTotalItems()} {t('quicksale.items')}</p>
                                         <p className="text-2xl font-bold text-primary">{getTotalAmount().toFixed(3)} DT</p>
                                     </div>
                                     <div className="flex gap-2">
@@ -325,7 +336,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                                             className="h-12"
                                         >
                                             <Trash2 className="w-4 h-4 mr-2" />
-                                            Clear
+                                            {t('quicksale.clear')}
                                         </Button>
                                         <Button
                                             variant="default"
@@ -334,7 +345,7 @@ export const QuickSaleMenu = ({ isOpen, onOpenChange, clientId, sessionId }: Qui
                                             className="h-12 bg-primary hover:bg-primary/90"
                                         >
                                             <ShoppingCart className="w-4 h-4 mr-2" />
-                                            {sessionId ? "Add to Tab" : "Complete Sale"}
+                                            {sessionId ? t('quicksale.add_to_tab') : t('quicksale.complete_sale')}
                                         </Button>
                                     </div>
                                 </div>

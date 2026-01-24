@@ -6,6 +6,7 @@ import { useConsoles, useUpdateConsole, useCreateConsole, useDeleteConsole } fro
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Console } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,7 +16,7 @@ import { toast } from "@/hooks/use-toast";
 const ConsoleManagement = () => {
   const { isOwner } = useAuth();
   const { data: consoles, isLoading } = useConsoles();
-  const [selectedConsole, setSelectedConsole] = useState<any>(null);
+  const [selectedConsole, setSelectedConsole] = useState<Console | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isaddDialogOpen, setIsAddDialogOpen] = useState(false);
 
@@ -44,7 +45,7 @@ const ConsoleManagement = () => {
     try {
       await updateConsole.mutateAsync({
         id: consoleId,
-        status: newStatus as any
+        status: newStatus as Console['status']
       });
 
       toast({
@@ -69,7 +70,7 @@ const ConsoleManagement = () => {
         id: selectedConsole.id,
         name: selectedConsole.name,
         console_type: selectedConsole.console_type,
-        station_number: parseInt(selectedConsole.station_number),
+        station_number: typeof selectedConsole.station_number === 'string' ? parseInt(selectedConsole.station_number) : selectedConsole.station_number,
         status: selectedConsole.status,
         shortcut_key: selectedConsole.shortcut_key
       });
@@ -89,10 +90,11 @@ const ConsoleManagement = () => {
       await deleteConsole.mutateAsync(id);
       toast({ title: "Console Deleted", description: "Console removed successfully." });
       setIsDialogOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Delete Error:", error);
+      const err = error as Error & { code?: string };
       // Check for Foreign Key Violation (Postgres Error 23503)
-      if (error?.message?.includes("foreign key constraint") || error?.code === '23503' || JSON.stringify(error).includes("23503")) {
+      if (err?.message?.includes("foreign key constraint") || err?.code === '23503' || JSON.stringify(err).includes("23503")) {
         toast({
           title: "Cannot Delete Console",
           description: "This console has session history. Please mark it as 'Offline' or 'Maintenance' instead to preserve financial records.",
@@ -131,7 +133,7 @@ const ConsoleManagement = () => {
   const ps5Consoles = consoles?.filter(c => c.console_type === 'ps5') || [];
   const otherConsoles = consoles?.filter(c => !['ps4', 'ps5'].includes(c.console_type)) || [];
 
-  const ConsoleGrid = ({ title, consoles: consoleList, icon }: { title: string, consoles: any[], icon: any }) => (
+  const ConsoleGrid = ({ title, consoles: consoleList, icon }: { title: string, consoles: Console[], icon: React.ReactNode }) => (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         {icon}
@@ -154,7 +156,7 @@ const ConsoleManagement = () => {
                   <span className="text-sm text-muted-foreground">Status:</span>
                   <Badge variant={
                     console.status === 'available' ? 'default' :
-                      (console.status === 'in_use' || console.status === 'occupied') ? 'secondary' :
+                      (console.status === 'in_use') ? 'secondary' :
                         console.status === 'maintenance' ? 'destructive' : 'outline'
                   }>
                     {getStatusText(console.status)}
@@ -278,18 +280,21 @@ const ConsoleManagement = () => {
                     try {
                       await createConsole.mutateAsync({
                         name,
-                        console_type: type,
+                        console_type: type as Console['console_type'],
                         station_number: station,
-                        status: (status as any) || 'available'
-                      } as any);
+                        status: (status as Console['status']) || 'available',
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString()
+                      });
                       toast({ title: "Console Added", description: `${name} created successfully.` });
                       setIsAddDialogOpen(false);
                       // Form reset is handled by Dialog closing/unmounting primarily, but explicit reset is safer if reused
-                    } catch (err: any) {
+                    } catch (err: unknown) {
                       console.error("Create console error:", err);
+                      const message = err instanceof Error ? err.message : "Failed to create console.";
                       toast({
                         title: "Error creating console",
-                        description: err.message || "Failed to create console. Station number might be taken.",
+                        description: message,
                         variant: "destructive"
                       });
                     }
@@ -398,7 +403,7 @@ const ConsoleManagement = () => {
                       <Input
                         type="number"
                         value={selectedConsole.station_number}
-                        onChange={(e) => setSelectedConsole({ ...selectedConsole, station_number: e.target.value })}
+                        onChange={(e) => setSelectedConsole({ ...selectedConsole, station_number: parseInt(e.target.value) || 0 })}
                         required
                       />
                     </div>
@@ -409,7 +414,7 @@ const ConsoleManagement = () => {
                     <label className="text-sm font-medium">Status</label>
                     <Select
                       value={selectedConsole.status}
-                      onValueChange={(v) => setSelectedConsole({ ...selectedConsole, status: v })}
+                      onValueChange={(v) => setSelectedConsole({ ...selectedConsole, status: v as Console['status'] })}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>

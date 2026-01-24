@@ -101,7 +101,7 @@ function getTopProducts(sales: Sale[]) {
 
 const DashboardOverview = () => {
   const { user, role } = useAuth();
-  const { sales, clients, isLoading: isDataLoading } = useData();
+  const { sales, clients, products, isLoading: isDataLoading } = useData();
   const { t, language, dir } = useLanguage();
   const isRTL = dir === 'rtl';
   const { data: todayStats } = useTodayStats();
@@ -116,9 +116,7 @@ const DashboardOverview = () => {
     if (!activeShiftsRaw) return [];
 
     const uniqueStaffIds = new Set();
-    const uniqueStaffIds = new Set();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return activeShiftsRaw.filter((shift: any) => {
+    return activeShiftsRaw.filter((shift: StaffShift) => {
       // Need to cast or fix hook type. For now suppressing since shifts structure is known but hook might trigger type mismatch
       if (uniqueStaffIds.has(shift.staff_id)) return false;
       uniqueStaffIds.add(shift.staff_id);
@@ -229,7 +227,7 @@ Game Store Zarzis - Intelligence Business
                   <div className="max-h-[250px] overflow-y-auto">
                     {activeShifts && activeShifts.length > 0 ? (
                       <div className="divide-y divide-white/5">
-                        {activeShifts.map((shift: any) => (
+                        {activeShifts.map((shift: StaffShift) => (
                           <div key={shift.id} className="p-3 flex items-center gap-3 hover:bg-white/5 transition-colors">
                             <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary uppercase">
                               {((shift.profile as Profile)?.full_name || (shift.profile as Profile)?.email || "?").substring(0, 2)}
@@ -631,8 +629,8 @@ Game Store Zarzis - Intelligence Business
                     {/* Low Stock Filter */}
                     {isDataLoading ? (
                       <p className="text-sm text-muted-foreground">{t("dashboard.checking_stock")}</p>
-                    ) : (useData().products.filter(p => p.stock_quantity <= 5).length > 0) ? (
-                      useData().products.filter(p => p.stock_quantity <= 5).map(p => (
+                    ) : (products.filter(p => p.stock_quantity <= 5).length > 0) ? (
+                      products.filter(p => p.stock_quantity <= 5).map(p => (
                         <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded bg-orange-500/20 flex items-center justify-center">

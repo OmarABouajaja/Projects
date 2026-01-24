@@ -294,7 +294,7 @@ const ClientsManagement = () => {
                       <Input
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Ahmed Mansour"
+                        placeholder={t("client.placeholder.name")}
                         className="pl-10 h-10 sm:h-12 text-base font-medium relative z-0"
                         style={{
                           backgroundColor: '#18181b',
@@ -313,7 +313,7 @@ const ClientsManagement = () => {
                       <Input
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="23 290 065"
+                        placeholder={t("client.placeholder.phone")}
                         className="pl-10 h-10 sm:h-12 text-base font-mono relative z-0"
                         style={{
                           backgroundColor: '#18181b',

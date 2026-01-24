@@ -117,7 +117,7 @@ const StaffAttendance = () => {
     });
 
     // Normalize sessions to always be an array
-    const allSessions = Array.isArray(sessionsRaw) ? sessionsRaw : [];
+    const allSessions = useMemo(() => Array.isArray(sessionsRaw) ? sessionsRaw : [], [sessionsRaw]);
 
     // Filter sessions by selected staff
     const sessions = useMemo(() => {
