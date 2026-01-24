@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,15 +110,8 @@ const ClientsManagement = () => {
     setIsRedeemDialogOpen(true);
   };
 
-  /* Optimization: Memoize filtering */
-  const filteredClients = useState(() => {
-    // Initial State is not needed, we use useMemo below.
-    // This is just to keep hooks order safe if we were refactoring deeper.
-    return [];
-  })[0];
-
-  /* Real Filter Logic */
-  const allFilteredClients = useMemo(() => {
+  /* Optimized Filter Logic (Memoized) */
+  const filteredClients = useMemo(() => {
     if (!clients) return [];
     const lowerSearch = searchTerm.toLowerCase();
     return clients.filter(
@@ -128,9 +121,9 @@ const ClientsManagement = () => {
     );
   }, [clients, searchTerm]);
 
-  /* Optimization: Lazy Rendering */
+  /* Lazy Rendering Logic */
   const [visibleCount, setVisibleCount] = useState(12);
-  const visibleClients = useMemo(() => allFilteredClients.slice(0, visibleCount), [allFilteredClients, visibleCount]);
+  const visibleClients = useMemo(() => filteredClients.slice(0, visibleCount), [filteredClients, visibleCount]);
 
 
 
@@ -289,7 +282,7 @@ const ClientsManagement = () => {
           </div>
 
           {/* Load More Sentinel */}
-          {visibleCount < allFilteredClients.length && (
+          {visibleCount < filteredClients.length && (
             <div className="flex justify-center py-4">
               <Button variant="ghost" onClick={() => setVisibleCount(prev => prev + 12)} className="text-muted-foreground hover:text-primary">
                 {t("common.load_more") || "Load More"}
