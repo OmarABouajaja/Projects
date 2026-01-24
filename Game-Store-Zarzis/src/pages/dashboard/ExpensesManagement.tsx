@@ -23,6 +23,7 @@ import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } fro
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ExpensesManagement = () => {
     const { role, user } = useAuth();
@@ -198,7 +199,11 @@ const ExpensesManagement = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">{t('expenses.daily_month')}</p>
-                                        <p className="text-2xl font-bold">{totalDaily.toFixed(3)} DT</p>
+                                        {isLoading ? (
+                                            <Skeleton className="h-8 w-24 bg-red-500/10" />
+                                        ) : (
+                                            <p className="text-2xl font-bold">{totalDaily.toFixed(3)} DT</p>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
@@ -212,7 +217,11 @@ const ExpensesManagement = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">{t('expenses.monthly_fixed')}</p>
-                                        <p className="text-2xl font-bold">{totalMonthly.toFixed(3)} DT</p>
+                                        {isLoading ? (
+                                            <Skeleton className="h-8 w-24 bg-orange-500/10" />
+                                        ) : (
+                                            <p className="text-2xl font-bold">{totalMonthly.toFixed(3)} DT</p>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
@@ -226,7 +235,11 @@ const ExpensesManagement = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-muted-foreground">{t('expenses.total_yearly')}</p>
-                                        <p className="text-2xl font-bold">{totalYearly.toFixed(3)} DT</p>
+                                        {isLoading ? (
+                                            <Skeleton className="h-8 w-24 bg-primary/10" />
+                                        ) : (
+                                            <p className="text-2xl font-bold">{totalYearly.toFixed(3)} DT</p>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
@@ -252,7 +265,29 @@ const ExpensesManagement = () => {
                         <CardContent>
                             <div className="space-y-4">
                                 {isLoading ? (
-                                    <div className="py-8 text-center text-muted-foreground text-sm">{t('expenses.loading')}</div>
+                                    <div className="space-y-3">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4 rounded-lg bg-black/10 border border-white/5">
+                                                <div className="flex items-center gap-4">
+                                                    <Skeleton className="h-10 w-10 rounded-lg bg-white/5" />
+                                                    <div className="space-y-2">
+                                                        <Skeleton className="h-5 w-48 bg-white/5" />
+                                                        <div className="flex gap-2">
+                                                            <Skeleton className="h-3 w-16 bg-white/5" />
+                                                            <Skeleton className="h-3 w-12 bg-white/5" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <Skeleton className="h-6 w-20 bg-white/5" />
+                                                    <div className="flex gap-2">
+                                                        <Skeleton className="h-8 w-8 bg-white/5" />
+                                                        <Skeleton className="h-8 w-8 bg-white/5" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 ) : filteredExpenses && filteredExpenses.length > 0 ? (
                                     <div className="grid grid-cols-1 gap-4">
                                         {filteredExpenses.map((expense) => (

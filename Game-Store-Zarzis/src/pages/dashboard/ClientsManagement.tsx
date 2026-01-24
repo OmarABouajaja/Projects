@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Plus, Search, Star, Gamepad2, DollarSign, History, Gift, TrendingUp, TrendingDown } from "lucide-react";
 
 const ClientsManagement = () => {
@@ -110,27 +111,11 @@ const ClientsManagement = () => {
     setIsRedeemDialogOpen(true);
   };
 
-  /* Optimized Filter Logic (Memoized) */
-  const filteredClients = useMemo(() => {
-    if (!clients) return [];
-    const lowerSearch = searchTerm.toLowerCase();
-    return clients.filter(
-      (c) =>
-        c.name.toLowerCase().includes(lowerSearch) ||
-        c.phone.includes(searchTerm)
-    );
-  }, [clients, searchTerm]);
-
-  /* Lazy Rendering Logic */
-  const [visibleCount, setVisibleCount] = useState(12);
-  const visibleClients = useMemo(() => filteredClients.slice(0, visibleCount), [filteredClients, visibleCount]);
-
-
-
-  // Reset visible count on search
-  useEffect(() => {
-    setVisibleCount(12);
-  }, [searchTerm]);
+  const filteredClients = clients?.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.phone.includes(searchTerm)
+  );
 
   return (
     <ProtectedRoute>
@@ -167,9 +152,13 @@ const ClientsManagement = () => {
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
               </div>
-              <p className="text-3xl sm:text-4xl font-display font-bold text-primary mb-1">
-                {clients?.length || 0}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-10 w-16 mx-auto mb-1 bg-white/5" />
+              ) : (
+                <p className="text-3xl sm:text-4xl font-display font-bold text-primary mb-1">
+                  {clients?.length || 0}
+                </p>
+              )}
               <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total")}</p>
             </div>
             {pointsSystemEnabled && (
@@ -179,9 +168,13 @@ const ClientsManagement = () => {
                     <Star className="w-5 h-5 sm:w-6 sm:h-6 text-secondary" />
                   </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-display font-bold text-secondary mb-1">
-                  {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
-                </p>
+                {isLoading ? (
+                  <Skeleton className="h-10 w-24 mx-auto mb-1 bg-white/5" />
+                ) : (
+                  <p className="text-3xl sm:text-4xl font-display font-bold text-secondary mb-1">
+                    {clients?.reduce((sum, c) => sum + (c.points || 0), 0) || 0}
+                  </p>
+                )}
                 <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_points")}</p>
               </div>
             )}
@@ -191,9 +184,13 @@ const ClientsManagement = () => {
                   <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                 </div>
               </div>
-              <p className="text-3xl sm:text-4xl font-display font-bold text-accent mb-1">
-                {clients?.reduce((sum, c) => sum + (c.total_games_played || 0), 0) || 0}
-              </p>
+              {isLoading ? (
+                <Skeleton className="h-10 w-20 mx-auto mb-1 bg-white/5" />
+              ) : (
+                <p className="text-3xl sm:text-4xl font-display font-bold text-accent mb-1">
+                  {clients?.reduce((sum, c) => sum + (c.total_games_played || 0), 0) || 0}
+                </p>
+              )}
               <p className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("client.total_games")}</p>
             </div>
           </div>
@@ -209,9 +206,34 @@ const ClientsManagement = () => {
             />
           </div>
 
-          {/* Clients List - Virtualized via Lazy Loading */}
+          {/* Clients List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {visibleClients?.map((client) => (
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="glass-card border-white/5">
+                  <CardContent className="p-6 space-y-4">
+                    <div className="flex justify-between">
+                      <div className="space-y-2">
+                        <Skeleton className="h-6 w-32 bg-white/5" />
+                        <Skeleton className="h-4 w-24 bg-white/5" />
+                      </div>
+                      <Skeleton className="h-10 w-16 rounded-full bg-white/5" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-20 bg-white/5" />
+                        <Skeleton className="h-4 w-20 bg-white/5" />
+                      </div>
+                      <Skeleton className="h-2 w-full bg-white/5" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-9 flex-1 bg-white/5" />
+                      <Skeleton className="h-9 flex-1 bg-white/5" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : filteredClients?.map((client) => (
               <Card key={client.id} className="glass-card group hover:border-primary/50 transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -280,15 +302,6 @@ const ClientsManagement = () => {
               </Card>
             ))}
           </div>
-
-          {/* Load More Sentinel */}
-          {visibleCount < filteredClients.length && (
-            <div className="flex justify-center py-4">
-              <Button variant="ghost" onClick={() => setVisibleCount(prev => prev + 12)} className="text-muted-foreground hover:text-primary">
-                {t("common.load_more") || "Load More"}
-              </Button>
-            </div>
-          )}
 
           {(!filteredClients || filteredClients.length === 0) && (
             <div className="text-center py-20 glass-card rounded-3xl border-dashed border-2 border-white/10">

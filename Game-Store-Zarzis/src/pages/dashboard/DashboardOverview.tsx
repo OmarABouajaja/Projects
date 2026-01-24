@@ -16,16 +16,15 @@ import { useAllActiveShifts } from "@/hooks/useStaffShifts";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAnalytics } from "@/contexts/AnalyticsContext";
 import { Sale, StaffShift, Profile } from "@/types";
-import { Sale, StaffShift, Profile } from "@/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DollarSign, TrendingUp, Users, Gamepad2, Wrench, CheckCircle2,
   Star, Gift, BarChart3, Settings, ArrowUpRight, ArrowDownRight,
-  Target, Zap, Award, Percent, Activity, Receipt, PieChart, Clock,
-  ShoppingCart, CreditCard
+  Target, Zap, Award, Percent, Activity, Receipt, PieChart, Clock
 } from "lucide-react";
 import { AttendanceToggle } from "@/components/AttendanceToggle";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 // Helper to get top products
@@ -117,16 +116,7 @@ Game Store Zarzis - Intelligence Business
     });
   };
 
-  if (isDataLoading || isAnalyticsLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">{t("dashboard.loading")}</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <ProtectedRoute>
@@ -233,12 +223,20 @@ Game Store Zarzis - Intelligence Business
                               timeRange === 'weekly' ? t("dashboard.chart.net_profit_weekly") :
                                 timeRange === 'monthly' ? t("dashboard.chart.net_profit_monthly") : t("dashboard.chart.net_profit_yearly")}
                           </p>
-                          <p className={`text-xl sm:text-2xl font-bold ${summary.profit.net >= 0 ? "text-green-600" : "text-red-600"}`}>
-                            {summary.profit.net.toFixed(3)} DT
-                          </p>
+                          {isAnalyticsLoading ? (
+                            <Skeleton className="h-8 w-24 sm:w-32 bg-white/5" />
+                          ) : (
+                            <p className={`text-xl sm:text-2xl font-bold ${summary.profit.net >= 0 ? "text-green-600" : "text-red-600"}`}>
+                              {summary.profit.net.toFixed(3)} DT
+                            </p>
+                          )}
                           <div className="flex items-center mt-1 text-[10px] sm:text-xs">
-                            <span className="text-muted-foreground mr-1 truncate">{t("dashboard.gross")}: {summary.revenue.total.toFixed(2)}</span>
-                            <span className="text-red-400 truncate">{t("dashboard.exp")}: {summary.expenses.total.toFixed(2)}</span>
+                            <span className="text-muted-foreground mr-1 truncate">
+                              {t("dashboard.gross")}: {isAnalyticsLoading ? "..." : summary.revenue.total.toFixed(2)}
+                            </span>
+                            <span className="text-red-400 truncate">
+                              {t("dashboard.exp")}: {isAnalyticsLoading ? "..." : summary.expenses.total.toFixed(2)}
+                            </span>
                           </div>
                         </div>
                         <div className="p-2 sm:p-3 bg-green-100 dark:bg-green-500/20 rounded-full flex-shrink-0">
@@ -259,9 +257,13 @@ Game Store Zarzis - Intelligence Business
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.profit_margin")}</p>
-                          <p className="text-xl sm:text-2xl font-bold text-blue-600">
-                            {summary.profit.margin.toFixed(1)}%
-                          </p>
+                          {isAnalyticsLoading ? (
+                            <Skeleton className="h-8 w-24 sm:w-32 bg-white/5" />
+                          ) : (
+                            <p className="text-xl sm:text-2xl font-bold text-blue-600">
+                              {summary.profit.margin.toFixed(1)}%
+                            </p>
+                          )}
                           <div className="flex items-center mt-1">
                             <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500 mr-1" />
                             <span className="text-[10px] sm:text-xs text-blue-500 truncate">{summary.profit.margin > 15 ? t("dashboard.healthy") : t("dashboard.low_margin")}</span>
@@ -285,7 +287,11 @@ Game Store Zarzis - Intelligence Business
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.active_clients")}</p>
-                          <p className="text-xl sm:text-2xl font-bold text-purple-600">{clients?.length || 0}</p>
+                          {isDataLoading ? (
+                            <Skeleton className="h-8 w-24 sm:w-32 bg-white/5" />
+                          ) : (
+                            <p className="text-xl sm:text-2xl font-bold text-purple-600">{clients?.length || 0}</p>
+                          )}
                           <div className="flex items-center mt-1">
                             <Users className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500 mr-1" />
                             <span className="text-[10px] sm:text-xs text-purple-500 truncate">{t("dashboard.total_registered")}</span>
@@ -309,12 +315,16 @@ Game Store Zarzis - Intelligence Business
                       <div className="flex items-center justify-between">
                         <div className="flex-1 min-w-0">
                           <p className="text-xs sm:text-sm font-medium text-muted-foreground line-clamp-2 min-h-[2.5em] leading-tight flex items-center">{t("dashboard.top_product")}</p>
-                          <p className="text-xl sm:text-2xl font-bold text-orange-600 truncate">
-                            {topProducts[0]?.name || t("common.cancel")}
-                          </p>
+                          {isDataLoading ? (
+                            <Skeleton className="h-8 w-full bg-white/5" />
+                          ) : (
+                            <p className="text-xl sm:text-2xl font-bold text-orange-600 truncate">
+                              {topProducts[0]?.name || t("common.cancel")}
+                            </p>
+                          )}
                           <div className="flex items-center mt-1">
                             <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 mr-1" />
-                            <span className="text-[10px] sm:text-xs text-orange-500 truncate">{topProducts[0]?.count || 0} {t("sales.quantity")}</span>
+                            <span className="text-[10px] sm:text-xs text-orange-500 truncate">{isDataLoading ? "..." : (topProducts[0]?.count || 0)} {t("sales.quantity")}</span>
                           </div>
                         </div>
                         <div className="p-2 sm:p-3 bg-orange-100 dark:bg-orange-500/20 rounded-full flex-shrink-0">
@@ -439,8 +449,14 @@ Game Store Zarzis - Intelligence Business
           {/* Common Revenue Graph & Recent Sales */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <React.Suspense fallback={
-              <Card className="glass-card lg:col-span-2 h-[300px] flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+              <Card className="glass-card lg:col-span-2 h-[300px] flex items-center justify-center p-6">
+                <div className="w-full h-full space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-6 w-32 bg-white/5" />
+                    <Skeleton className="h-8 w-48 bg-white/5" />
+                  </div>
+                  <Skeleton className="h-[200px] w-full bg-white/5" />
+                </div>
               </Card>
             }>
               <OverviewRevenueChart
@@ -448,6 +464,7 @@ Game Store Zarzis - Intelligence Business
                 timeRange={timeRange}
                 setTimeRange={setTimeRange}
                 isOwner={isOwner}
+                isLoading={isDataLoading}
               />
             </React.Suspense>
 

@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3 } from "lucide-react";
 import { Sale } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Helper to process sales for today (hourly)
 function getTodayRevenue(sales: Sale[]) {
@@ -63,16 +64,30 @@ interface OverviewRevenueChartProps {
     timeRange: 'today' | 'weekly' | 'monthly' | 'yearly';
     setTimeRange: (range: 'today' | 'weekly' | 'monthly' | 'yearly') => void;
     isOwner: boolean;
+    isLoading?: boolean;
 }
 
-const OverviewRevenueChart = ({ sales, timeRange, setTimeRange, isOwner }: OverviewRevenueChartProps) => {
+const OverviewRevenueChart = ({ sales, timeRange, setTimeRange, isOwner, isLoading }: OverviewRevenueChartProps) => {
     const { t } = useLanguage();
 
     const revenueData = useMemo(() => {
+        if (isLoading || !sales) return [];
         if (timeRange === 'today') return getTodayRevenue(sales || []);
         if (timeRange === 'weekly') return getDailyRevenueRange(sales || [], 7);
         return getDailyRevenueRange(sales || [], 30);
-    }, [sales, timeRange]);
+    }, [sales, timeRange, isLoading]);
+
+    if (isLoading) {
+        return (
+            <Card className="glass-card lg:col-span-2 h-[400px] flex flex-col p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <Skeleton className="h-6 w-32 bg-white/5" />
+                    <Skeleton className="h-8 w-48 bg-white/5" />
+                </div>
+                <Skeleton className="flex-1 w-full bg-white/5" />
+            </Card>
+        );
+    }
 
     return (
         <Card className="glass-card lg:col-span-2">
