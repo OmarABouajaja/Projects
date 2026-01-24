@@ -93,7 +93,12 @@ export default defineConfig({
     // Optimize chunk splitting - more aggressive for better caching
     rollupOptions: {
       output: {
-        // Use standard Vite chunking for better reliability
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-charts': ['recharts', 'recharts-scale'],
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-label', '@radix-ui/react-tabs'],
+          'vendor-utils': ['date-fns', 'lucide-react', 'clsx', 'tailwind-merge'],
+        }
       },
     },
     // Minification (using esbuild, faster than terser)
