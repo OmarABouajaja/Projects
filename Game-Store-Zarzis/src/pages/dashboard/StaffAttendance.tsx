@@ -34,7 +34,7 @@ interface AttendanceStats {
 
 const StaffAttendance = () => {
     const { user, isOwner } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     // Default to current month range
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: startOfMonth(new Date()),
@@ -158,9 +158,9 @@ const StaffAttendance = () => {
         // Handle case where profile might be returned as array from join
         if (Array.isArray(profile)) {
             const first = profile[0] as Profile;
-            return first?.email || first?.full_name || 'Unknown Staff';
+            return first?.email || first?.full_name || t("attendance.unknown_staff");
         }
-        return profile?.email || profile?.full_name || 'Unknown Staff';
+        return profile?.email || profile?.full_name || t("attendance.unknown_staff");
     };
 
     const safeFormat = (date: string | Date | undefined, formatStr: string) => {
@@ -176,18 +176,18 @@ const StaffAttendance = () => {
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="font-display text-3xl font-bold mb-2">Worker Attendance</h1>
-                            <p className="text-muted-foreground">Track staff work hours and performance stats.</p>
+                            <h1 className="font-display text-3xl font-bold mb-2">{t("attendance.title")}</h1>
+                            <p className="text-muted-foreground">{t("attendance.subtitle")}</p>
                         </div>
                         {isOwner && (
                             <div className="flex items-center gap-2 bg-background/50 p-1 rounded-lg border border-border/40">
                                 <Users className="w-4 h-4 ml-2 text-muted-foreground" />
                                 <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
                                     <SelectTrigger className="w-[200px] border-none shadow-none bg-transparent h-8">
-                                        <SelectValue placeholder="All Staff" />
+                                        <SelectValue placeholder={t("attendance.all_staff")} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Staff</SelectItem>
+                                        <SelectItem value="all">{t("attendance.all_staff")}</SelectItem>
                                         {staffProfiles?.map((staff: Pick<Profile, 'id' | 'full_name' | 'email'>) => (
                                             <SelectItem key={staff.id} value={staff.id}>
                                                 {staff.full_name || staff.email}
@@ -205,10 +205,10 @@ const StaffAttendance = () => {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-lg">
                                         <CalendarIcon className="w-5 h-5 text-primary" />
-                                        Select Period
+                                        {t("attendance.select_period")}
                                     </CardTitle>
                                     <CardDescription>
-                                        Filter data by date range.
+                                        {t("attendance.filter_by_date")}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="flex justify-center pb-6">
@@ -229,7 +229,7 @@ const StaffAttendance = () => {
                                             <TrendingUp className="w-6 h-6 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Period Summary</p>
+                                            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">{t("attendance.period_summary")}</p>
                                             <h3 className="text-xl font-bold text-foreground">
                                                 {dateRange?.from ? safeFormat(dateRange.from, "MMM d") : '--'}
                                                 {' - '}
@@ -240,16 +240,16 @@ const StaffAttendance = () => {
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center border-b border-primary/10 pb-2">
-                                            <span className="text-sm text-muted-foreground">Total Worked</span>
-                                            <span className="font-bold text-lg">{totalHours} <span className="text-xs font-normal text-muted-foreground">hrs</span></span>
+                                            <span className="text-sm text-muted-foreground">{t("attendance.total_worked")}</span>
+                                            <span className="font-bold text-lg">{totalHours} <span className="text-xs font-normal text-muted-foreground">{t("attendance.hrs")}</span></span>
                                         </div>
                                         <div className="flex justify-between items-center border-b border-primary/10 pb-2">
-                                            <span className="text-sm text-muted-foreground">Shifts Completed</span>
+                                            <span className="text-sm text-muted-foreground">{t("attendance.shifts_completed")}</span>
                                             <span className="font-bold text-lg">{stats.shifts}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm text-muted-foreground">Avg. Daily</span>
-                                            <span className="font-bold text-lg text-secondary">{avgHoursPerDay} <span className="text-xs font-normal text-muted-foreground">hrs/day</span></span>
+                                            <span className="text-sm text-muted-foreground">{t("attendance.avg_daily")}</span>
+                                            <span className="font-bold text-lg text-secondary">{avgHoursPerDay} <span className="text-xs font-normal text-muted-foreground">{t("attendance.hrs_day")}</span></span>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -261,10 +261,10 @@ const StaffAttendance = () => {
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Briefcase className="w-5 h-5 text-secondary" />
-                                        Shift History
+                                        {t("attendance.shift_history")}
                                     </CardTitle>
                                     <CardDescription>
-                                        Detailed logs for the selected period.
+                                        {t("attendance.detailed_logs")}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
@@ -272,7 +272,7 @@ const StaffAttendance = () => {
                                         {isLoading ? (
                                             <div className="flex flex-col items-center justify-center py-12 space-y-4 text-muted-foreground">
                                                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                                                <p>Loading attendance data...</p>
+                                                <p>{t("attendance.loading")}</p>
                                             </div>
                                         ) : sessions.length > 0 ? (
                                             sessions.map((session) => {
@@ -303,7 +303,7 @@ const StaffAttendance = () => {
                                                                         <Clock className="w-3 h-3" />
                                                                         {safeFormat(session.check_in, 'HH:mm')}
                                                                         {' → '}
-                                                                        {session.check_out ? safeFormat(session.check_out, 'HH:mm') : 'Now'}
+                                                                        {session.check_out ? safeFormat(session.check_out, 'HH:mm') : t("attendance.now")}
                                                                     </span>
                                                                     <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
                                                                     <span>{getStaffInfo(session)}</span>
@@ -315,7 +315,7 @@ const StaffAttendance = () => {
                                                             {isActive ? (
                                                                 <div className="flex flex-col items-end">
                                                                     <Badge variant="default" className="mb-1 bg-green-500 hover:bg-green-600 border-green-400/50 shadow-[0_0_10px_rgba(34,197,94,0.4)] animate-pulse">
-                                                                        Active
+                                                                        {t("attendance.active")}
                                                                     </Badge>
                                                                     <span className="font-mono text-sm text-foreground/80">
                                                                         {displayHours}h {displayMinutes}m
@@ -326,7 +326,7 @@ const StaffAttendance = () => {
                                                                     <span className="font-bold text-lg text-primary leading-none">
                                                                         {displayHours}h {displayMinutes}m
                                                                     </span>
-                                                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Duration</span>
+                                                                    <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{t("attendance.duration")}</span>
                                                                 </div>
                                                             )}
                                                         </div>
@@ -336,8 +336,8 @@ const StaffAttendance = () => {
                                         ) : (
                                             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/5">
                                                 <AlertCircle className="w-12 h-12 mb-4 opacity-20" />
-                                                <p className="text-lg font-medium">No shifts found</p>
-                                                <p className="text-sm opacity-60">Try selecting a different date range or staff member.</p>
+                                                <p className="text-lg font-medium">{t("attendance.no_shifts")}</p>
+                                                <p className="text-sm opacity-60">{t("attendance.try_different_range")}</p>
                                             </div>
                                         )}
                                     </div>

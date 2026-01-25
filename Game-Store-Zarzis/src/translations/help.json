@@ -153,5 +153,75 @@
         "fr": "Traitement en cours...",
         "en": "Processing...",
         "ar": "جار المعالجة..."
+    },
+    "auth.staffLogin": {
+        "fr": "Connexion Staff",
+        "en": "Staff Login",
+        "ar": "تسجيل دخول الموظف"
+    },
+    "auth.dashboardSubtitle": {
+        "fr": "Tableau de Bord Game Store Zarzis",
+        "en": "Game Store Zarzis Dashboard",
+        "ar": "لوحة تحكم Game Store Zarzis"
+    },
+    "auth.signingIn": {
+        "fr": "Connexion...",
+        "en": "Signing in...",
+        "ar": "جارٍ تسجيل الدخول..."
+    },
+    "auth.signIn": {
+        "fr": "Se connecter",
+        "en": "Sign In",
+        "ar": "تسجيل الدخول"
+    },
+    "auth.backToWebsite": {
+        "fr": "← Retour au site",
+        "en": "← Back to Website",
+        "ar": "← العودة للموقع"
+    },
+    "auth.email": {
+        "fr": "Email",
+        "en": "Email",
+        "ar": "البريد الإلكتروني"
+    },
+    "auth.password": {
+        "fr": "Mot de passe",
+        "en": "Password",
+        "ar": "كلمة المرور"
+    },
+    "auth.invalidEmailPassword": {
+        "fr": "Email ou mot de passe invalide",
+        "en": "Invalid email or password",
+        "ar": "بريد إلكتروني أو كلمة مرور غير صحيحة"
+    },
+    "auth.unexpectedError": {
+        "fr": "Une erreur inattendue s'est produite",
+        "en": "An unexpected error occurred",
+        "ar": "حدث خطأ غير متوقع"
+    },
+    "auth.enterNewPassword": {
+        "fr": "Entrez votre nouveau mot de passe ci-dessous",
+        "en": "Enter your new password below",
+        "ar": "أدخل كلمة المرور الجديدة أدناه"
+    },
+    "auth.updating": {
+        "fr": "Mise à jour...",
+        "en": "Updating...",
+        "ar": "جارٍ التحديث..."
+    },
+    "auth.canNowSignIn": {
+        "fr": "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        "en": "You can now sign in with your new password.",
+        "ar": "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة."
+    },
+    "auth.invalidResetLink": {
+        "fr": "Lien invalide ou expiré",
+        "en": "Invalid or expired reset link",
+        "ar": "رابط غير صالح أو منتهي الصلاحية"
+    },
+    "auth.sessionExpired": {
+        "fr": "Session expirée ou invalide. Veuillez demander un nouveau lien.",
+        "en": "Session expired or invalid. Please request a new link.",
+        "ar": "جلسة منتهية أو غير صالحة. يرجى طلب رابط جديد."
     }
 }

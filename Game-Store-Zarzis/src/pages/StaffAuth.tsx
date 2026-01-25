@@ -48,7 +48,7 @@ const StaffAuth = () => {
 
       if (signInError) {
         if (signInError.message.includes("Invalid login")) {
-          setError("Invalid email or password");
+          setError(t("auth.invalidEmailPassword"));
         } else {
           setError(signInError.message);
         }
@@ -57,7 +57,7 @@ const StaffAuth = () => {
 
       navigate("/dashboard");
     } catch (err) {
-      setError("An unexpected error occurred");
+      setError(t("auth.unexpectedError"));
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +94,7 @@ const StaffAuth = () => {
         description: t("auth.resetEmailSentDesc")
       });
     } catch (err) {
-      toast.error("An unexpected error occurred");
+      toast.error(t("auth.unexpectedError"));
     } finally {
       setIsResetLoading(false);
     }
@@ -111,9 +111,9 @@ const StaffAuth = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/20 mb-4">
               <Gamepad2 className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="font-display text-2xl font-bold mb-2">Staff Login</h1>
+            <h1 className="font-display text-2xl font-bold mb-2">{t("auth.staffLogin")}</h1>
             <p className="text-muted-foreground text-sm">
-              Game Store Zarzis Dashboard
+              {t("auth.dashboardSubtitle")}
             </p>
           </div>
 
@@ -128,7 +128,7 @@ const StaffAuth = () => {
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -144,7 +144,7 @@ const StaffAuth = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
@@ -187,7 +187,7 @@ const StaffAuth = () => {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign In"}
+              {isLoading ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
 
@@ -198,7 +198,7 @@ const StaffAuth = () => {
               onClick={() => navigate("/")}
               className="text-muted-foreground hover:text-foreground"
             >
-              ← Back to Website
+              {t("auth.backToWebsite")}
             </Button>
           </div>
         </div>

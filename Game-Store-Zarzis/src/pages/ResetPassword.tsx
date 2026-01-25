@@ -74,14 +74,14 @@ const ResetPassword = () => {
 
                 if (sessionError) {
                     console.error("Failed to set session", sessionError);
-                    toast.error("Session expired or invalid. Please request a new link.");
+                    toast.error(t("auth.sessionExpired"));
                     setTimeout(() => navigate('/staff-login'), 4000);
                 } else {
                     // Session established successfully
                 }
             } else {
                 // No recovery token found
-                toast.error("Invalid or expired reset link");
+                toast.error(t("auth.invalidResetLink"));
                 setTimeout(() => navigate('/staff-login'), 4000);
             }
         };
@@ -123,8 +123,8 @@ const ResetPassword = () => {
                 navigate('/staff-login');
             }, 3000);
         } catch (err) {
-            setError("An unexpected error occurred");
-            toast.error("An unexpected error occurred");
+            setError(t("auth.unexpectedError"));
+            toast.error(t("auth.unexpectedError"));
         } finally {
             setIsLoading(false);
         }
@@ -146,7 +146,7 @@ const ResetPassword = () => {
                         </h1>
 
                         <p className="text-muted-foreground mb-6">
-                            You can now sign in with your new password.
+                            {t("auth.canNowSignIn")}
                         </p>
 
                         <Button
@@ -177,7 +177,7 @@ const ResetPassword = () => {
                             {t("auth.resetPasswordTitle")}
                         </h1>
                         <p className="text-muted-foreground text-sm">
-                            Enter your new password below
+                            {t("auth.enterNewPassword")}
                         </p>
                     </div>
 
@@ -253,7 +253,7 @@ const ResetPassword = () => {
                             className="w-full"
                             disabled={isLoading}
                         >
-                            {isLoading ? "Updating..." : t("auth.updatePassword")}
+                            {isLoading ? t("auth.updating") : t("auth.updatePassword")}
                         </Button>
                     </form>
 

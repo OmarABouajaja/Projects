@@ -1,4 +1,5 @@
 import { useData } from '@/contexts/DataContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,14 +11,28 @@ import SEO from '@/components/SEO';
 
 const Blog = () => {
   const { blogPosts } = useData();
+  const { t, language } = useLanguage();
 
   const publishedPosts = blogPosts.filter(post => post.is_published);
+
+  // Get localized title/content based on current language
+  const getLocalizedTitle = (post: typeof blogPosts[0]) => {
+    if (language === 'fr' && post.title_fr) return post.title_fr;
+    if (language === 'ar' && post.title_ar) return post.title_ar;
+    return post.title;
+  };
+
+  const getLocalizedContent = (post: typeof blogPosts[0]) => {
+    if (language === 'fr' && post.content_fr) return post.content_fr;
+    if (language === 'ar' && post.content_ar) return post.content_ar;
+    return post.content;
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title="Blog"
-        description="Découvrez nos derniers articles sur les réparations, le gaming et les actualités du store à Zarzis."
+        title={t("blog.page.title")}
+        description={t("blog.page.description")}
       />
       {/* Header */}
       <header className="border-b bg-card">
@@ -26,17 +41,17 @@ const Blog = () => {
             <Link to="/">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
+                {t("blog.back_home")}
               </Button>
             </Link>
           </div>
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
               Game Store
-              <span className="text-gradient"> Blog</span>
+              <span className="text-gradient"> {t("nav.blog")}</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Stay updated with our latest repairs, services, and gaming tips
+              {t("blog.page.subtitle")}
             </p>
           </div>
         </div>
@@ -46,8 +61,8 @@ const Blog = () => {
         {publishedPosts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-muted-foreground">
-              <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
-              <p>Check back soon for updates on repairs and services!</p>
+              <h3 className="text-lg font-semibold mb-2">{t("blog.no_posts")}</h3>
+              <p>{t("blog.check_back")}</p>
             </div>
           </div>
         ) : (
@@ -58,7 +73,7 @@ const Blog = () => {
                   <div className="relative overflow-hidden rounded-t-lg">
                     <img
                       src={post.image_url}
-                      alt={post.title}
+                      alt={getLocalizedTitle(post)}
                       className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
@@ -72,10 +87,10 @@ const Blog = () => {
                     )}
                   </div>
                   <CardTitle className="group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
+                    {getLocalizedTitle(post)}
                   </CardTitle>
                   <CardDescription className="line-clamp-3">
-                    {post.content}
+                    {getLocalizedContent(post)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -83,11 +98,11 @@ const Blog = () => {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3" />
-                        <span>Staff</span>
+                        <span>{t("blog.author_staff")}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                        <span>{new Date(post.created_at).toLocaleDateString(language === 'ar' ? 'ar-TN' : language === 'fr' ? 'fr-TN' : 'en-US')}</span>
                       </div>
                     </div>
                   </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useConsoles, useUpdateConsole, useCreateConsole, useDeleteConsole } from "@/hooks/useConsoles";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 
 const ConsoleManagement = () => {
   const { isOwner } = useAuth();
+  const { t } = useLanguage();
   const { data: consoles, isLoading } = useConsoles();
   const [selectedConsole, setSelectedConsole] = useState<Console | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -32,8 +34,8 @@ const ConsoleManagement = () => {
         <DashboardLayout>
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-              <p className="text-muted-foreground">Only owners can manage consoles.</p>
+              <h2 className="text-2xl font-bold mb-2">{t("console.access_denied")}</h2>
+              <p className="text-muted-foreground">{t("console.owners_only")}</p>
             </div>
           </div>
         </DashboardLayout>
@@ -49,13 +51,13 @@ const ConsoleManagement = () => {
       });
 
       toast({
-        title: "Status updated",
-        description: `Console is now ${newStatus}`
+        title: t("console.status_updated"),
+        description: `${t("console.now")} ${newStatus}`
       });
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to update status",
+        title: t("common.error"),
+        description: t("console.failed_update_status"),
         variant: "destructive"
       });
     }
@@ -75,11 +77,11 @@ const ConsoleManagement = () => {
         shortcut_key: selectedConsole.shortcut_key
       });
 
-      toast({ title: "Console Updated", description: "Changes saved successfully." });
+      toast({ title: t("console.updated"), description: t("console.changes_saved") });
       setIsDialogOpen(false);
       setSelectedConsole(null);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update console.", variant: "destructive" });
+      toast({ title: t("common.error"), description: t("console.failed_update"), variant: "destructive" });
     }
   };
 
@@ -120,11 +122,11 @@ const ConsoleManagement = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'available': return 'Available';
+      case 'available': return t("console.status.available");
       case 'in_use':
-      case 'occupied': return 'In Use';
-      case 'maintenance': return 'Maintenance';
-      case 'offline': return 'Offline';
+      case 'occupied': return t("console.status.in_use");
+      case 'maintenance': return t("console.status.maintenance");
+      case 'offline': return t("console.status.offline");
       default: return status;
     }
   };
@@ -245,9 +247,9 @@ const ConsoleManagement = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="font-display text-3xl font-bold mb-2">Console Management</h1>
+              <h1 className="font-display text-3xl font-bold mb-2">{t("console.title")}</h1>
               <p className="text-muted-foreground">
-                Monitor and manage all gaming consoles in your store
+                {t("console.subtitle")}
               </p>
             </div>
 
@@ -256,12 +258,12 @@ const ConsoleManagement = () => {
               <DialogTrigger asChild>
                 <Button className="shadow-lg hover:shadow-primary/25 transition-all">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Console
+                  {t("console.add")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>Add New Console</DialogTitle>
+                  <DialogTitle>{t("console.add_new_title")}</DialogTitle>
                   <DialogDescription>
                     Create a new station for your store. Station numbers must be unique.
                   </DialogDescription>
