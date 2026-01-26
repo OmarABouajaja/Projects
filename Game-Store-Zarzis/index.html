@@ -40,7 +40,12 @@
   <link rel="alternate" hreflang="ar" href="https://www.gamestorezarzis.com.tn?lang=ar" />
   <link rel="alternate" hreflang="x-default" href="https://www.gamestorezarzis.com.tn" />
 
-  <!-- Preconnect to critical external resources -->
+  <!-- Preconnect to critical external resources - ORDERED BY PRIORITY -->
+  <!-- Supabase is critical for dashboard - must preconnect -->
+  <link rel="preconnect" href="https://pwoiaacevjsihrnsxmzb.supabase.co" crossorigin />
+  <link rel="dns-prefetch" href="https://pwoiaacevjsihrnsxmzb.supabase.co" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -48,6 +53,7 @@
   <link rel="dns-prefetch" href="https://wa.me" />
   <link rel="dns-prefetch" href="https://www.instagram.com" />
   <link rel="dns-prefetch" href="https://www.tiktok.com" />
+  <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
 
   <!-- Module preload for critical components -->
 
@@ -189,8 +195,12 @@
     }
   </style>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <!-- Favicon - Using inline SVG for instant load (no network request) -->
+  <!-- The heavy favicon.ico (1.2MB) is deferred using fetchpriority=low -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%230a0e1a' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='%2300d4ff'%3E🎮%3C/text%3E%3C/svg%3E" />
+  <!-- Defer heavy favicon to after page load -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" fetchpriority="low" />
 
   <!-- Enhanced Open Graph for Social Media Sharing -->
   <meta property="og:title" content="🎮 Game Store Zarzis - Premium Gaming & Tech Hub" />
@@ -395,7 +405,52 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Loading skeleton for instant FCP - will be replaced by React -->
+    <div style="display:flex;min-height:100vh;background:hsl(222 47% 6%);">
+      <!-- Sidebar skeleton -->
+      <div
+        style="width:64px;background:hsl(222 47% 8%);border-right:1px solid hsl(222 30% 18%);display:flex;flex-direction:column;align-items:center;padding-top:1rem;">
+        <div
+          style="width:40px;height:40px;background:hsl(222 30% 15%);border-radius:8px;animation:pulse 1.5s infinite;">
+        </div>
+        <div
+          style="margin-top:2rem;width:32px;height:32px;background:hsl(222 30% 15%);border-radius:8px;animation:pulse 1.5s infinite;">
+        </div>
+        <div
+          style="margin-top:1rem;width:32px;height:32px;background:hsl(222 30% 15%);border-radius:8px;animation:pulse 1.5s infinite;">
+        </div>
+        <div
+          style="margin-top:1rem;width:32px;height:32px;background:hsl(222 30% 15%);border-radius:8px;animation:pulse 1.5s infinite;">
+        </div>
+      </div>
+      <!-- Main content skeleton -->
+      <div style="flex:1;padding:1.5rem;">
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;">
+          <div style="flex:1;height:100px;background:hsl(222 47% 8%);border-radius:12px;animation:pulse 1.5s infinite;">
+          </div>
+          <div style="flex:1;height:100px;background:hsl(222 47% 8%);border-radius:12px;animation:pulse 1.5s infinite;">
+          </div>
+          <div style="flex:1;height:100px;background:hsl(222 47% 8%);border-radius:12px;animation:pulse 1.5s infinite;">
+          </div>
+        </div>
+        <div style="height:200px;background:hsl(222 47% 8%);border-radius:12px;animation:pulse 1.5s infinite;"></div>
+      </div>
+    </div>
+    <style>
+      @keyframes pulse {
+
+        0%,
+        100% {
+          opacity: 1
+        }
+
+        50% {
+          opacity: .5
+        }
+      }
+    </style>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

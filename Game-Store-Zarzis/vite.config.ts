@@ -90,14 +90,24 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimize chunk splitting - more aggressive for better caching
+    // Optimize chunk splitting - aggressive for better caching and parallel loading
     rollupOptions: {
       output: {
         manualChunks: {
+          // Core React - loads first
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Charts are heavy - separate chunk, lazy loaded
           'vendor-charts': ['recharts', 'recharts-scale'],
-          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-label', '@radix-ui/react-tabs'],
+          // UI components - separate chunk
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot', '@radix-ui/react-label', '@radix-ui/react-tabs', '@radix-ui/react-dropdown-menu', '@radix-ui/react-popover', '@radix-ui/react-toast'],
+          // Utilities
           'vendor-utils': ['date-fns', 'lucide-react', 'clsx', 'tailwind-merge'],
+          // Supabase client - separate for caching
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // Form handling
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // Query library
+          'vendor-query': ['@tanstack/react-query'],
         }
       },
     },
