@@ -271,12 +271,12 @@ const StaffAuth = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
                     <Button
                       type="button"
                       variant="ghost"
                       onClick={() => setShowForgotPassword(false)}
-                      className="flex-1"
+                      className="w-full sm:w-auto sm:flex-1 min-w-0"
                       disabled={isResetLoading}
                     >
                       {t("common.cancel")}
@@ -284,7 +284,7 @@ const StaffAuth = () => {
                     <Button
                       type="submit"
                       variant="hero"
-                      className="flex-1 h-11 neon-cyan-glow"
+                      className="w-full sm:w-auto sm:flex-[1.5] min-w-0 h-11 neon-cyan-glow whitespace-normal break-words text-center"
                       disabled={isResetLoading}
                     >
                       {isResetLoading ? t("staff.processing") : t("auth.sendResetLink")}
