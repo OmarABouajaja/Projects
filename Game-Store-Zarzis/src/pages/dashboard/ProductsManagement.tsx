@@ -227,7 +227,15 @@ const ProductsManagement = () => {
                     <Select
                       value={formData.product_type}
                       onValueChange={(value: 'physical' | 'consumable' | 'digital') =>
-                        setFormData({ ...formData, product_type: value })
+                        setFormData({
+                          ...formData,
+                          product_type: value,
+                          // Reset fields that don't apply to the new type
+                          subcategory: value === 'consumable' ? formData.subcategory : "",
+                          is_quick_sale: value === 'consumable' ? formData.is_quick_sale : false,
+                          digital_content: value === 'digital' ? formData.digital_content : "",
+                          is_digital_delivery: value === 'digital' ? formData.is_digital_delivery : false
+                        })
                       }
                     >
                       <SelectTrigger>

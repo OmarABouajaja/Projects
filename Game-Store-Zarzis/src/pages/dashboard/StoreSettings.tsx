@@ -694,7 +694,7 @@ const StoreSettings = () => {
                         </div>
                         <div>
                           <div className="text-2xl font-bold text-orange-600">
-                            {hasScheduleConflicts() ? 'âš ï¸' : 'âœ…'}
+                            {hasScheduleConflicts() ? '⚠️' : '✅'}
                           </div>
                           <div className="text-xs text-muted-foreground">{t('settings.weeklySchedule.validationStatus')}</div>
                         </div>
