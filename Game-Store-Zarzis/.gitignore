@@ -141,3 +141,10 @@ secrets.json
 # macOS
 .AppleDouble
 .LSOverride
+
+# AI Assistants (prevent traces from being committed)
+.gemini/
+.agent/
+.cursor/
+.copilot/
+.github/copilot/

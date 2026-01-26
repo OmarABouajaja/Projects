@@ -178,7 +178,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           supabase.from(TABLES.STORE_SETTINGS).select('*'),
           supabase.from(TABLES.PRICING).select('*').order('sort_order', { ascending: true }),
           supabase.from(TABLES.GAME_SHORTCUTS).select('*').order('display_order', { ascending: true }),
-          supabase.from(TABLES.PRODUCTS).select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(20)
+          supabase.from(TABLES.PRODUCTS).select('*').order('created_at', { ascending: false }).limit(20)
         ]);
 
         setConsoles(consolesResponse.data?.map(mapConsoleFromDB) || []);

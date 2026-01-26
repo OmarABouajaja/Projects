@@ -4,11 +4,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star, Zap } from "lucide-react";
+import { ShoppingCart, Star, Zap, Loader2 } from "lucide-react";
 import { memo } from "react";
 
 const ProductsShowcase = () => {
-  const { products } = useData();
+  const { products, isLoading } = useData();
   const { addItem } = useCart();
   const { t } = useLanguage();
 
@@ -17,6 +17,30 @@ const ProductsShowcase = () => {
     .filter(p => (p.product_type !== 'consumable') && (p.isOnSale || products.indexOf(p) < 6))
     .slice(0, 6);
 
+  // Show loading state while products are loading
+  if (isLoading) {
+    return (
+      <section id="products" className="py-8 sm:py-12 md:py-16 lg:py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/5 to-transparent" />
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12">
+            <span className="text-accent font-display text-[10px] sm:text-xs md:text-sm tracking-widest uppercase mb-2 sm:mb-3 block">
+              {t("products.special")}
+            </span>
+            <h2 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
+              {t("products.featured")}
+              <span className="text-gradient"> {t("products.title_suffix")}</span>
+            </h2>
+          </div>
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Don't render if no products
   if (showcaseProducts.length === 0) {
     return null;
   }
