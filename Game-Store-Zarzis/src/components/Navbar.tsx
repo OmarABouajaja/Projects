@@ -83,9 +83,9 @@ const Navbar = () => {
 
   const navLinks: { name: string; href: string; icon: ElementType; id: string }[] = useMemo(() => [
     { name: t("nav.home"), href: "#home", icon: Home, id: "home" },
+    { name: t("nav.shop"), href: "#products", icon: ShoppingCart, id: "products" },
     { name: t("nav.services"), href: "#services", icon: Wrench, id: "services" },
     { name: t("nav.gaming"), href: "#lounge", icon: Pad, id: "lounge" },
-    { name: t("nav.shop"), href: "#products", icon: ShoppingCart, id: "products" },
     { name: t("nav.about"), href: "#about", icon: Info, id: "about" },
     { name: t("nav.contact"), href: "#contact", icon: PhoneCall, id: "contact" },
   ], [t]);
