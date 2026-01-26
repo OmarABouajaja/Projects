@@ -14,7 +14,6 @@ const Hero = () => {
       try {
         const { count, error } = await supabase
           .from('consoles')
-          .select('*', { count: 'exact', head: true })
           .select('*', { count: 'exact', head: true });
 
         if (count !== null && !error) {
@@ -36,12 +35,12 @@ const Hero = () => {
   ], [t, consoleCount]);
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-12" itemScope itemType="https://schema.org/WebPage">
-      <div className="container mx-auto px-3 sm:px-4 relative z-10">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16" itemScope itemType="https://schema.org/WebPage">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-5xl mx-auto text-center" style={{ contain: 'layout style' }}>
           {/* Main Heading - LCP element */}
           <h1
-            className="font-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-2 sm:mb-3 md:mb-4"
+            className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight"
             style={{
               contain: 'layout style',
               animation: 'slide-up 0.6s ease-out forwards'
@@ -61,7 +60,7 @@ const Hero = () => {
 
           {/* Subheading */}
           <p
-            className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-4"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 md:mb-10 px-2 leading-relaxed"
             style={{
               animation: 'fade-in 0.8s ease-out 0.2s forwards'
             }}
@@ -69,9 +68,9 @@ const Hero = () => {
             {t("hero.subtitle")}
           </p>
 
-          {/* CTA Buttons */}
+          {/* CTA Buttons - Improved mobile touch targets */}
           <div
-            className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 md:mb-12 px-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-12 md:mb-14 px-2"
             style={{
               animation: 'fade-in 0.8s ease-out 0.4s forwards'
             }}
@@ -80,25 +79,25 @@ const Hero = () => {
               href="https://wa.me/21629290065?text=Bonjour%2C%20je%20souhaite%20r%C3%A9server%20une%20session%20gaming."
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm sm:text-base font-semibold h-10 sm:h-11 px-5 sm:px-6 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_16px_hsl(var(--primary)/0.4)] transition-all duration-300 w-full sm:w-auto min-w-[160px] sm:min-w-[170px] hover:scale-[1.02] touch-manipulation min-h-[40px] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-xl text-base sm:text-lg font-bold h-12 sm:h-14 px-6 sm:px-8 bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_hsl(var(--primary)/0.5)] transition-all duration-300 w-full sm:w-auto min-w-[180px] hover:scale-[1.03] touch-manipulation active:scale-[0.97]"
             >
-              <Gamepad2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6" />
               {t("hero.cta1")}
             </a>
             <a
               href="https://wa.me/21629290065?text=Bonjour%2C%20je%20souhaite%20demander%20un%20devis%20pour%20une%20r%C3%A9paration."
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm sm:text-base font-semibold h-10 sm:h-11 px-5 sm:px-6 bg-muted/40 border-2 border-primary/40 text-foreground hover:bg-muted/60 hover:border-primary transition-all duration-300 w-full sm:w-auto min-w-[160px] sm:min-w-[170px] hover:scale-[1.02] touch-manipulation min-h-[40px] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2.5 whitespace-nowrap rounded-xl text-base sm:text-lg font-bold h-12 sm:h-14 px-6 sm:px-8 bg-muted/50 border-2 border-primary/50 text-foreground hover:bg-muted/70 hover:border-primary transition-all duration-300 w-full sm:w-auto min-w-[180px] hover:scale-[1.03] touch-manipulation active:scale-[0.97]"
             >
-              <Wrench className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <Wrench className="w-5 h-5 sm:w-6 sm:h-6" />
               {t("hero.cta2")}
             </a>
           </div>
 
-          {/* Stats */}
+          {/* Stats - Enhanced mobile cards */}
           <div
-            className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6 max-w-3xl mx-auto"
+            className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-6 max-w-3xl mx-auto"
             style={{
               animation: 'fade-in 0.8s ease-out 0.6s forwards'
             }}
@@ -106,12 +105,12 @@ const Hero = () => {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="text-center rounded-lg sm:rounded-xl bg-muted/30 border border-border/50 p-2 sm:p-2.5 md:p-3 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_hsl(var(--primary)/0.15)]"
+                className="text-center rounded-xl sm:rounded-2xl bg-muted/40 border border-border/60 p-3 sm:p-4 md:p-5 hover:border-primary/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_hsl(var(--primary)/0.2)]"
               >
-                <div className={`font-display text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-${stat.color} mb-1 sm:mb-1.5 drop-shadow-[0_6px_16px_hsl(var(--primary)/0.3)]`}>
+                <div className={`font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-${stat.color} mb-1.5 sm:mb-2 drop-shadow-[0_6px_20px_hsl(var(--primary)/0.4)]`}>
                   {stat.value}
                 </div>
-                <div className="text-muted-foreground text-[9px] sm:text-[10px] md:text-xs lg:text-sm">{stat.label}</div>
+                <div className="text-muted-foreground text-[10px] sm:text-xs md:text-sm font-medium">{stat.label}</div>
               </div>
             ))}
           </div>

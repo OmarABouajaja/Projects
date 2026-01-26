@@ -78,20 +78,22 @@ const Services = () => {
             {t("services.subtitle")}
           </p>
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
-            {categories.map((cat) => (
-              <Button
-                key={cat.id}
-                variant={activeCategory === cat.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveCategory(cat.id)}
-                className="rounded-full px-4 py-1 h-auto text-xs sm:text-sm"
-              >
-                <cat.icon className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                {cat.label}
-              </Button>
-            ))}
+          {/* Category Filters - Horizontal scroll on mobile */}
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide mb-8">
+            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-center min-w-max sm:min-w-0">
+              {categories.map((cat) => (
+                <Button
+                  key={cat.id}
+                  variant={activeCategory === cat.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className="rounded-full px-4 sm:px-5 py-2 h-10 sm:h-11 text-sm sm:text-base font-medium touch-manipulation active:scale-95 transition-all whitespace-nowrap"
+                >
+                  <cat.icon className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  {cat.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
