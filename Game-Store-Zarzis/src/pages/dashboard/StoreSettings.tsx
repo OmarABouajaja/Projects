@@ -21,6 +21,7 @@ import { toast } from "@/hooks/use-toast";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { StoreSettings as StoreSettingsType } from "@/types";
 
 const StoreSettings = () => {
   const { isOwner } = useAuth();
@@ -72,7 +73,11 @@ const StoreSettings = () => {
       bank_transfer: { enabled: false, details: '' },
       d17: { enabled: false, details: '' },
       direct_card: { enabled: false }
-    }
+    },
+    // Notification settings
+    notify_new_order: true,
+    notify_low_stock: true,
+    notify_daily_summary: false
   });
 
   const [showSpecialHoursDialog, setShowSpecialHoursDialog] = useState(false);
@@ -258,7 +263,7 @@ const StoreSettings = () => {
   const handleSave = async () => {
     try {
       // Create a batch update object with all local settings
-      const settingsToUpdate: Partial<StoreSettings> = {
+      const settingsToUpdate: Partial<StoreSettingsType> = {
         opening_hours: localSettings.opening_hours,
         weekly_schedule: localSettings.weekly_schedule,
         special_hours: localSettings.special_hours,

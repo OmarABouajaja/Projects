@@ -9,17 +9,26 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/gamestorelogocmp.png",
-      "sizes": "48x48",
-      "type": "image/x-icon",
+      "src": "/controller-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/controller-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "lang": "fr",
   "dir": "ltr",
-  "categories": ["business", "entertainment", "games"],
+  "categories": [
+    "business",
+    "entertainment",
+    "games"
+  ],
   "screenshots": [],
   "related_applications": [],
   "prefer_related_applications": false
 }
-

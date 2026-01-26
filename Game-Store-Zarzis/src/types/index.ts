@@ -142,15 +142,17 @@ export interface StoreSettings {
   store_name: string;
   sms_enabled: boolean;
   sms_phone?: string;
+  sms_api_key?: string;
   free_games_enabled: boolean;
   points_system_enabled: boolean;
   help_tooltips_enabled: boolean;
-  tariff_display_mode: 'cards' | 'table' | 'comparison';
+  tariff_display_mode: 'cards' | 'table' | 'comparison' | string;
   data_limit_mb: number;
   opening_hours: OpeningHours;
   pricing_config: PricingConfig;
   auth_config: AuthConfig;
   weekly_schedule?: WeeklySchedule;
+  special_hours?: unknown[];
   delivery_settings?: DeliverySettings;
   default_pricing_ps4?: string;
   default_pricing_ps5?: string;

@@ -232,6 +232,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-[55]"
           onClick={() => setMobileOpen(false)}
+          role="button"
+          aria-label="Close menu"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setMobileOpen(false)}
         />
       )}
 
@@ -273,7 +277,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-none">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-none" aria-label="Dashboard navigation">
           {navItems.map((item, index) => {
             // Optional: Group separators for clearer organization
             const isStartOfGroup = index === 0 ||
@@ -335,6 +339,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               size="icon"
               className="h-6 w-6 rounded-full hover:bg-muted"
               onClick={() => setCollapsed(!collapsed)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!collapsed}
             >
               {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
             </Button>
@@ -369,8 +375,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   "text-muted-foreground hover:bg-muted/60 hover:text-foreground hover:shadow-sm",
                   collapsed && "justify-center px-2"
                 )}
+                aria-label={collapsed ? t("password.security") : undefined}
               >
-                <Key className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+                <Key className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
                 {(!collapsed || mobileOpen) && (
                   <span className="text-sm tracking-wide">{t("password.security")}</span>
                 )}
@@ -385,8 +392,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               collapsed && "justify-center px-2"
             )}
             onClick={handleSignOut}
+            aria-label={collapsed ? t("sidebar.sign_out") : undefined}
           >
-            <LogOut className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" />
+            <LogOut className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" aria-hidden="true" />
             {(!collapsed || mobileOpen) && (
               <span className="text-sm tracking-wide">{t("sidebar.sign_out")}</span>
             )}
@@ -396,6 +404,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Main Content Area */}
       <main
+        id="main-content"
         className={cn(
           "flex-1 transition-all duration-500 ease-in-out min-h-screen",
           isRTL
@@ -422,8 +431,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               onClick={() => navigate("/dashboard/settings")}
               className="h-8 w-8 rounded-full bg-secondary/20 flex items-center justify-center hover:bg-secondary/40 transition-colors"
               title={t("sidebar.store_settings")}
+              aria-label={t("sidebar.store_settings")}
             >
-              <Settings className="w-4 h-4 opacity-70" />
+              <Settings className="w-4 h-4 opacity-70" aria-hidden="true" />
             </button>
           </div>
         </div>
