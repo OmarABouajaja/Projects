@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { useOrders, useUpdateOrderStatus } from "@/hooks/useOrders";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
-import { ShoppingBag, Truck, CheckCircle, XCircle, Clock, Search, Eye, Copy, Mail, ExternalLink } from "lucide-react";
+import { ShoppingBag, Truck, CheckCircle, XCircle, Clock, Search, Eye, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Order, OrderItem } from "@/types";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const OrdersManagement = () => {
+    const { t } = useLanguage();
     const { data: orders, isLoading } = useOrders();
     const updateStatus = useUpdateOrderStatus();
     const [searchTerm, setSearchTerm] = useState("");
@@ -32,18 +33,18 @@ const OrdersManagement = () => {
     const handleStatusUpdate = async (id: string, newStatus: string) => {
         try {
             await updateStatus.mutateAsync({ id, status: newStatus });
-            toast({ title: "Status updated", description: `Order marked as ${newStatus}` });
+            toast({ title: t('orders.status.updated'), description: `${t('orders.status.marked_as')} ${newStatus}` });
         } catch (error) {
-            toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+            toast({ title: t('orders.error'), description: t('orders.error.update'), variant: "destructive" });
         }
     };
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'pending': return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
-            case 'processing': return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20"><Truck className="w-3 h-3 mr-1" /> Processing</Badge>;
-            case 'completed': return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20"><CheckCircle className="w-3 h-3 mr-1" /> Completed</Badge>;
-            case 'cancelled': return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20"><XCircle className="w-3 h-3 mr-1" /> Cancelled</Badge>;
+            case 'pending': return <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20"><Clock className="w-3 h-3 mr-1" /> {t('orders.filter.pending')}</Badge>;
+            case 'processing': return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20"><Truck className="w-3 h-3 mr-1" /> {t('orders.filter.processing')}</Badge>;
+            case 'completed': return <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20"><CheckCircle className="w-3 h-3 mr-1" /> {t('orders.filter.completed')}</Badge>;
+            case 'cancelled': return <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20"><XCircle className="w-3 h-3 mr-1" /> {t('orders.filter.cancelled')}</Badge>;
             default: return <Badge variant="outline">{status}</Badge>;
         }
     };
@@ -53,8 +54,8 @@ const OrdersManagement = () => {
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-display font-bold">Orders Management</h1>
-                        <p className="text-muted-foreground">Manage customer orders and delivery</p>
+                        <h1 className="text-3xl font-display font-bold">{t('orders.title')}</h1>
+                        <p className="text-muted-foreground">{t('orders.subtitle')}</p>
                     </div>
                 </div>
                 {/* Filters */}
@@ -62,7 +63,7 @@ const OrdersManagement = () => {
                     <div className="relative w-full sm:w-72">
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search by name or phone..."
+                            placeholder={t('orders.search')}
                             className="pl-9"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -70,14 +71,14 @@ const OrdersManagement = () => {
                     </div>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                         <SelectTrigger className="w-full sm:w-[180px]">
-                            <SelectValue placeholder="Filter by status" />
+                            <SelectValue placeholder={t('orders.table.status')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Orders</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="processing">Processing</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                            <SelectItem value="all">{t('orders.filter.all')}</SelectItem>
+                            <SelectItem value="pending">{t('orders.filter.pending')}</SelectItem>
+                            <SelectItem value="processing">{t('orders.filter.processing')}</SelectItem>
+                            <SelectItem value="completed">{t('orders.filter.completed')}</SelectItem>
+                            <SelectItem value="cancelled">{t('orders.filter.cancelled')}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -88,14 +89,14 @@ const OrdersManagement = () => {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Order ID</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Delivery</TableHead>
-                                    <TableHead>Payment</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead>{t('orders.table.id')}</TableHead>
+                                    <TableHead>{t('orders.table.customer')}</TableHead>
+                                    <TableHead>{t('orders.table.total')}</TableHead>
+                                    <TableHead>{t('orders.table.delivery')}</TableHead>
+                                    <TableHead>{t('orders.table.payment')}</TableHead>
+                                    <TableHead>{t('orders.table.date')}</TableHead>
+                                    <TableHead>{t('orders.table.status')}</TableHead>
+                                    <TableHead className="text-right">{t('orders.table.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -153,30 +154,30 @@ const OrdersManagement = () => {
                                                     </DialogTrigger>
                                                     <DialogContent className="max-w-md">
                                                         <DialogHeader>
-                                                            <DialogTitle>Order Details #{order.id.slice(0, 8)}</DialogTitle>
+                                                            <DialogTitle>{t('orders.detail.title')} #{order.id.slice(0, 8)}</DialogTitle>
                                                         </DialogHeader>
                                                         <div className="space-y-4">
                                                             <div className="grid grid-cols-2 gap-2 text-sm">
                                                                 <div>
-                                                                    <span className="font-bold block">Customer:</span>
+                                                                    <span className="font-bold block">{t('orders.detail.customer')}</span>
                                                                     {order.client_name} <br />
                                                                     {order.client_phone} <br />
                                                                     {order.client_email}
                                                                 </div>
                                                                 <div>
-                                                                    <span className="font-bold block">Delivery:</span>
+                                                                    <span className="font-bold block">{t('orders.detail.delivery')}</span>
                                                                     <span className="capitalize">{order.delivery_method?.replace('_', ' ')}</span> <br />
-                                                                    {order.delivery_address || "No address provided"}
+                                                                    {order.delivery_address || t('orders.detail.no_address')}
                                                                 </div>
                                                                 <div className="md:col-span-2 pt-2 mt-2 border-t">
-                                                                    <span className="font-bold block text-primary mb-1">Order Notes & Client Info:</span>
+                                                                    <span className="font-bold block text-primary mb-1">{t('orders.detail.notes')}</span>
                                                                     <div className="p-3 bg-muted/40 rounded-lg text-xs whitespace-pre-wrap font-mono border">
-                                                                        {order.notes || "No additional notes"}
+                                                                        {order.notes || t('orders.detail.no_notes')}
                                                                     </div>
                                                                 </div>
                                                                 <div className="md:col-span-2 pt-2 mt-2 border-t flex justify-between items-center">
                                                                     <div>
-                                                                        <span className="font-bold block text-primary">Payment Information:</span>
+                                                                        <span className="font-bold block text-primary">{t('orders.detail.payment_info')}</span>
                                                                         <span className="capitalize">{order.payment_method?.replace('_', ' ')}</span>
                                                                         {order.payment_reference && (
                                                                             <span className="ml-2 px-1.5 py-0.5 bg-muted rounded font-mono text-xs">
@@ -191,7 +192,7 @@ const OrdersManagement = () => {
                                                             </div>
 
                                                             <div className="border rounded-lg p-2 bg-muted/20">
-                                                                <span className="font-bold text-sm mb-2 block">Items:</span>
+                                                                <span className="font-bold text-sm mb-2 block">{t('orders.detail.items')}</span>
                                                                 <div className="space-y-2 max-h-40 overflow-y-auto">
                                                                     {order.items && Array.isArray(order.items) && order.items.map((item: OrderItem, idx: number) => (
                                                                         <div key={idx} className="flex justify-between items-center text-sm p-1 border-b last:border-0 border-muted/20">
@@ -200,7 +201,7 @@ const OrdersManagement = () => {
                                                                                 {item.product_type === 'digital' && (
                                                                                     <div className="flex flex-col gap-1 mt-1">
                                                                                         <Badge variant="outline" className="text-[10px] w-fit h-4 text-blue-500 border-blue-200 bg-blue-50">
-                                                                                            Digital Code Needed
+                                                                                            {t('orders.detail.digital_needed')}
                                                                                         </Badge>
                                                                                         {item.digital_content && (
                                                                                             <div className="flex items-center gap-2 mt-1 p-1.5 bg-muted rounded border group/code">
@@ -226,13 +227,13 @@ const OrdersManagement = () => {
                                                                     ))}
                                                                 </div>
                                                                 <div className="border-t mt-2 pt-2 flex justify-between font-bold">
-                                                                    <span>Total</span>
+                                                                    <span>{t('orders.table.total')}</span>
                                                                     <span>{order.total_amount?.toFixed(3)} DT</span>
                                                                 </div>
                                                             </div>
 
                                                             <div className="space-y-2">
-                                                                <span className="font-bold text-sm">Update Status:</span>
+                                                                <span className="font-bold text-sm">{t('orders.detail.update_status')}</span>
                                                                 <div className="flex gap-2 flex-wrap">
                                                                     {['pending', 'processing', 'completed', 'cancelled'].map(status => (
                                                                         <Button
@@ -242,7 +243,7 @@ const OrdersManagement = () => {
                                                                             className="capitalize"
                                                                             onClick={() => handleStatusUpdate(order.id, status)}
                                                                         >
-                                                                            {status}
+                                                                            {t(`orders.filter.${status}`)}
                                                                         </Button>
                                                                     ))}
                                                                 </div>
@@ -254,7 +255,7 @@ const OrdersManagement = () => {
                                         </TableRow>
                                     ))
                                 ) : (
-                                    <TableRow><TableCell colSpan={7} className="text-center py-8">No orders found.</TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={8} className="text-center py-8">{t('orders.empty')}</TableCell></TableRow>
                                 )}
                             </TableBody>
                         </Table>
