@@ -6,35 +6,24 @@ export const useCreateOrder = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (orderData: OrderFormData) => {
-            // 1. Get totals from orderData (calculated in frontend with store settings)
-            const subtotal = orderData.subtotal;
-            const deliveryCost = orderData.delivery_cost;
-            const totalAmount = orderData.total_amount;
-
-            // Combine client info into notes since columns are missing
-            const clientInfoNote = `
---- Client Info ---
-Name: ${orderData.client_name}
-Phone: ${orderData.client_phone}
-Email: ${orderData.client_email || 'N/A'}
-Address: ${orderData.delivery_address || 'N/A'}
-Subtotal: ${subtotal.toFixed(3)} DT
-Delivery: ${deliveryCost.toFixed(3)} DT
--------------------`;
-
-            const finalNotes = orderData.notes ? `${orderData.notes}\n${clientInfoNote}` : clientInfoNote;
-
-            // 2. Insert Order
+            // Insert Order with all client fields directly
             const { data: order, error: orderError } = await supabase
                 .from("orders")
                 .insert({
+                    client_name: orderData.client_name,
+                    client_phone: orderData.client_phone,
+                    client_email: orderData.client_email || null,
+                    delivery_address: orderData.delivery_address || null,
+                    subtotal: orderData.subtotal,
+                    delivery_cost: orderData.delivery_cost,
                     delivery_method: orderData.delivery_method,
-                    total_amount: totalAmount,
+                    total_amount: orderData.total_amount,
                     items: orderData.items, // JSONB column
                     payment_method: orderData.payment_method || 'cash',
                     payment_reference: orderData.payment_reference || null,
+                    payment_status: 'pending',
                     status: 'pending',
-                    notes: finalNotes.trim()
+                    notes: orderData.notes || null
                 })
                 .select()
                 .single();

@@ -248,16 +248,24 @@ CREATE TABLE public.store_settings (
 CREATE TABLE public.orders (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES auth.users, -- Optional for guest checkout
+    client_name TEXT,
+    client_phone TEXT,
+    client_email TEXT,
+    delivery_address TEXT,
     items JSONB NOT NULL, -- Array of items with qty, price, etc.
+    subtotal DECIMAL(12,3),
+    delivery_cost DECIMAL(12,3) DEFAULT 0,
     total_amount DECIMAL(12,3) NOT NULL,
     delivery_method TEXT NOT NULL, -- 'pickup', 'rapid_post', 'local_delivery'
     payment_method TEXT NOT NULL, -- 'cash', 'bank_transfer', 'd17', 'card'
     payment_reference TEXT,
+    payment_status TEXT DEFAULT 'pending', -- 'pending', 'paid', 'failed'
     status TEXT DEFAULT 'pending' NOT NULL, -- 'pending', 'processing', 'completed', 'cancelled'
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
 );
+
 
 -- daily_stats: Cached stats for reporting
 CREATE TABLE public.daily_stats (
