@@ -85,7 +85,13 @@ const calculateStatus = (settings?: any): TimeStatus => {
              closingHour = parseInt(settings.opening_hours.close.split(':')[0], 10);
          }
          
-         const openingMinutes = openingHour * 60 + parseInt(daySchedule.open.split(':')[1], 10);
+         let openingMinutes = openingHour * 60;
+         if (daySchedule && daySchedule.open) {
+             openingMinutes += parseInt(daySchedule.open.split(':')[1], 10) || 0;
+         } else if (settings.opening_hours && settings.opening_hours.open) {
+             openingMinutes += parseInt(settings.opening_hours.open.split(':')[1], 10) || 0;
+         }
+         
          const currentMinutes = tunisianHour * 60 + tunisianMinute;
          
          if (closingHour <= openingHour) {
@@ -198,9 +204,8 @@ export const getTunisianToday = (): string => {
  */
 export const getBusinessDayBoundsStr = async (): Promise<string> => {
   try {
-    // We should fetch both weekly_schedule and opening_hours
-    const { data: scheduleRes } = await supabase.from('store_settings').select('value').eq('key', 'weekly_schedule').single();
-    const { data: hoursRes } = await supabase.from('store_settings').select('value').eq('key', 'opening_hours').single();
+    const { data: scheduleRes } = await supabase.from('store_settings').select('value').eq('key', 'weekly_schedule').maybeSingle();
+    const { data: hoursRes } = await supabase.from('store_settings').select('value').eq('key', 'opening_hours').maybeSingle();
     
     let scheduleDict: any = {};
     if (scheduleRes && scheduleRes.value) scheduleDict = typeof scheduleRes.value === 'string' ? JSON.parse(scheduleRes.value) : scheduleRes.value;
