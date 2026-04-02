@@ -4,6 +4,7 @@ from typing import Optional, List
 from datetime import datetime
 import os
 from services.supabase_client import get_supabase
+from utils.security import get_current_user
 from supabase import Client
 
 router = APIRouter(prefix="/expenses", tags=["Expenses"])
@@ -25,7 +26,7 @@ class ExpenseUpdate(BaseModel):
     date: Optional[str] = None
 
 @router.get("/")
-def get_expenses():
+def get_expenses(user = Depends(get_current_user)):
     try:
         res = supabase.table("expenses").select("*").order("date", desc=True).execute()
         return res.data
@@ -33,7 +34,7 @@ def get_expenses():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/")
-def create_expense(expense: ExpenseCreate):
+def create_expense(expense: ExpenseCreate, user = Depends(get_current_user)):
     try:
         data = expense.model_dump(exclude_unset=True)
         # If staff_id is required by DB but not provided by frontend yet, handle it or rely on DB default if nullable
@@ -71,7 +72,7 @@ def create_expense(expense: ExpenseCreate):
         raise HTTPException(status_code=500, detail=f"Failed to create expense: {str(e)}")
 
 @router.delete("/{expense_id}")
-def delete_expense(expense_id: str):
+def delete_expense(expense_id: str, user = Depends(get_current_user)):
     try:
         res = supabase.table("expenses").delete().eq("id", expense_id).execute()
         return {"success": True}

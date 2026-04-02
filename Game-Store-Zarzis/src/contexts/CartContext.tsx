@@ -49,7 +49,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const addItem = (product: Product) => {
         setItems(prev => {
             const existing = prev.find(item => item.id === product.id);
+            const stockLimit = product.stock_quantity ?? product.stock ?? 0;
+            
             if (existing) {
+                if (existing.quantity >= stockLimit) {
+                    toast({ title: "Stock Limit Reached", description: `Only ${stockLimit} available in stock.`, variant: "destructive" });
+                    return prev;
+                }
                 toast({ title: "Updated quantity", description: `${product.name} quantity increased.` });
                 return prev.map(item =>
                     item.id === product.id
@@ -57,6 +63,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         : item
                 );
             }
+
+            if (stockLimit <= 0) {
+                toast({ title: "Out of Stock", description: `${product.name} is currently out of stock.`, variant: "destructive" });
+                return prev;
+            }
+
             toast({ title: "Added to cart", description: `${product.name} added to your cart.` });
             return [...prev, { ...product, quantity: 1 }];
         });
@@ -71,11 +83,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             removeItem(productId);
             return;
         }
-        setItems(prev =>
-            prev.map(item =>
-                item.id === productId ? { ...item, quantity } : item
-            )
-        );
+        setItems(prev => {
+            const item = prev.find(i => i.id === productId);
+            if (!item) return prev;
+            
+            const stockLimit = item.stock_quantity ?? item.stock ?? 0;
+            if (quantity > stockLimit) {
+                toast({ title: "Stock Limit Reached", description: `Only ${stockLimit} available in stock.`, variant: "destructive" });
+                return prev.map(i => i.id === productId ? { ...i, quantity: stockLimit } : i);
+            }
+
+            return prev.map(i => i.id === productId ? { ...i, quantity } : i);
+        });
     };
 
     const clearCart = () => {

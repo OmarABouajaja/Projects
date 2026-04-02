@@ -1100,6 +1100,8 @@ const SessionsManagement = () => {
             </DialogHeader>
             {selectedSession && (
               <div className="space-y-4">
+                {endSessionStep === 'summary' ? (
+                  <>
                 <div className="glass-card rounded-lg p-4">
                   <p className="text-sm text-muted-foreground">Duration</p>
                   <p className="font-display text-xl font-bold">
@@ -1288,6 +1290,73 @@ const SessionsManagement = () => {
                     <span className="text-lg ml-1 text-muted-foreground">DT</span>
                   </p>
                 </div>
+                  </>
+                ) : (
+                  <div className="bg-white text-black p-6 rounded-lg font-mono shadow-inner border border-gray-200 w-full mx-auto max-w-sm relative">
+                    {/* Simulated ZigZag Receipt Top/Bottom if desired, but rounded is fine */}
+                    <div className="text-center mb-6">
+                      <h3 className="text-xl font-bold uppercase tracking-widest mb-1">Game Store Zarzis</h3>
+                      <p className="text-xs text-gray-500 uppercase">Gaming Lounge Receipt</p>
+                    </div>
+                    
+                    <div className="border-b border-dashed border-gray-400 pb-3 mb-3 text-sm">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-500">Date:</span>
+                        <span className="font-semibold">{new Date().toLocaleDateString('fr-FR')} {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-500">Console:</span>
+                        <span className="font-semibold">{consoles?.find(c => c.id === selectedSession.console_id)?.name || 'N/A'}</span>
+                      </div>
+                      {selectedClientForSession && (
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-gray-500">Client:</span>
+                          <span className="font-semibold max-w-[150px] truncate">{selectedClientForSession.name}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2 mb-4 text-sm">
+                      <div className="flex justify-between items-start font-semibold">
+                        <div className="flex flex-col">
+                          <span>Gaming Session</span>
+                          <span className="text-gray-500 text-xs font-normal">
+                             {selectedSession.session_type === 'hourly' ? `Duration: ${getSessionDuration(selectedSession.start_time)}` : `Matches: ${gamesInSession}`}
+                          </span>
+                        </div>
+                        <span>{estimatedRevenue.toFixed(3)} DT</span>
+                      </div>
+
+                      {sessionConsumptions && sessionConsumptions.length > 0 && (
+                        <div className="pt-2 mt-2 border-t border-gray-100">
+                          <span className="text-xs uppercase text-gray-500 mb-1 block">Consumables</span>
+                          {sessionConsumptions.map((item: any) => (
+                            <div key={item.id} className="flex justify-between items-start text-xs mb-1">
+                              <span>{item.quantity}x {item.product?.name || 'Item'}</span>
+                              <span>{(item.unit_price * item.quantity).toFixed(3)} DT</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t-2 border-dashed border-gray-800 pt-3 mt-4">
+                      <div className="flex justify-between items-end">
+                        <span className="font-bold text-lg uppercase">Total</span>
+                        <span className="font-black text-2xl">
+                          {(estimatedRevenue + (sessionConsumptions?.reduce((sum: number, c: SessionConsumption) => sum + (c.unit_price * c.quantity), 0) || 0)).toFixed(3)}
+                          <span className="text-sm ml-1">DT</span>
+                        </span>
+                      </div>
+                      {estimatedPoints > 0 && (
+                        <div className="flex justify-between items-center mt-2 text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded">
+                          <span>Points Earned:</span>
+                          <span>+{estimatedPoints} pts</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   {endSessionStep === 'confirm' && (

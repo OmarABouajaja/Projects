@@ -123,6 +123,21 @@ const Checkout = () => {
     };
 
     const handleSubmit = async () => {
+        // Final stock check before submission
+        const outOfStockItems = items.filter(item => {
+            const stockLimit = item.stock_quantity ?? item.stock ?? 0;
+            return item.quantity > stockLimit;
+        });
+
+        if (outOfStockItems.length > 0) {
+            toast({ 
+                title: "Stock Issue", 
+                description: `Cannot checkout: ${outOfStockItems[0].name} exceeds available stock. Please reduce the quantity.`, 
+                variant: "destructive" 
+            });
+            return;
+        }
+
         try {
             await createOrder.mutateAsync({
                 client_name: formData.name,

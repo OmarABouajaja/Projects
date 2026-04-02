@@ -16,7 +16,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PSBackground from "@/components/PSBackground";
 import CacheManager from "@/components/CacheManager";
-import OfflineIndicator from "@/components/OfflineIndicator";
+import CacheStatus from "@/components/CacheStatus";
 
 // Lazy load pages for better performance
 const Index = lazyWithRetry(() => import("./pages/Index"));
@@ -103,7 +103,7 @@ const App = () => {
                     <TooltipProvider>
                       <Toaster />
                       <Sonner />
-                      <OfflineIndicator />
+                      <CacheStatus />
                       <CacheManager />
                       <BrowserRouter future={routerFutureFlags}>
                         <Suspense fallback={<div className="min-h-screen bg-background" />}>

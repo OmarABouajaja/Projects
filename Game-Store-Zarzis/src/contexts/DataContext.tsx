@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { supabase, TABLES } from '@/lib/supabase';
 import {
   Product,
@@ -286,7 +287,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newProduct = mapProductFromDB(data);
       setProducts(prev => [newProduct, ...prev]);
     } catch (error) {
-      console.error('Error adding product:', error);
+      toast({ title: "Error", description: "Failed to add product", variant: "destructive" });
     }
   };
 
@@ -307,7 +308,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedProduct = mapProductFromDB(data);
       setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
     } catch (error) {
-      console.error('Error updating product:', error);
+      toast({ title: "Error", description: "Failed to update product", variant: "destructive" });
     }
   };
 
@@ -322,7 +323,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (error) {
-      console.error('Error deleting product:', error);
+      toast({ title: "Error", description: "Failed to delete product", variant: "destructive" });
     }
   };
 
@@ -343,7 +344,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newService = mapServiceCatalogFromDB(data);
       setServices(prev => [newService, ...prev]);
     } catch (error) {
-      console.error('Error adding service:', error);
+      toast({ title: "Error", description: "Failed to add service", variant: "destructive" });
     }
   };
 
@@ -364,7 +365,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedService = mapServiceCatalogFromDB(data);
       setServices(prev => prev.map(s => s.id === id ? updatedService : s));
     } catch (error) {
-      console.error('Error updating service:', error);
+      toast({ title: "Error", description: "Failed to update service", variant: "destructive" });
     }
   };
 
@@ -380,7 +381,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       setServices(prev => prev.filter(s => s.id !== id));
     } catch (error) {
-      console.error('Error deleting service:', error);
+      toast({ title: "Error", description: "Failed to delete service", variant: "destructive" });
     }
   };
 
@@ -402,7 +403,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       setClients(prev => [newClient, ...prev]);
       return newClient;
     } catch (error) {
-      console.error('Error adding client:', error);
+      toast({ title: "Error", description: "Failed to add client", variant: "destructive" });
       throw error;
     }
   };
@@ -424,7 +425,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedClient = mapClientFromDB(data);
       setClients(prev => prev.map(c => c.id === id ? updatedClient : c));
     } catch (error) {
-      console.error('Error updating client:', error);
+      toast({ title: "Error", description: "Failed to update client", variant: "destructive" });
     }
   };
 
@@ -443,7 +444,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newSession = mapGameSessionFromDB(data);
       setSessions(prev => [newSession, ...prev]);
     } catch (error) {
-      console.error('Error adding session:', error);
+      toast({ title: "Error", description: "Failed to add session", variant: "destructive" });
     }
   };
 
@@ -461,7 +462,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedSession = mapGameSessionFromDB(data);
       setSessions(prev => prev.map(s => s.id === id ? updatedSession : s));
     } catch (error) {
-      console.error('Error updating session:', error);
+      toast({ title: "Error", description: "Failed to update session", variant: "destructive" });
     }
   };
 
@@ -482,7 +483,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newRequest = mapServiceRequestFromDB(data);
       setServiceRequests(prev => [newRequest, ...prev]);
     } catch (error) {
-      console.error('Error adding service request:', error);
+      toast({ title: "Error", description: "Failed to add service request", variant: "destructive" });
     }
   };
 
@@ -503,7 +504,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedRequest = mapServiceRequestFromDB(data);
       setServiceRequests(prev => prev.map(r => r.id === id ? updatedRequest : r));
     } catch (error) {
-      console.error('Error updating service request:', error);
+      toast({ title: "Error", description: "Failed to update service request", variant: "destructive" });
     }
   };
 
@@ -524,7 +525,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedConsole = mapConsoleFromDB(data);
       setConsoles(prev => prev.map(c => c.id === id ? updatedConsole : c));
     } catch (error) {
-      console.error('Error updating console:', error);
+      toast({ title: "Error", description: "Failed to update console", variant: "destructive" });
     }
   };
 
@@ -545,7 +546,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newPost = mapBlogPostFromDB(data);
       setBlogPosts(prev => [newPost, ...prev]);
     } catch (error) {
-      console.error('Error adding blog post:', error);
+      toast({ title: "Error", description: "Failed to add blog post", variant: "destructive" });
     }
   };
 
@@ -566,7 +567,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const updatedPost = mapBlogPostFromDB(data);
       setBlogPosts(prev => prev.map(p => p.id === id ? updatedPost : p));
     } catch (error) {
-      console.error('Error updating blog post:', error);
+      toast({ title: "Error", description: "Failed to update blog post", variant: "destructive" });
     }
   };
 
@@ -581,7 +582,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       setBlogPosts(prev => prev.filter(p => p.id !== id));
     } catch (error) {
-      console.error('Error deleting blog post:', error);
+      toast({ title: "Error", description: "Failed to delete blog post", variant: "destructive" });
     }
   };
 
@@ -641,7 +642,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       }
 
     } catch (error) {
-      console.error('Error adding points transaction:', error);
+      toast({ title: "Error", description: "Failed to add points transaction", variant: "destructive" });
     }
   };
 
@@ -663,7 +664,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       const newShortcut = mapGameShortcutFromDB(data);
       setGameShortcuts(prev => [...prev, newShortcut].sort((a, b) => a.display_order - b.display_order));
     } catch (error) {
-      console.error('Error adding game shortcut:', error);
+      toast({ title: "Error", description: "Failed to add game shortcut", variant: "destructive" });
     }
   };
 
@@ -687,7 +688,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           .sort((a, b) => a.display_order - b.display_order)
       );
     } catch (error) {
-      console.error('Error updating game shortcut:', error);
+      toast({ title: "Error", description: "Failed to update game shortcut", variant: "destructive" });
     }
   };
 
@@ -702,7 +703,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       setGameShortcuts(prev => prev.filter(s => s.id !== id));
     } catch (error) {
-      console.error('Error deleting game shortcut:', error);
+      toast({ title: "Error", description: "Failed to delete game shortcut", variant: "destructive" });
     }
   };
 

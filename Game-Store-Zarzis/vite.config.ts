@@ -46,7 +46,7 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: false, // Set to false to allow user to prompt via CacheManager
+        skipWaiting: true, // Activate new SW immediately to prevent stale cache issues
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         // Exclude large raw logo files from precaching (they load fine without SW)
         globIgnores: ['**/logo/**'],
@@ -84,6 +84,15 @@ export default defineConfig({
         ],
         // Cache navigation requests
         navigateFallback: '/index.html',
+        // CRITICAL: Don't intercept API requests with the navigation fallback
+        navigateFallbackDenylist: [
+          /^\/api/,           // Backend API routes
+          /^.*\.supabase\.co/, // Supabase API calls
+          /^\/verify/,         // Verification endpoints
+          /^\/email/,          // Email endpoints
+          /^\/expenses/,       // Expenses endpoints
+          /^\/admin/,          // Admin endpoints
+        ],
       },
     }),
   ],
