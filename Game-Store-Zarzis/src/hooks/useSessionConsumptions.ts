@@ -92,3 +92,24 @@ export const useDeleteSessionConsumption = () => {
         },
     });
 };
+
+export const useUpdateSessionConsumption = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, quantity }: { id: string; quantity: number }) => {
+            const { data, error } = await supabase
+                .from("session_consumptions")
+                .update({ quantity })
+                .eq("id", id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["session-consumptions"] });
+        },
+    });
+};

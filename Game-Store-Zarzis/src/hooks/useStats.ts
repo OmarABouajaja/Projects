@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
-import { getTunisianToday } from "@/hooks/useTunisianTime";
+import { getBusinessDayBoundsStr } from "@/hooks/useTunisianTime";
 
 export interface DailyStats {
   total_revenue: number;
@@ -11,14 +11,11 @@ export interface DailyStats {
   total_sales: number;
   total_services: number;
 }
-
 export const useTodayStats = () => {
-  const today = getTunisianToday();
-
   return useQuery({
-    queryKey: ["today-stats", today],
+    queryKey: ["today-stats"],
     queryFn: async () => {
-      const startOfDay = `${today}T00:00:00`;
+      const startOfDay = await getBusinessDayBoundsStr();
 
       const [sessionsRes, salesRes, servicesRes, countRes] = await Promise.all([
         supabase

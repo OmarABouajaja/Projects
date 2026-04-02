@@ -336,7 +336,7 @@ const ClientAuth = () => {
           <div className="flex flex-col items-center gap-4 text-center">
             <Link to="/" className="lg:hidden">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20">
-                <img src="/logo/logo-bleu-transparent.png" alt="Logo" className="w-10 h-10 object-contain" />
+                <img src="/logo/tbck.png" alt="Logo" className="w-10 h-10 object-contain" />
               </div>
             </Link>
 

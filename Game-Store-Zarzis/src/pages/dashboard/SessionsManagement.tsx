@@ -8,7 +8,7 @@ import { useClients, useCreateClient, useClientByPhone } from "@/hooks/useClient
 import { useStartSession, useEndSession, useTodaySessions, useActiveSessions, useAddGameToSession } from "@/hooks/useGamingSessions";
 import { useCreatePointsTransaction } from "@/hooks/usePointsTransactions";
 import { useCreateSale } from "@/hooks/useSales";
-import { useSessionConsumptions, useDeleteSessionConsumption, SessionConsumption } from "@/hooks/useSessionConsumptions";
+import { useSessionConsumptions, useDeleteSessionConsumption, useUpdateSessionConsumption, SessionConsumption } from "@/hooks/useSessionConsumptions";
 import { useStoreSettings, useUpdateStoreSetting } from "@/hooks/useStoreSettings";
 import { useGameShortcuts, useCreateGameShortcut, useDeleteGameShortcut } from "@/hooks/useGameShortcuts";
 import { Client, GameSession, StoreSettings, Pricing, Console } from "@/types";
@@ -68,6 +68,7 @@ const SessionsManagement = () => {
   // Consumption Data for Selected Session
   const { data: sessionConsumptions, isLoading: isConsumptionsLoading } = useSessionConsumptions(selectedSession?.id);
   const deleteSessionConsumption = useDeleteSessionConsumption();
+  const updateSessionConsumption = useUpdateSessionConsumption();
   const createSale = useCreateSale();
 
   // New State for Consumption Dialog
@@ -933,7 +934,7 @@ const SessionsManagement = () => {
 
         {/* Start Session Dialog */}
         <Dialog open={isStartDialogOpen} onOpenChange={setIsStartDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md w-[95vw] rounded-xl">
             <DialogHeader>
               <DialogTitle>{t('sessions.start_new')}</DialogTitle>
             </DialogHeader>
@@ -1041,7 +1042,7 @@ const SessionsManagement = () => {
 
         {/* Extend Session Dialog */}
         <Dialog open={isExtendDialogOpen} onOpenChange={setIsExtendDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md w-[95vw] rounded-xl">
             <DialogHeader>
               <DialogTitle>{t('sessions.extend_session')}</DialogTitle>
             </DialogHeader>
@@ -1094,7 +1095,7 @@ const SessionsManagement = () => {
 
         {/* End Session Dialog */}
         <Dialog open={isEndDialogOpen} onOpenChange={setIsEndDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md w-[95vw] rounded-xl">
             <DialogHeader>
               <DialogTitle>End Session</DialogTitle>
             </DialogHeader>
@@ -1120,8 +1121,36 @@ const SessionsManagement = () => {
                         <div className="flex justify-center py-2"><Loader2 className="animate-spin w-5 h-5 text-primary" /></div>
                       ) : (
                         sessionConsumptions?.map((item: any) => (
-                          <div key={item.id} className="flex justify-between text-xs sm:text-sm">
-                            <span>{item.quantity}x {item.product?.name || 'Item'}</span>
+                          <div key={item.id} className="flex justify-between items-center text-xs sm:text-sm">
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-6 w-6" 
+                                onClick={() => {
+                                  if (item.quantity <= 1) {
+                                    deleteSessionConsumption.mutate(item.id);
+                                  } else {
+                                    updateSessionConsumption.mutate({ id: item.id, quantity: item.quantity - 1 });
+                                  }
+                                }} 
+                                disabled={updateSessionConsumption.isPending || deleteSessionConsumption.isPending}
+                              >
+                                -
+                              </Button>
+                              <span>{item.quantity}x {item.product?.name || 'Item'}</span>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-6 w-6" 
+                                onClick={() => {
+                                  updateSessionConsumption.mutate({ id: item.id, quantity: item.quantity + 1 });
+                                }} 
+                                disabled={updateSessionConsumption.isPending || deleteSessionConsumption.isPending}
+                              >
+                                +
+                              </Button>
+                            </div>
                             <span className="font-mono">{((item.unit_price * item.quantity).toFixed(3))}</span>
                           </div>
                         ))

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
-import { getTunisianToday } from "@/hooks/useTunisianTime";
+import { getBusinessDayBoundsStr } from "@/hooks/useTunisianTime";
 
 export interface GamingSession {
   id: string;
@@ -79,11 +79,10 @@ export const useActiveSessions = () => {
 };
 
 export const useTodaySessions = () => {
-  const today = getTunisianToday();
-
   return useQuery({
-    queryKey: ["today-sessions", today],
+    queryKey: ["today-sessions"],
     queryFn: async () => {
+      const startOfDay = await getBusinessDayBoundsStr();
       const { data, error } = await supabase
         .from("gaming_sessions")
         .select(`
@@ -92,7 +91,7 @@ export const useTodaySessions = () => {
           client:clients(*),
           pricing:pricing(*)
         `)
-        .gte("created_at", `${today}T00:00:00`)
+        .gte("created_at", startOfDay)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
