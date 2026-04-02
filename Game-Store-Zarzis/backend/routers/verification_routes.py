@@ -113,6 +113,8 @@ def check_verification_code(request: Request, body: VerifyCodeRequest):
         else:
             raise HTTPException(status_code=400, detail="Invalid or expired code")
             
+    except HTTPException:
+        raise  # Re-raise 400 "Invalid or expired code" as-is
     except Exception as e:
         # logger.error(f"Error verifying OTP: {e}")
         raise HTTPException(status_code=500, detail="Verification failed")

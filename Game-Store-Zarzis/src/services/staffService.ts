@@ -19,16 +19,9 @@ export interface StaffMemberData {
  */
 export async function createStaffInvitation(data: StaffMemberData): Promise<boolean> {
     try {
-        // Check if email already exists in profiles
-        const { data: existingProfile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('email', data.email)
-            .single();
-
-        if (existingProfile) {
-            throw new Error('Un utilisateur avec cet email existe déjà');
-        }
+        // Note: profiles table doesn't have an 'email' column
+        // Check user_roles or auth directly if needed
+        // Skipping duplicate check - the auth.signUp in createStaffDirectly will catch duplicates
 
         // Create a pending invitation record
         const { error: inviteError } = await supabase
@@ -46,7 +39,9 @@ export async function createStaffInvitation(data: StaffMemberData): Promise<bool
 
         // Send notification email (optional - requires backend)
         try {
-            await fetch('http://localhost:8000/api/notifications/staff-invite', {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
+            const apiUrl = backendUrl.startsWith('http') ? backendUrl : `https://${backendUrl}`;
+            await fetch(`${apiUrl}/api/notifications/staff-invite`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -226,16 +226,12 @@ const ClientAuth = () => {
 
         const newClientData: Omit<Client, 'id' | 'created_at' | 'updated_at'> = {
           name: registerData.name,
-          email: registerData.email,
-          phone: smsEnabled ? phone : (phone || `email_${Date.now()}@placeholder.com`),
+          email: smsEnabled ? registerData.email : identifier,
+          phone: smsEnabled ? phone : (phone || ''),
           points: 0,
           total_spent: 0,
           total_games_played: 0
         };
-
-        if (!smsEnabled && !phone) {
-          newClientData.phone = phone || `no-phone-${Date.now()}`;
-        }
 
         // Await the creation to ensure we get the real ID and data
         const createdClient = await addClient(newClientData);
@@ -340,7 +336,7 @@ const ClientAuth = () => {
           <div className="flex flex-col items-center gap-4 text-center">
             <Link to="/" className="lg:hidden">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20">
-                <img src="/gamestorelogocmp.png" alt="Logo" className="w-10 h-10 object-contain" />
+                <img src="/logo/logo-bleu-transparent.png" alt="Logo" className="w-10 h-10 object-contain" />
               </div>
             </Link>
 

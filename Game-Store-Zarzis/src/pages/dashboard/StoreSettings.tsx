@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -21,7 +21,7 @@ import { toast } from "@/hooks/use-toast";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { StoreSettings as StoreSettingsType } from "@/types";
+import type { StoreSettings as StoreSettingsType, WeeklySchedule } from "@/types";
 
 const StoreSettings = () => {
   const { isOwner } = useAuth();
@@ -30,7 +30,7 @@ const StoreSettings = () => {
   const { data: pricing } = usePricing();
   const { updateSettings } = useData();
   const updateSettingMutation = useUpdateStoreSetting();
-  const defaultWeeklySchedule = {
+  const defaultWeeklySchedule: WeeklySchedule = {
     monday: { isOpen: true, open: "08:00", close: "02:00", breakStart: "12:00", breakEnd: "13:30", hasBreak: true },
     tuesday: { isOpen: true, open: "08:00", close: "02:00", breakStart: "12:00", breakEnd: "13:30", hasBreak: true },
     wednesday: { isOpen: true, open: "08:00", close: "02:00", breakStart: "12:00", breakEnd: "13:30", hasBreak: true },
@@ -1858,7 +1858,7 @@ const StoreSettings = () => {
                           className="opacity-90 hover:opacity-100"
                           onClick={() => {
                             if (confirm(`Delete data older than ${days} days?`)) {
-                              fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/admin/cleanup`, {
+                              fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn'}/api/admin/cleanup`, {
                                 method: 'DELETE',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ days_to_keep: days, tables: ["sales", "gaming_sessions", "expenses"] })

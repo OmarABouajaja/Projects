@@ -100,10 +100,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // 🟢 Heartbeat removed because last_active_at doesn't exist in schema
-  useEffect(() => {
-    // Online status tracking is disabled until schema is updated
-  }, [user]);
+
+
 
   useEffect(() => {
     let isMounted = true;

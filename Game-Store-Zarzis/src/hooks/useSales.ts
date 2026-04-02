@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { getTunisianToday } from "@/hooks/useTunisianTime";
 
 export interface Sale {
   id: string;
@@ -17,7 +18,7 @@ export interface Sale {
 }
 
 export const useTodaySales = () => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTunisianToday();
 
   return useQuery({
     queryKey: ["today-sales", today],
@@ -52,31 +53,31 @@ export const useCreateSale = () => {
 
       if (saleError) throw saleError;
 
-      // Update product stock directly
-      const { error: stockError } = await supabase
-        .from("products")
-        .update({
-          stock_quantity: supabase.rpc ? undefined : undefined // Placeholder, we'll handle below
-        })
-        .eq("id", sale.product_id);
+      // Atomically decrement stock using RPC, with fallback
+      try {
+        const { error: rpcError } = await supabase.rpc('decrement_stock', {
+          p_product_id: sale.product_id,
+          p_quantity: sale.quantity
+        });
 
-      // Actually decrement stock using raw update
-      const { data: product } = await supabase
-        .from("products")
-        .select("stock_quantity")
-        .eq("id", sale.product_id)
-        .single();
+        if (rpcError) {
+          // Fallback: read-then-update (less safe but functional)
+          console.warn('RPC decrement_stock not available, using fallback:', rpcError.message);
+          const { data: product } = await supabase
+            .from("products")
+            .select("stock_quantity")
+            .eq("id", sale.product_id)
+            .single();
 
-      if (product) {
-        await supabase
-          .from("products")
-          .update({ stock_quantity: Math.max(0, product.stock_quantity - sale.quantity) })
-          .eq("id", sale.product_id);
-      }
-
-      // If stock update fails, we still have the sale but log it
-      if (stockError) {
-
+          if (product) {
+            await supabase
+              .from("products")
+              .update({ stock_quantity: Math.max(0, product.stock_quantity - sale.quantity) })
+              .eq("id", sale.product_id);
+          }
+        }
+      } catch (stockErr) {
+        console.warn('Stock update failed (sale still recorded):', stockErr);
       }
 
       return newSale;

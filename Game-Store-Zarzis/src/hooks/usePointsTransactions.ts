@@ -35,14 +35,14 @@ export const useCreatePointsTransaction = () => {
       reference_id?: string;
       staff_id?: string;
     }) => {
-      // Get current balance
-      const { data: transactions } = await supabase
-        .from("points_transactions")
-        .select("amount")
-        .eq("client_id", transaction.client_id)
-        .order("created_at", { ascending: false });
+      // Get current balance from the client record (not by summing all transactions)
+      const { data: client } = await supabase
+        .from("clients")
+        .select("points")
+        .eq("id", transaction.client_id)
+        .single();
 
-      const currentBalance = transactions?.reduce((sum, t) => sum + t.amount, 0) || 0;
+      const currentBalance = client?.points || 0;
       const newBalance = currentBalance + transaction.amount;
 
       // Prevent negative balance ONLY if we are spending/removing points

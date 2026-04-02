@@ -165,7 +165,7 @@ const StaffManagement = () => {
 
       } else {
         const tempPassword = generatePassword();
-        const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+        const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
         const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
         const { user_id, email_sent: apiEmailSent } = await createStaffMember({
           email: formData.email,
@@ -222,7 +222,6 @@ const StaffManagement = () => {
       setEditingUser(null);
       setFormData({ email: "", full_name: "", phone: "", role: "worker" });
 
-      setFormData({ email: "", full_name: "", phone: "", role: "worker" });
 
     } catch (error: unknown) {
       console.error("Staff management error:", error);
@@ -327,7 +326,7 @@ const StaffManagement = () => {
                 onClick={async () => {
                   try {
                     setIsLoading(true);
-                    const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+                    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
                     const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
                     const token = session?.access_token;
 

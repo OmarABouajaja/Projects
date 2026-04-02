@@ -171,20 +171,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
           consolesResponse,
           settingsResponse,
           pricingResponse,
-          gameShortcutsResponse,
-          productsResponse
+          gameShortcutsResponse
         ] = await Promise.all([
           supabase.from(TABLES.CONSOLES).select('*'),
           supabase.from(TABLES.STORE_SETTINGS).select('*'),
           supabase.from(TABLES.PRICING).select('*').order('sort_order', { ascending: true }),
-          supabase.from(TABLES.GAME_SHORTCUTS).select('*').order('display_order', { ascending: true }),
-          supabase.from(TABLES.PRODUCTS).select('*').order('created_at', { ascending: false }).limit(20)
+          supabase.from(TABLES.GAME_SHORTCUTS).select('*').order('display_order', { ascending: true })
         ]);
 
         setConsoles(consolesResponse.data?.map(mapConsoleFromDB) || []);
         setSettings(settingsResponse.data ? mapStoreSettingsFromDB(settingsResponse.data) : null);
         setGameShortcuts(gameShortcutsResponse.data?.map(mapGameShortcutFromDB) || []);
-        setProducts(productsResponse.data?.map(mapProductFromDB) || []);
 
         // Pricing is kept local if not already moved to hooks
         // setPricing(pricingResponse.data || []); 

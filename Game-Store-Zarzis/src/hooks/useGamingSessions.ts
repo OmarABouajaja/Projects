@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useEffect } from "react";
+import { getTunisianToday } from "@/hooks/useTunisianTime";
 
 export interface GamingSession {
   id: string;
@@ -78,7 +79,7 @@ export const useActiveSessions = () => {
 };
 
 export const useTodaySessions = () => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTunisianToday();
 
   return useQuery({
     queryKey: ["today-sessions", today],
@@ -207,28 +208,38 @@ export const useEndSession = () => {
 
       // Update Client Stats (Total Spent & Games Played)
       if (client_id) {
-        const { data: clientData } = await supabase
-          .from("clients")
-          .select("total_spent, total_games_played")
-          .eq("id", client_id)
-          .single();
+        const gamesToAdd = (games_played && games_played > 0) ? games_played : 1;
 
-        if (clientData) {
-          const currentSpent = clientData.total_spent || 0;
-          const currentGames = clientData.total_games_played || 0;
+        try {
+          // Try atomic RPC first
+          const { error: rpcError } = await supabase.rpc('increment_client_stats', {
+            p_client_id: client_id,
+            p_spent: total_amount,
+            p_games: gamesToAdd
+          });
 
-          // For 'games_played', we use the value from the session (if Per Game) or 1 (if Hourly/Time based)
-          // Adjust logic as needed. Assuming 1 session = 1 game play event if games_played is 0.
-          const gamesToAdd = (games_played && games_played > 0) ? games_played : 1;
+          if (rpcError) {
+            // Fallback: read-then-update (less safe but functional)
+            console.warn('RPC increment_client_stats not available, using fallback:', rpcError.message);
+            const { data: clientData } = await supabase
+              .from("clients")
+              .select("total_spent, total_games_played")
+              .eq("id", client_id)
+              .single();
 
-          await supabase
-            .from("clients")
-            .update({
-              total_spent: currentSpent + total_amount,
-              total_games_played: currentGames + gamesToAdd,
-              updated_at: new Date().toISOString()
-            })
-            .eq("id", client_id);
+            if (clientData) {
+              await supabase
+                .from("clients")
+                .update({
+                  total_spent: (clientData.total_spent || 0) + total_amount,
+                  total_games_played: (clientData.total_games_played || 0) + gamesToAdd,
+                  updated_at: new Date().toISOString()
+                })
+                .eq("id", client_id);
+            }
+          }
+        } catch (statsErr) {
+          console.warn('Client stats update failed (session still completed):', statsErr);
         }
       }
     },

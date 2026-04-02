@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { getTunisianToday } from "@/hooks/useTunisianTime";
 
 export interface DailyStats {
   total_revenue: number;
@@ -12,7 +13,7 @@ export interface DailyStats {
 }
 
 export const useTodayStats = () => {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTunisianToday();
 
   return useQuery({
     queryKey: ["today-stats", today],

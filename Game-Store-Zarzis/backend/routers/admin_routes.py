@@ -47,8 +47,6 @@ class CleanupRequest(BaseModel):
 
 @router.delete("/cleanup")
 @limiter.limit("5/hour")
-@router.delete("/cleanup")
-@limiter.limit("5/hour")
 def cleanup_data(request: Request, body: CleanupRequest):
     """
     Deletes data older than X days from specified tables to free up space.
@@ -89,9 +87,7 @@ def cleanup_data(request: Request, body: CleanupRequest):
         raise HTTPException(status_code=500, detail=f"Cleanup process failed: {str(e)}")
 
 @router.get("/export")
-@limiter.limit("2/hour") # Lower limit for heavy operation
-@router.get("/export")
-@limiter.limit("2/hour") # Lower limit for heavy operation
+@limiter.limit("2/hour")
 def export_data(request: Request):
     """
     Exports core data as JSON for backup.
@@ -133,8 +129,6 @@ class CreateStaffRequest(BaseModel):
     lang: str = "fr"
 
 
-@router.post("/staff")
-@limiter.limit("10/minute")
 @router.post("/staff")
 @limiter.limit("10/minute")
 def create_staff_member(request: Request, body: CreateStaffRequest):
@@ -238,8 +232,6 @@ def create_staff_member(request: Request, body: CreateStaffRequest):
         raise HTTPException(status_code=500, detail=str(e))
 @router.post("/sync-profiles")
 @limiter.limit("5/minute")
-@router.post("/sync-profiles")
-@limiter.limit("5/minute")
 def sync_profiles(request: Request):
     """
     Force-syncs auth.users data to public.profiles.
@@ -262,10 +254,8 @@ def sync_profiles(request: Request):
                 # Upsert to profiles
                 supabase.table("profiles").upsert({
                     "id": user.id,
-                    "email": user.email,
                     "full_name": full_name,
-                    "last_sign_in_at": user.last_sign_in_at,
-                    "is_active": True, # Assume active if present in auth
+                    "is_active": True,
                     "updated_at": datetime.datetime.now().isoformat()
                 }).execute()
                 synced_count += 1
@@ -284,8 +274,6 @@ def sync_profiles(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/staff/{user_id}")
-@limiter.limit("10/minute")
 @router.delete("/staff/{user_id}")
 @limiter.limit("10/minute")
 def delete_staff_member(request: Request, user_id: str):

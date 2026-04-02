@@ -133,3 +133,21 @@ export const useTunisianTime = (): TimeStatus => {
   return status;
 };
 
+/**
+ * Get today's date string (YYYY-MM-DD) in Tunisia timezone.
+ * Use this for "today" queries to avoid UTC date mismatches after midnight.
+ */
+export const getTunisianToday = (): string => {
+  try {
+    const now = new Date();
+    // en-CA locale returns YYYY-MM-DD format
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Africa/Tunis",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+  } catch {
+    return new Date().toISOString().split("T")[0];
+  }
+};

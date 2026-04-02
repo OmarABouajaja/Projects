@@ -1,10 +1,10 @@
-import { Suspense, useState, lazy } from "react";
+import { Suspense, useState } from "react";
 import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
@@ -44,16 +44,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Simple test component
-const TestComponent = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold mb-4">Test Route Works!</h1>
-      <p className="text-muted-foreground mb-4">This confirms routing is working.</p>
-      <a href="/dashboard" className="px-4 py-2 bg-primary text-white rounded">Go to Dashboard</a>
-    </div>
-  </div>
-);
 
 const SessionsManagement = lazyWithRetry(() => import("./pages/dashboard/SessionsManagement"));
 const ServicesManagement = lazyWithRetry(() => import("./pages/dashboard/ServicesManagement"));
@@ -81,20 +71,20 @@ const routerFutureFlags = {
 
 import { ConditionalCreatorCredit } from "@/components/ConditionalCreatorCredit";
 
+// Suppress React DevTools warning in development (runs once at module load)
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    const message = typeof args[0] === 'string' ? args[0] : String(args[0] || '');
+    if (message.includes('Download the React DevTools')) {
+      return;
+    }
+    originalWarn(...args);
+  };
+}
+
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
-
-  // Suppress React DevTools warning in development only
-  if (typeof window !== 'undefined' && import.meta.env.DEV) {
-    const originalWarn = console.warn;
-    console.warn = (...args: any[]) => {
-      const message = typeof args[0] === 'string' ? args[0] : String(args[0] || '');
-      if (message.includes('Download the React DevTools')) {
-        return;
-      }
-      originalWarn(...args);
-    };
-  }
 
   const handleLoadingComplete = () => {
     setIsLoading(false);
@@ -118,8 +108,7 @@ const App = () => {
                       <BrowserRouter future={routerFutureFlags}>
                         <Suspense fallback={<div className="min-h-screen bg-background" />}>
                           <Routes>
-                            {/* Test Routes - No auth required */}
-                            <Route path="/test" element={<TestComponent />} />
+                            {/* Public Routes */}
 
                             {/* Public Routes */}
                             <Route path="/" element={<Index />} />
@@ -189,7 +178,7 @@ const App = () => {
                             <Route
                               path="/dashboard/products"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <ProductsManagement />
                                 </ProtectedRoute>
                               }
@@ -197,7 +186,7 @@ const App = () => {
                             <Route
                               path="/dashboard/transactions"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <TransactionsHistory />
                                 </ProtectedRoute>
                               }
@@ -205,7 +194,7 @@ const App = () => {
                             <Route
                               path="/dashboard/pricing"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <PricingManagement />
                                 </ProtectedRoute>
                               }
@@ -213,7 +202,7 @@ const App = () => {
                             <Route
                               path="/dashboard/consoles"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <ConsoleManagement />
                                 </ProtectedRoute>
                               }
@@ -221,7 +210,7 @@ const App = () => {
                             <Route
                               path="/dashboard/staff"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <StaffManagement />
                                 </ProtectedRoute>
                               }
@@ -245,7 +234,7 @@ const App = () => {
                             <Route
                               path="/dashboard/expenses"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <ExpensesManagement />
                                 </ProtectedRoute>
                               }
@@ -261,7 +250,7 @@ const App = () => {
                             <Route
                               path="/dashboard/settings"
                               element={
-                                <ProtectedRoute>
+                                <ProtectedRoute requireOwner>
                                   <StoreSettings />
                                 </ProtectedRoute>
                               }

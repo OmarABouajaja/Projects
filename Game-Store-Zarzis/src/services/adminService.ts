@@ -3,7 +3,7 @@
  * Protected endpoints for admin operations
  */
 
-const rawUrl = import.meta.env.VITE_API_URL || 'https://bck.gamestorezarzis.com.tn';
+const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
 const API_URL = rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`;
 const API_BASE_URL = `${API_URL}/api/admin`;
 const REQUEST_TIMEOUT = 30000; // 30 seconds
@@ -52,7 +52,6 @@ export async function createStaffMember(data: CreateStaffData, token: string): P
             throw new Error(errorMessage);
         }
 
-        return await response.json();
         return await response.json();
     } catch (error: unknown) {
         clearTimeout(timeoutId);
@@ -105,7 +104,6 @@ export async function deleteStaffMember(userId: string, token: string): Promise<
             throw new Error(errorMessage);
         }
 
-        return await response.json();
         return await response.json();
     } catch (error: unknown) {
         clearTimeout(timeoutId);

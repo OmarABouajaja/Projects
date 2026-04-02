@@ -25,7 +25,6 @@ class ExpenseUpdate(BaseModel):
     date: Optional[str] = None
 
 @router.get("/")
-@router.get("/")
 def get_expenses():
     try:
         res = supabase.table("expenses").select("*").order("date", desc=True).execute()
@@ -34,10 +33,9 @@ def get_expenses():
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/")
-@router.post("/")
 def create_expense(expense: ExpenseCreate):
     try:
-        data = expense.dict(exclude_unset=True)
+        data = expense.model_dump(exclude_unset=True)
         # If staff_id is required by DB but not provided by frontend yet, handle it or rely on DB default if nullable
         # For now, we just pass what we get.
         
@@ -72,7 +70,6 @@ def create_expense(expense: ExpenseCreate):
         # Fallback for debugging if column names mismatch
         raise HTTPException(status_code=500, detail=f"Failed to create expense: {str(e)}")
 
-@router.delete("/{expense_id}")
 @router.delete("/{expense_id}")
 def delete_expense(expense_id: str):
     try:

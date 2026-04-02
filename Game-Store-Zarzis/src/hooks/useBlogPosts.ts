@@ -25,7 +25,7 @@ export const useBlogPosts = (publishedOnly = true) => {
   return useQuery({
     queryKey: ["blog-posts", publishedOnly],
     queryFn: async () => {
-      let query = supabase
+      const query = supabase
         .from("blog_posts")
         .select("*")
         .order("created_at", { ascending: false });

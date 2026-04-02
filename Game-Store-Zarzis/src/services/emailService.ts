@@ -3,7 +3,8 @@
  * Sends requests to the Python Backend which handles MailerSend integration
  */
 
-const API_BASE_URL = 'http://localhost:8000/email';
+const rawUrl = import.meta.env.VITE_BACKEND_URL || 'https://bck.gamestorezarzis.com.tn';
+const API_BASE_URL = `${rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`}/email`;
 
 export interface BookingEmailData {
     clientName: string;
