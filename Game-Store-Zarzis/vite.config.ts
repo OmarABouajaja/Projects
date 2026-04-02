@@ -48,6 +48,9 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: false, // Set to false to allow user to prompt via CacheManager
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Exclude large raw logo files from precaching (they load fine without SW)
+        globIgnores: ['**/logo/**'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB safety net
         // Simplified runtime caching to avoid configuration issues
         runtimeCaching: [
           {
