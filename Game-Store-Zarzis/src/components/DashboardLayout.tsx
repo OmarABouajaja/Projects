@@ -114,7 +114,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         } else if (session.session_type === 'per_game') {
           const durationPerGame = session.pricing?.game_duration_minutes || 15;
           const totalGames = session.games_played || 1;
-          const expectedDuration = totalGames * durationPerGame;
+          const totalProlongations = session.extra_time_minutes || 0;
+          const expectedDuration = (totalGames * durationPerGame) + (totalProlongations * (durationPerGame / 2));
           if (elapsedMinutes > (expectedDuration + 5)) isOverdue = true;
         }
 

@@ -6,22 +6,35 @@ import { BarChart3 } from "lucide-react";
 import { Sale } from "@/types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useData } from "@/contexts/DataContext";
+
+interface Transaction {
+    date: Date;
+    amount: number;
+}
+
+function getLocalDayStr(d: Date) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 
 // Helper to process sales for today (hourly)
-function getTodayRevenue(sales: Sale[]) {
+function getTodayRevenue(transactions: Transaction[]) {
     const hours = Array.from({ length: 24 }, (_, i) => i);
-    const todayStr = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const todayStr = getLocalDayStr(now);
 
     return hours.map(hour => {
         const hourStr = hour.toString().padStart(2, '0');
-        const hourRevenue = sales
-            .filter(s => {
-                const saleDate = new Date(s.created_at);
-                const saleDateStr = saleDate.toISOString().split('T')[0];
-                const saleHour = saleDate.getHours();
-                return saleDateStr === todayStr && saleHour === hour;
+        const hourRevenue = transactions
+            .filter(t => {
+                const itemDateStr = getLocalDayStr(t.date);
+                const itemHour = t.date.getHours();
+                return itemDateStr === todayStr && itemHour === hour;
             })
-            .reduce((sum, s) => sum + Number(s.total_amount), 0);
+            .reduce((sum, t) => sum + t.amount, 0);
 
         return {
             label: `${hourStr}:00`,
@@ -31,18 +44,18 @@ function getTodayRevenue(sales: Sale[]) {
 }
 
 // Helper to process sales for a daily range (Weekly or Monthly)
-function getDailyRevenueRange(sales: Sale[], daysBack: number) {
+function getDailyRevenueRange(transactions: Transaction[], daysBack: number) {
     const data = [];
     const today = new Date();
 
     for (let i = daysBack - 1; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+        const dateStr = getLocalDayStr(d);
 
-        const dayRevenue = sales
-            .filter(s => s.created_at.startsWith(dateStr))
-            .reduce((sum, s) => sum + Number(s.total_amount), 0);
+        const dayRevenue = transactions
+            .filter(t => getLocalDayStr(t.date) === dateStr)
+            .reduce((sum, t) => sum + t.amount, 0);
 
         // Format label based on range
         const displayLabel = d.toLocaleDateString('fr-FR', {
@@ -67,15 +80,40 @@ interface OverviewRevenueChartProps {
     isLoading?: boolean;
 }
 
-const OverviewRevenueChart = ({ sales, timeRange, setTimeRange, isOwner, isLoading }: OverviewRevenueChartProps) => {
+const OverviewRevenueChart = ({ sales: propSales, timeRange, setTimeRange, isOwner, isLoading }: OverviewRevenueChartProps) => {
     const { t } = useLanguage();
+    const { sales: contextSales, sessions, serviceRequests } = useData();
 
     const revenueData = useMemo(() => {
-        if (isLoading || !sales) return [];
-        if (timeRange === 'today') return getTodayRevenue(sales || []);
-        if (timeRange === 'weekly') return getDailyRevenueRange(sales || [], 7);
-        return getDailyRevenueRange(sales || [], 30);
-    }, [sales, timeRange, isLoading]);
+        if (isLoading) return [];
+        
+        // Merge all revenue streams
+        // Fallback to propSales if context is empty
+        const activeSales = contextSales?.length ? contextSales : (propSales || []);
+        
+        const allTransactions: Transaction[] = [
+            ...(activeSales).map(s => ({ 
+                date: new Date(s.created_at), 
+                amount: Number(s.total_amount) 
+            })),
+            ...(sessions || [])
+                .filter(s => s.status === 'completed' && s.created_at)
+                .map(s => ({ 
+                    date: new Date(s.created_at!), 
+                    amount: Number(s.total_amount || 0) 
+                })),
+            ...(serviceRequests || [])
+                .filter(s => s.status === 'completed')
+                .map(s => ({ 
+                    date: new Date(s.created_at), 
+                    amount: Number(s.final_cost || s.quoted_price || 0) 
+                }))
+        ];
+
+        if (timeRange === 'today') return getTodayRevenue(allTransactions);
+        if (timeRange === 'weekly') return getDailyRevenueRange(allTransactions, 7);
+        return getDailyRevenueRange(allTransactions, 30);
+    }, [contextSales, propSales, sessions, serviceRequests, timeRange, isLoading]);
 
     if (isLoading) {
         return (
