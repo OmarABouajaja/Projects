@@ -64,7 +64,7 @@ const SessionsManagement = () => {
   const { data: activeSessions } = useActiveSessions();
   const { data: storeSettingsData } = useStoreSettings();
 
-  const uniqueConsoleTypes = React.useMemo(() => {
+  const uniqueConsoleTypes = useMemo(() => {
     const types = new Set<string>();
     consoles?.forEach(c => {
       if (c.console_type) types.add(c.console_type.toUpperCase());
