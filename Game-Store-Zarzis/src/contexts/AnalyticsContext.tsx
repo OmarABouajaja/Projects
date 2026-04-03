@@ -104,9 +104,7 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const dailyExp = filteredExpenses.filter(e => e.category === ExpenseCategory.DAILY).reduce((sum, e) => sum + e.amount, 0);
         const monthlyExp = filteredExpenses.filter(e => e.category === ExpenseCategory.MONTHLY).reduce((sum, e) => sum + e.amount, 0);
         const yearlyExp = filteredExpenses.filter(e => e.category === ExpenseCategory.YEARLY).reduce((sum, e) => sum + e.amount, 0);
-        const otherExp = filteredExpenses.filter(e => e.category === ExpenseCategory.OTHER).reduce((sum, e) => sum + e.amount, 0);
-
-        const totalExp = dailyExp + monthlyExp + yearlyExp + otherExp;
+        const totalExp = dailyExp + monthlyExp + yearlyExp;
 
         // Profitability
         const grossProfit = totalRev; // Simplified for now, can add COGS if tracked

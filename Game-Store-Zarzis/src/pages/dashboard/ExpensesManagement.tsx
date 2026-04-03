@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from "@/hooks/useExpenses";
+import { useExpensesAutomation } from "@/hooks/useExpensesAutomation";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
@@ -33,6 +34,7 @@ const ExpensesManagement = () => {
     const deleteExpense = useDeleteExpense();
     const { toast } = useToast();
     const { t } = useLanguage();
+    useExpensesAutomation();
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingExpense, setEditingExpense] = useState<any>(null);
@@ -404,7 +406,6 @@ const ExpensesManagement = () => {
                                         <SelectItem value="daily">{t('expenses.cat_daily')}</SelectItem>
                                         <SelectItem value="monthly">{t('expenses.cat_monthly')}</SelectItem>
                                         <SelectItem value="yearly">{t('expenses.cat_yearly')}</SelectItem>
-                                        <SelectItem value="other">{t('expenses.cat_other')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

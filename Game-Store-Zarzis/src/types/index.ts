@@ -325,8 +325,7 @@ export interface DeliverySettings {
 export enum ExpenseCategory {
   DAILY = 'daily',
   MONTHLY = 'monthly',
-  YEARLY = 'yearly',
-  OTHER = 'other'
+  YEARLY = 'yearly'
 }
 
 // Expense definition
