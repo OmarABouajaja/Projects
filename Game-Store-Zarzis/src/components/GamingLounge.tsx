@@ -22,7 +22,7 @@ const GamingLounge = () => {
     if (pricingData && pricingData.length > 0) {
       return pricingData.map(p => ({
         label: language === 'ar' ? p.name_ar : (language === 'fr' ? p.name_fr : p.name),
-        price: `${p.price.toFixed(3)} DT`,
+        price: `${Number(p.price || 0).toFixed(3)} DT`,
         console: p.console_type?.toLowerCase() || 'ps4', 
         type: p.price_type === 'time' ? 'time' : 'game'
       }));
@@ -33,17 +33,20 @@ const GamingLounge = () => {
     const ps5Prices = settings?.timeSessionPrices?.PS5 || settings?.pricing_config?.PS5 || { 30: 3, 60: 5, 120: 8 };
     const gamePrices = settings?.gameSessionPrices || settings?.pricing_config?.games || { FIFA: 1, 'Pro Evolution Soccer': 1 };
 
-    const items = [
-      { label: t("pricing.ps4_30min"), price: `${ps4Prices[30] || '2'} DT`, console: 'ps4', type: 'time' },
-      { label: t("pricing.ps4_1h"), price: `${ps4Prices[60] || '3'} DT`, console: 'ps4', type: 'time' },
-      { label: t("pricing.ps4_2h"), price: `${ps4Prices[120] || '5'} DT`, console: 'ps4', type: 'time' },
-      { label: t("pricing.ps5_30min"), price: `${ps5Prices[30] || '3'} DT`, console: 'ps5', type: 'time' },
-      { label: t("pricing.ps5_1h"), price: `${ps5Prices[60] || '5'} DT`, console: 'ps5', type: 'time' },
-      { label: t("pricing.ps5_2h"), price: `${ps5Prices[120] || '8'} DT`, console: 'ps5', type: 'time' },
-      { label: "FIFA", price: `${gamePrices.FIFA || '1'} DT`, console: 'ps4', type: 'game' },
-    ];
+    // Safely enforce objects to prevent null access errors
+    const safePs4 = typeof ps4Prices === 'object' && ps4Prices !== null ? ps4Prices : { 30: 2, 60: 3, 120: 5 };
+    const safePs5 = typeof ps5Prices === 'object' && ps5Prices !== null ? ps5Prices : { 30: 3, 60: 5, 120: 8 };
+    const safeGames = typeof gamePrices === 'object' && gamePrices !== null ? gamePrices : { FIFA: 1, 'Pro Evolution Soccer': 1 };
 
-    return items;
+    return [
+      { label: t("pricing.ps4_30min"), price: `${safePs4[30] || '2'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps4_1h"), price: `${safePs4[60] || '3'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps4_2h"), price: `${safePs4[120] || '5'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps5_30min"), price: `${safePs5[30] || '3'} DT`, console: 'ps5', type: 'time' },
+      { label: t("pricing.ps5_1h"), price: `${safePs5[60] || '5'} DT`, console: 'ps5', type: 'time' },
+      { label: t("pricing.ps5_2h"), price: `${safePs5[120] || '8'} DT`, console: 'ps5', type: 'time' },
+      { label: "FIFA", price: `${safeGames.FIFA || '1'} DT`, console: 'ps4', type: 'game' },
+    ];
   }, [pricingData, settings, language, t]);
 
   const features = useMemo(() => [
