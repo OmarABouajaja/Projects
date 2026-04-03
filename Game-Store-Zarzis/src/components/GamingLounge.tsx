@@ -2,7 +2,7 @@ import { Gamepad2, Users, Music, Coffee, Tv, Cookie, Clock, MonitorPlay } from "
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTunisianTime } from "@/hooks/useTunisianTime";
 import { useData } from "@/contexts/DataContext";
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { usePricing } from "@/hooks/usePricing";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
