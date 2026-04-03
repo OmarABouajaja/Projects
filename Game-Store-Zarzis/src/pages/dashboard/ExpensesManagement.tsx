@@ -92,18 +92,33 @@ const ExpensesManagement = () => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.description || !formData.amount) {
-            toast({ title: "Validation Error", description: "Please fill all fields", variant: "destructive" });
+        const amountNum = parseFloat(formData.amount);
+        
+        if (!formData.description || isNaN(amountNum) || amountNum <= 0) {
+            toast({ 
+                title: "Validation Error", 
+                description: t('common.invalid_amount') || "Veuillez entrer une description et un montant valide.", 
+                variant: "destructive" 
+            });
+            return;
+        }
+
+        if (!user?.id) {
+            toast({ 
+                title: "Auth Error", 
+                description: "Session expirée. Veuillez vous reconnecter.", 
+                variant: "destructive" 
+            });
             return;
         }
 
         try {
             const payload = {
-                description: formData.description,
-                amount: parseFloat(formData.amount),
+                description: formData.description.trim(),
+                amount: amountNum,
                 category: formData.category as any,
                 date: formData.date,
-                staff_id: user?.id || ""
+                staff_id: user.id
             };
 
             if (editingExpense) {
@@ -114,8 +129,13 @@ const ExpensesManagement = () => {
                 toast({ title: "✅ Success", description: t('expenses.success_add') });
             }
             setIsDialogOpen(false);
-        } catch (error) {
-            toast({ title: "❌ Error", description: "Operation failed", variant: "destructive" });
+        } catch (error: any) {
+            console.error("Expense operation error:", error);
+            toast({ 
+                title: "❌ Error", 
+                description: error?.message || "Operation failed", 
+                variant: "destructive" 
+            });
         }
     };
 

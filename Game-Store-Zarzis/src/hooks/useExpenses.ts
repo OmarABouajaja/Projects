@@ -24,10 +24,7 @@ export const useUpdateExpense = () => {
         mutationFn: async (expense: Partial<Expense> & { id: string }) => {
             const { error } = await supabase
                 .from(TABLES.EXPENSES)
-                .update({
-                    ...expense,
-                    updated_at: new Date().toISOString()
-                })
+                .update(expense)
                 .eq("id", expense.id);
 
             if (error) throw error;
@@ -45,11 +42,7 @@ export const useCreateExpense = () => {
         mutationFn: async (expense: Omit<Expense, "id" | "created_at" | "updated_at">) => {
             const { data, error } = await supabase
                 .from(TABLES.EXPENSES)
-                .insert([{
-                    ...expense,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }])
+                .insert([expense])
                 .select()
                 .single();
 
