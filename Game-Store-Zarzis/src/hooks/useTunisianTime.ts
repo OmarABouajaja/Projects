@@ -62,7 +62,13 @@ const calculateStatus = (settings?: any): TimeStatus => {
       const tunisianHour = hourPart ? parseInt(hourPart.value, 10) : 0;
       const tunisianMinute = minutePart ? parseInt(minutePart.value, 10) : 0;
       const currentTime = timeFormatter.format(now);
-      const currentDay = dayFormatter.format(now).toLowerCase();
+      
+      // If we are before 8 AM, we are technically still in "yesterday's" business day
+      const logicalDate = new Date(now);
+      if (tunisianHour < 8) {
+        logicalDate.setDate(logicalDate.getDate() - 1);
+      }
+      const currentDay = dayFormatter.format(logicalDate).toLowerCase();
       
       let openingHour = OPENING_HOUR;
       let closingHour = CLOSING_HOUR;

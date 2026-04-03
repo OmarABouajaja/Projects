@@ -1111,13 +1111,27 @@ const SessionsManagement = () => {
                 </div>
 
                 {/* Consumption Summary Block */}
-                {sessionConsumptions && sessionConsumptions.length > 0 && (
-                  <div className="glass-card rounded-lg p-3 sm:p-4 border-secondary/20 bg-secondary/5">
-                    <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                <div className="glass-card rounded-lg p-3 sm:p-4 border-secondary/20 bg-secondary/5">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-bold text-sm flex items-center gap-2">
                       <Utensils className="w-4 h-4 text-secondary" /> Consommations (Tabs)
                     </h4>
-                    <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                      {isConsumptionsLoading ? (
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-7 text-xs bg-secondary/10 hover:bg-secondary/20 text-secondary" 
+                      onClick={() => {
+                        setSelectedSessionForConsumption(selectedSession);
+                        setIsConsumptionDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-1" /> Add
+                    </Button>
+                  </div>
+                  {sessionConsumptions && sessionConsumptions.length > 0 ? (
+                    <>
+                      <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+                        {isConsumptionsLoading ? (
                         <div className="flex justify-center py-2"><Loader2 className="animate-spin w-5 h-5 text-primary" /></div>
                       ) : (
                         sessionConsumptions?.map((item: any) => (
@@ -1162,8 +1176,13 @@ const SessionsManagement = () => {
                         {sessionConsumptions.reduce((sum: number, c: SessionConsumption) => sum + (c.unit_price * c.quantity), 0).toFixed(3)} DT
                       </span>
                     </div>
-                  </div>
-                )}
+                    </>
+                  ) : (
+                    <div className="py-3 text-center text-xs text-muted-foreground italic">
+                      No consumables attached yet
+                    </div>
+                  )}
+                </div>
 
                 {selectedSession.session_type === 'per_game' && (
                   <div className="space-y-4">

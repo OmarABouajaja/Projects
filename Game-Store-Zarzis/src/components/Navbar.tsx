@@ -38,7 +38,7 @@ const LogoImage = ({ size }: { size: 'xs' | 'sm' }) => {
 
   return (
     <img
-      src="/logo/tbck.png"
+      src="/gamestorelogocmp.png"
       alt="Game Store logo"
       className={`${sizeClasses[size]} object-contain cursor-pointer`}
       width={size === 'xs' ? 24 : 28}

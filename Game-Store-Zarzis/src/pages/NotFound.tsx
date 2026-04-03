@@ -46,7 +46,7 @@ const NotFound = () => {
         <Link to="/" className="inline-block mb-8 group">
           <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30 shadow-lg shadow-primary/20 group-hover:scale-105 transition-all duration-300">
             <img
-              src="/logo/tbck.png"
+              src="/gamestorelogocmp.png"
               alt="Game Store Zarzis"
               className="w-12 h-12 object-contain"
               onError={(e) => {
