@@ -1,9 +1,10 @@
-import { Gamepad2, Users, Music, Coffee, Tv, Cookie, Monitor } from "lucide-react";
+import { Gamepad2, Users, Music, Coffee, Tv, Cookie, Clock, MonitorPlay } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTunisianTime } from "@/hooks/useTunisianTime";
 import { useData } from "@/contexts/DataContext";
-import { useMemo, memo } from "react";
+import { useMemo } from "react";
 import { usePricing } from "@/hooks/usePricing";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const GamingLounge = () => {
   const { t, language } = useLanguage();
@@ -21,7 +22,9 @@ const GamingLounge = () => {
     if (pricingData && pricingData.length > 0) {
       return pricingData.map(p => ({
         label: language === 'ar' ? p.name_ar : (language === 'fr' ? p.name_fr : p.name),
-        price: `${p.price.toFixed(3)} DT`
+        price: `${p.price.toFixed(3)} DT`,
+        console: p.console_type?.toLowerCase() || 'ps4', 
+        type: p.price_type === 'time' ? 'time' : 'game'
       }));
     }
 
@@ -31,13 +34,13 @@ const GamingLounge = () => {
     const gamePrices = settings?.gameSessionPrices || settings?.pricing_config?.games || { FIFA: 1, 'Pro Evolution Soccer': 1 };
 
     const items = [
-      { label: t("pricing.ps4_30min"), price: `${ps4Prices[30] || '2'} DT` },
-      { label: t("pricing.ps4_1h"), price: `${ps4Prices[60] || '3'} DT` },
-      { label: t("pricing.ps4_2h"), price: `${ps4Prices[120] || '5'} DT` },
-      { label: t("pricing.ps5_30min"), price: `${ps5Prices[30] || '3'} DT` },
-      { label: t("pricing.ps5_1h"), price: `${ps5Prices[60] || '5'} DT` },
-      { label: t("pricing.ps5_2h"), price: `${ps5Prices[120] || '8'} DT` },
-      { label: "FIFA", price: `${gamePrices.FIFA || '1'} DT` },
+      { label: t("pricing.ps4_30min"), price: `${ps4Prices[30] || '2'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps4_1h"), price: `${ps4Prices[60] || '3'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps4_2h"), price: `${ps4Prices[120] || '5'} DT`, console: 'ps4', type: 'time' },
+      { label: t("pricing.ps5_30min"), price: `${ps5Prices[30] || '3'} DT`, console: 'ps5', type: 'time' },
+      { label: t("pricing.ps5_1h"), price: `${ps5Prices[60] || '5'} DT`, console: 'ps5', type: 'time' },
+      { label: t("pricing.ps5_2h"), price: `${ps5Prices[120] || '8'} DT`, console: 'ps5', type: 'time' },
+      { label: "FIFA", price: `${gamePrices.FIFA || '1'} DT`, console: 'ps4', type: 'game' },
     ];
 
     return items;
@@ -122,73 +125,50 @@ const GamingLounge = () => {
               </h3>
 
               <div className="space-y-3 md:space-y-4">
-                {(!settings?.tariff_display_mode || settings.tariff_display_mode === 'cards') && (
-                  pricing.map((item, index) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/30 border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_12px_28px_hsl(var(--primary)/0.16)] hover:-translate-x-1"
-                    >
-                      <span className="text-sm md:text-base font-medium">{item.label}</span>
-                      <span className="font-display text-lg md:text-xl font-bold text-primary" style={{ height: '25px', display: 'inline-flex', alignItems: 'center' }}>{item.price}</span>
-                    </div>
-                  ))
-                )}
+                <Tabs defaultValue="ps5" className="w-full">
+                  <TabsList className="w-full grid grid-cols-2 bg-black/40 p-1 rounded-xl mb-4 sm:mb-6 h-[50px]">
+                     <TabsTrigger value="ps5" className="rounded-lg font-bold text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300">PS5</TabsTrigger>
+                     <TabsTrigger value="ps4" className="rounded-lg font-bold text-sm sm:text-base data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">PS4</TabsTrigger>
+                  </TabsList>
 
-                {settings?.tariff_display_mode === 'table' && (
-                  <div className="overflow-hidden rounded-lg border border-border/50 bg-muted/20">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-border/50 bg-muted/50">
-                          <th className="p-3 text-left font-medium">{t("gaming.table.session_type")}</th>
-                          <th className="p-3 text-right font-medium">{t("gaming.table.price")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {pricing.map((item, index) => (
-                          <tr key={item.label} className="border-b border-border/50 last:border-0 hover:bg-muted/30 transition-colors">
-                            <td className="p-3 font-medium">{item.label}</td>
-                            <td className="p-3 text-right font-bold text-primary">{item.price}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                  {['ps5', 'ps4'].map(consoleType => (
+                    <TabsContent key={consoleType} value={consoleType} className="space-y-5 animate-in fade-in-50 duration-500 outline-none">
+                       
+                       {/* Time Prices */}
+                       <div className="space-y-2.5">
+                         <div className="flex items-center gap-2 text-muted-foreground text-sm font-semibold mb-1 px-1">
+                            <Clock className="w-4 h-4" /> Temps Libre
+                         </div>
+                         <div className="grid grid-cols-1 gap-2.5">
+                           {pricing.filter(p => p.console === consoleType && p.type === 'time').map(item => (
+                             <div key={item.label} className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-muted/40 border border-white/5 hover:bg-black/40 hover:border-white/10 transition-all duration-300 group">
+                               <span className="font-medium text-sm sm:text-base group-hover:pl-1 transition-all duration-300">{item.label}</span>
+                               <span className={`font-display text-base sm:text-lg font-bold ${consoleType === 'ps5' ? 'text-primary' : 'text-blue-400'}`}>{item.price}</span>
+                             </div>
+                           ))}
+                         </div>
+                       </div>
+                       
+                       {/* Games Prices */}
+                       {pricing.filter(p => p.console === consoleType && p.type === 'game').length > 0 && (
+                         <div className="pt-2">
+                           <div className="flex items-center gap-2 text-muted-foreground text-sm font-semibold mb-3 px-1">
+                              <MonitorPlay className="w-4 h-4" /> Par Match
+                           </div>
+                           <div className="flex flex-wrap gap-2.5">
+                             {pricing.filter(p => p.console === consoleType && p.type === 'game').map(item => (
+                               <div key={item.label} className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${consoleType === 'ps5' ? 'bg-primary/10 border-primary/20 text-primary-foreground hover:bg-primary/20' : 'bg-blue-500/10 border-blue-500/20 text-blue-100 hover:bg-blue-500/20'} transition-colors cursor-default`}>
+                                 <span className="opacity-70 mr-1.5">{item.label}:</span>
+                                 <span className="font-bold">{item.price}</span>
+                               </div>
+                             ))}
+                           </div>
+                         </div>
+                       )}
 
-                {settings?.tariff_display_mode === 'comparison' && (
-                  <div className="grid grid-cols-2 gap-3 md:gap-4">
-                    {/* PS4 Column */}
-                    <div className="space-y-2">
-                      <div className="text-center font-bold text-blue-400 mb-2 border-b border-blue-500/30 pb-1">PS4</div>
-                      {pricing.filter(p => p.label.includes('PS4')).map(item => (
-                        <div key={item.label} className="p-2 rounded bg-blue-500/10 border border-blue-500/20 text-center">
-                          <div className="text-xs text-muted-foreground">{item.label.replace('PS4 - ', '')}</div>
-                          <div className="font-bold text-blue-400">{item.price}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* PS5 Column */}
-                    <div className="space-y-2">
-                      <div className="text-center font-bold text-primary mb-2 border-b border-primary/30 pb-1">PS5</div>
-                      {pricing.filter(p => p.label.includes('PS5')).map(item => (
-                        <div key={item.label} className="p-2 rounded bg-primary/10 border border-primary/20 text-center">
-                          <div className="text-xs text-muted-foreground">{item.label.replace('PS5 - ', '')}</div>
-                          <div className="font-bold text-primary">{item.price}</div>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Games Row */}
-                    <div className="col-span-2 mt-2 pt-2 border-t border-border/30">
-                      <div className="flex gap-2 justify-center flex-wrap">
-                        {pricing.filter(p => !p.label.includes('PS4') && !p.label.includes('PS5')).map(item => (
-                          <div key={item.label} className="px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-xs">
-                            <span className="font-bold text-secondary">{item.label}:</span> {item.price}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    </TabsContent>
+                  ))}
+                </Tabs>
               </div>
 
               <div className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-6 border-t border-border/50">

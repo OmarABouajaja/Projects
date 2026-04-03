@@ -47,27 +47,43 @@ export const AnalyticsProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }, []);
 
     const summary = useMemo(() => {
+        const getLogicalBusinessDate = (date: Date) => {
+            const logicalDate = new Date(date);
+            if (logicalDate.getHours() < 8) {
+                logicalDate.setDate(logicalDate.getDate() - 1);
+            }
+            return logicalDate;
+        };
+
+        const getLocalDayStr = (d: Date) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
+        const logicalNow = getLogicalBusinessDate(now);
+        const todayStr = getLocalDayStr(logicalNow);
 
         // Filter data based on timeRange
         const filterByTime = (dateStr: string) => {
             const date = new Date(dateStr);
             if (timeRange === 'today') {
-                return dateStr.startsWith(todayStr);
+                return getLocalDayStr(getLogicalBusinessDate(date)) === todayStr;
             }
             if (timeRange === 'weekly') {
-                const lastWeek = new Date();
-                lastWeek.setDate(now.getDate() - 7);
-                return date >= lastWeek;
+                const lastWeek = new Date(logicalNow);
+                lastWeek.setDate(logicalNow.getDate() - 7);
+                return getLogicalBusinessDate(date) >= lastWeek;
             }
             if (timeRange === 'monthly') {
-                const lastMonth = new Date();
-                lastMonth.setMonth(now.getMonth() - 1);
-                return date >= lastMonth;
+                const lastMonth = new Date(logicalNow);
+                lastMonth.setMonth(logicalNow.getMonth() - 1);
+                return getLogicalBusinessDate(date) >= lastMonth;
             }
             if (timeRange === 'yearly') {
-                return date.getFullYear() === now.getFullYear();
+                return getLogicalBusinessDate(date).getFullYear() === logicalNow.getFullYear();
             }
             return true;
         };

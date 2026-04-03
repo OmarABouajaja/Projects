@@ -13,6 +13,14 @@ interface Transaction {
     amount: number;
 }
 
+function getLogicalBusinessDate(date: Date) {
+    const logicalDate = new Date(date);
+    if (logicalDate.getHours() < 8) {
+        logicalDate.setDate(logicalDate.getDate() - 1);
+    }
+    return logicalDate;
+}
+
 function getLocalDayStr(d: Date) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -20,17 +28,22 @@ function getLocalDayStr(d: Date) {
     return `${year}-${month}-${day}`;
 }
 
-// Helper to process sales for today (hourly)
+// Helper to process sales for today (hourly using Business Day 08:00 -> 07:00)
 function getTodayRevenue(transactions: Transaction[]) {
-    const hours = Array.from({ length: 24 }, (_, i) => i);
+    // Business day hours: 8 AM to 7 AM next day
+    const hours = [
+        ...Array.from({ length: 16 }, (_, i) => i + 8), // 8 to 23
+        ...Array.from({ length: 8 }, (_, i) => i)       // 0 to 7
+    ];
+    
     const now = new Date();
-    const todayStr = getLocalDayStr(now);
+    const todayStr = getLocalDayStr(getLogicalBusinessDate(now));
 
     return hours.map(hour => {
         const hourStr = hour.toString().padStart(2, '0');
         const hourRevenue = transactions
             .filter(t => {
-                const itemDateStr = getLocalDayStr(t.date);
+                const itemDateStr = getLocalDayStr(getLogicalBusinessDate(t.date));
                 const itemHour = t.date.getHours();
                 return itemDateStr === todayStr && itemHour === hour;
             })
@@ -43,18 +56,19 @@ function getTodayRevenue(transactions: Transaction[]) {
     });
 }
 
-// Helper to process sales for a daily range (Weekly or Monthly)
+// Helper to process sales for a daily range (Weekly or Monthly) using Business Days
 function getDailyRevenueRange(transactions: Transaction[], daysBack: number) {
     const data = [];
-    const today = new Date();
+    const now = new Date();
+    const logicalToday = getLogicalBusinessDate(now);
 
     for (let i = daysBack - 1; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
+        const d = new Date(logicalToday);
+        d.setDate(logicalToday.getDate() - i);
         const dateStr = getLocalDayStr(d);
 
         const dayRevenue = transactions
-            .filter(t => getLocalDayStr(t.date) === dateStr)
+            .filter(t => getLocalDayStr(getLogicalBusinessDate(t.date)) === dateStr)
             .reduce((sum, t) => sum + t.amount, 0);
 
         // Format label based on range

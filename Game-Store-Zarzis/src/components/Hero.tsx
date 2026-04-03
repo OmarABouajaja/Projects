@@ -38,6 +38,22 @@ const Hero = () => {
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16" itemScope itemType="https://schema.org/WebPage">
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-5xl mx-auto text-center" style={{ contain: 'layout style' }}>
+          
+          {/* Responsive Centered Logo */}
+          <div 
+            className="flex justify-center w-full mb-6 sm:mb-8 md:mb-10 px-4"
+            style={{
+              animation: 'fade-in 0.8s ease-out forwards, soft-glow 6s ease-in-out infinite'
+            }}
+          >
+            <img 
+              src="/logo/logo-bleu-transparent.png" 
+              alt="Game Store Zarzis Logo" 
+              className="h-20 sm:h-28 md:h-36 lg:h-44 w-auto object-contain drop-shadow-[0_0_15px_hsl(var(--primary)/0.3)] transition-transform duration-500 hover:scale-105"
+              fetchPriority="high"
+            />
+          </div>
+
           {/* Main Heading - LCP element */}
           <h1
             className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-3 sm:mb-4 md:mb-5 leading-tight"
