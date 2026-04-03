@@ -335,8 +335,9 @@ export interface Expense {
   description: string;
   amount: number;
   category: ExpenseCategory;
+  expense_type: string;
   date: string;
-  staff_id: string;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }

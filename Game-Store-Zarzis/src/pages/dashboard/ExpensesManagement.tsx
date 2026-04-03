@@ -40,6 +40,7 @@ const ExpensesManagement = () => {
         description: "",
         amount: "",
         category: "daily",
+        expense_type: "",
         date: new Date().toISOString().split('T')[0]
     });
 
@@ -75,6 +76,7 @@ const ExpensesManagement = () => {
             description: "",
             amount: "",
             category: "daily",
+            expense_type: "",
             date: new Date().toISOString().split('T')[0]
         });
         setIsDialogOpen(true);
@@ -86,6 +88,7 @@ const ExpensesManagement = () => {
             description: expense.description,
             amount: expense.amount.toString(),
             category: expense.category,
+            expense_type: expense.expense_type || "",
             date: expense.date
         });
         setIsDialogOpen(true);
@@ -117,8 +120,9 @@ const ExpensesManagement = () => {
                 description: formData.description.trim(),
                 amount: amountNum,
                 category: formData.category as any,
+                expense_type: formData.expense_type || formData.category,
                 date: formData.date,
-                staff_id: user.id
+                created_by: user.id
             };
 
             if (editingExpense) {
@@ -383,17 +387,26 @@ const ExpensesManagement = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>{t('expenses.category')}</Label>
-                                    <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v })}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="daily">{t('expenses.cat_daily')}</SelectItem>
-                                            <SelectItem value="monthly">{t('expenses.cat_monthly')}</SelectItem>
-                                            <SelectItem value="yearly">{t('expenses.cat_yearly')}</SelectItem>
-                                            <SelectItem value="other">{t('expenses.cat_other')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Label>Type de Dépense</Label>
+                                    <Input
+                                        placeholder="Ex: Facture, Achat..."
+                                        value={formData.expense_type}
+                                        onChange={e => setFormData({ ...formData, expense_type: e.target.value })}
+                                        className="text-base md:text-sm"
+                                    />
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>{t('expenses.category')}</Label>
+                                <Select value={formData.category} onValueChange={v => setFormData({ ...formData, category: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="daily">{t('expenses.cat_daily')}</SelectItem>
+                                        <SelectItem value="monthly">{t('expenses.cat_monthly')}</SelectItem>
+                                        <SelectItem value="yearly">{t('expenses.cat_yearly')}</SelectItem>
+                                        <SelectItem value="other">{t('expenses.cat_other')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-2">
                                 <Label>{t('expenses.date')}</Label>
