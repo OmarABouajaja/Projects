@@ -551,61 +551,7 @@ const StoreSettings = () => {
             </TabsList>
 
             <TabsContent value="hours" className="space-y-4 sm:space-y-6">
-              {/* Device Configuration (Work Station) */}
-              <Card className="glass-card border-l-4 border-l-purple-500">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Monitor className="w-5 h-5 text-purple-600" />
-                    {t('settings.deviceConfig.title')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div>
-                    <p className="font-medium">
-                      {t('settings.deviceConfig.workStation')}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {t('settings.deviceConfig.description')}
-                    </p>
-                    {localStorage.getItem('GAME_STORE_WORK_STATION') === 'true' && (
-                      <div className="flex items-center gap-2 mt-2 text-green-600 text-sm font-medium">
-                        <CheckCircle className="w-4 h-4" />
-                        {t('settings.deviceConfig.authorized')}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {localStorage.getItem('GAME_STORE_WORK_STATION') === 'true' ? (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          if (confirm(t('settings.deviceConfig.revokeQuote'))) {
-                            localStorage.removeItem('GAME_STORE_WORK_STATION');
-                            toast({ title: t('settings.deviceConfig.deauthorizedSuccess') });
-                            window.location.reload();
-                          }
-                        }}
-                      >
-                        {t('settings.deviceConfig.revoke')}
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-purple-200 hover:bg-purple-50 text-purple-700 dark:border-purple-800 dark:hover:bg-purple-900/20"
-                        onClick={() => {
-                          localStorage.setItem('GAME_STORE_WORK_STATION', 'true');
-                          toast({ title: t('settings.deviceConfig.authorizedSuccess'), description: t('settings.deviceConfig.authorizedDesc') });
-                          window.location.reload();
-                        }}
-                      >
-                        {t('settings.deviceConfig.authorize')}
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+
               {/* Default Operating Hours */}
               <Card className="glass-card">
                 <CardHeader>

@@ -136,7 +136,7 @@ Game Store Zarzis - Intelligence Business
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              {!isOwner && <AttendanceToggle />}
+              <AttendanceToggle />
 
               <Popover>
                 <PopoverTrigger asChild>

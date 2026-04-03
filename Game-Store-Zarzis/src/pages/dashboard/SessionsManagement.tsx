@@ -22,7 +22,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee, Utensils, Loader2 } from "lucide-react";
+import { Gamepad2, Play, Square, Plus, Clock, Gift, User, Star, MoreVertical, Timer, Bell, BellOff, AlertTriangle, Wrench, Edit, Trash2, DollarSign, Zap, Coffee, Utensils, Loader2, Printer } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { HelpTooltip } from "@/components/ui/help-tooltip";
 import { useData } from "@/contexts/DataContext";
@@ -1340,9 +1340,16 @@ const SessionsManagement = () => {
                 </div>
                   </>
                 ) : (
-                  <div className="bg-white text-black p-6 rounded-lg font-mono shadow-inner border border-gray-200 w-full mx-auto max-w-sm relative">
+                  <div className="bg-white text-black p-6 rounded-lg font-mono shadow-inner border border-gray-200 w-full mx-auto max-w-sm relative print-receipt-container">
                     {/* Simulated ZigZag Receipt Top/Bottom if desired, but rounded is fine */}
-                    <div className="text-center mb-6">
+                    <button 
+                      className="no-print absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                      onClick={() => window.print()}
+                      title="Print Receipt"
+                    >
+                      <Printer size={18} />
+                    </button>
+                    <div className="text-center mb-6 pr-6">
                       <h3 className="text-xl font-bold uppercase tracking-widest mb-1">Game Store Zarzis</h3>
                       <p className="text-xs text-gray-500 uppercase">Gaming Lounge Receipt</p>
                     </div>
@@ -1406,7 +1413,7 @@ const SessionsManagement = () => {
                   </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 no-print">
                   {endSessionStep === 'confirm' && (
                     <Button variant="outline" onClick={() => setEndSessionStep('summary')} className="flex-1">
                       Back
@@ -1414,12 +1421,14 @@ const SessionsManagement = () => {
                   )}
                   <Button
                     variant={endSessionStep === 'confirm' ? "default" : "secondary"}
-                    className="flex-1 h-12 text-lg font-bold"
+                    className={endSessionStep === 'confirm' 
+                      ? "flex-1 h-12 text-lg font-extrabold tracking-wider border-none bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] transition-all duration-300 hover:scale-[1.02]" 
+                      : "flex-1 h-12 text-lg font-bold"}
                     onClick={handleEndSession}
                     disabled={endSession.isPending || (isCreatingClient && (!newClientName || !newClientPhone)) || isConsumptionsLoading}
                   >
                     {(endSession.isPending || isConsumptionsLoading) ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> : endSessionStep === 'confirm' ? <Square className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2" />}
-                    {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading..." : endSessionStep === 'confirm' ? "Confirm & Pay" : "Review Payment"}
+                    {endSession.isPending ? "Ending..." : isConsumptionsLoading ? "Loading..." : endSessionStep === 'confirm' ? "CONFIRM & PAY" : "Review Payment"}
                   </Button>
                 </div>
               </div>

@@ -353,9 +353,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!error && data.user) {
       const targetUser = data.user;
 
-      // Perform background sync and clock-in only if this is an authorized work station
-      const isWorkStation = localStorage.getItem('GAME_STORE_WORK_STATION') === 'true';
-
       const promises: any[] = [
         supabase
           .from('profiles')
@@ -366,40 +363,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           })
       ];
 
-      if (isWorkStation) {
-        promises.push(
-          supabase
-            .from('staff_shifts')
-            .insert({ staff_id: targetUser.id })
-            .select()
-            .single()
-        );
-      }
-
       Promise.all(promises).then((results) => {
         const profileRes = results[0];
         if (profileRes.error) console.error("Profile sync failed", profileRes.error);
-
-        if (isWorkStation && results[1]) {
-          const shiftRes = results[1];
-          if (shiftRes.data) {
-            const shiftData = shiftRes.data;
-            localStorage.setItem('current_staff_session_id', shiftData.id);
-            localStorage.setItem('currentSessionStartTime', shiftData.check_in);
-            setIsClockedIn(true);
-            setCurrentSessionStartTime(shiftData.check_in);
-
-            // Invalidate queries for real-time dashboard sync
-            queryClient.invalidateQueries({ queryKey: ['all-active-shifts'] });
-
-            // Notify user of auto clock-in
-            import("sonner").then(({ toast }) => {
-              toast.success("Shift Started Automatically", {
-                description: "Work Station authorized. Attendance tracking active."
-              });
-            });
-          }
-        }
       }).catch(err => console.error("Post-login operations failed", err));
     }
 

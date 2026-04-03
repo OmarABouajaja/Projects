@@ -70,14 +70,7 @@ class ErrorBoundary extends Component<Props, State> {
               </p>
             </div>
 
-            {this.state.error && (
-              <div className="bg-muted p-4 rounded-lg text-left">
-                <h3 className="font-semibold text-sm mb-2">Error Details (Development)</h3>
-                <pre className="text-xs text-red-600 overflow-auto">
-                  {this.state.error.stack}
-                </pre>
-              </div>
-            )}
+
 
             <div className="flex gap-3 justify-center">
               <Button onClick={this.handleRetry} variant="outline">

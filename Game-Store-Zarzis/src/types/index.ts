@@ -62,6 +62,8 @@ export interface GameSession {
   staff_id: string;
   notes: string | null;
   created_at?: string;
+  pricing?: Pricing;
+  console?: Console;
 }
 
 // Console system
@@ -144,7 +146,9 @@ export interface StoreSettings {
   sms_phone?: string;
   sms_api_key?: string;
   free_games_enabled: boolean;
+  free_game_threshold?: { games_required: number } | any;
   points_system_enabled: boolean;
+  points_config?: any;
   help_tooltips_enabled: boolean;
   tariff_display_mode: 'cards' | 'table' | 'comparison' | string;
   data_limit_mb: number;
@@ -493,6 +497,7 @@ export interface Pricing {
   extra_time_price?: number;
   game_duration_minutes?: number;
   is_active: boolean;
+  points_earned?: number;
   created_at?: string;
 }
 
