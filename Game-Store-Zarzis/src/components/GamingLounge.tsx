@@ -12,11 +12,19 @@ const GamingLounge = () => {
   const { settings, consoles } = useData();
   const { data: pricingData } = usePricing();
 
-  const availableConsoles = consoles.filter(c => c.status === 'available');
-  const ps4Count = consoles.filter(c => c.console_type?.toLowerCase() === 'ps4').length;
-  const ps5Count = consoles.filter(c => c.console_type?.toLowerCase() === 'ps5').length;
-  const ps4Available = consoles.filter(c => c.console_type?.toLowerCase() === 'ps4' && c.status === 'available').length;
-  const ps5Available = consoles.filter(c => c.console_type?.toLowerCase() === 'ps5' && c.status === 'available').length;
+  const uniqueConsoleTypes = useMemo(() => {
+    const types = new Set<string>();
+    consoles.forEach(c => {
+      if (c.console_type) types.add(c.console_type.toLowerCase());
+    });
+    if (pricingData) {
+      pricingData.forEach(p => {
+        if (p.console_type) types.add(p.console_type.toLowerCase());
+      });
+    }
+    const arr = Array.from(types).sort((a,b) => b.localeCompare(a)); 
+    return arr.length > 0 ? arr : ['ps5', 'ps4'];
+  }, [consoles, pricingData]);
 
   const pricing = useMemo(() => {
     if (pricingData && pricingData.length > 0) {
@@ -128,46 +136,27 @@ const GamingLounge = () => {
               </h3>
 
               <div className="space-y-3 md:space-y-4">
-                <Tabs defaultValue="ps5" className="w-full">
-                  <TabsList className="w-full grid grid-cols-2 bg-black/40 p-1 rounded-xl mb-4 sm:mb-6 h-[50px]">
-                     <TabsTrigger value="ps5" className="rounded-lg font-bold text-sm sm:text-base data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg transition-all duration-300">PS5</TabsTrigger>
-                     <TabsTrigger value="ps4" className="rounded-lg font-bold text-sm sm:text-base data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">PS4</TabsTrigger>
+                <Tabs defaultValue={uniqueConsoleTypes[0]} className="w-full">
+                  <TabsList className="w-full flex bg-black/40 p-1 rounded-xl mb-4 sm:mb-6 h-[50px] overflow-x-auto no-scrollbar">
+                    {uniqueConsoleTypes.map(cType => (
+                       <TabsTrigger key={cType} value={cType} className={`flex-1 uppercase rounded-lg font-bold text-sm sm:text-base data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 min-w-[80px] ${cType === 'ps4' ? 'data-[state=active]:bg-blue-600' : 'data-[state=active]:bg-primary'}`}>{cType}</TabsTrigger>
+                    ))}
                   </TabsList>
 
-                  {['ps5', 'ps4'].map(consoleType => (
+                  {uniqueConsoleTypes.map(consoleType => (
                     <TabsContent key={consoleType} value={consoleType} className="space-y-5 animate-in fade-in-50 duration-500 outline-none">
                        
-                       {/* Time Prices */}
-                       <div className="space-y-2.5">
-                         <div className="flex items-center gap-2 text-muted-foreground text-sm font-semibold mb-1 px-1">
-                            <Clock className="w-4 h-4" /> Temps Libre
-                         </div>
-                         <div className="grid grid-cols-1 gap-2.5">
-                           {pricing.filter(p => p.console === consoleType && p.type === 'time').map(item => (
-                             <div key={item.label} className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-muted/40 border border-white/5 hover:bg-black/40 hover:border-white/10 transition-all duration-300 group">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                         {pricing.filter(p => p.console === consoleType).map(item => (
+                           <div key={item.label} className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl bg-muted/40 border border-white/5 hover:bg-black/40 hover:border-white/10 transition-all duration-300 group">
+                             <div className="flex flex-col">
+                               {item.type === 'game' && <span className="opacity-50 uppercase text-[9px] font-bold tracking-wider mb-0.5 leading-none">Par Match</span>}
                                <span className="font-medium text-sm sm:text-base group-hover:pl-1 transition-all duration-300">{item.label}</span>
-                               <span className={`font-display text-base sm:text-lg font-bold ${consoleType === 'ps5' ? 'text-primary' : 'text-blue-400'}`}>{item.price}</span>
                              </div>
-                           ))}
-                         </div>
+                             <span className={`font-display text-base sm:text-xl font-bold ${consoleType === 'ps5' ? 'text-primary' : 'text-blue-400'}`}>{item.price}</span>
+                           </div>
+                         ))}
                        </div>
-                       
-                       {/* Games Prices */}
-                       {pricing.filter(p => p.console === consoleType && p.type === 'game').length > 0 && (
-                         <div className="pt-2">
-                           <div className="flex items-center gap-2 text-muted-foreground text-sm font-semibold mb-3 px-1">
-                              <MonitorPlay className="w-4 h-4" /> Par Match
-                           </div>
-                           <div className="flex flex-wrap gap-2.5">
-                             {pricing.filter(p => p.console === consoleType && p.type === 'game').map(item => (
-                               <div key={item.label} className={`px-4 py-2 rounded-full text-xs sm:text-sm font-medium border ${consoleType === 'ps5' ? 'bg-primary/10 border-primary/20 text-primary-foreground hover:bg-primary/20' : 'bg-blue-500/10 border-blue-500/20 text-blue-100 hover:bg-blue-500/20'} transition-colors cursor-default`}>
-                                 <span className="opacity-70 mr-1.5">{item.label}:</span>
-                                 <span className="font-bold">{item.price}</span>
-                               </div>
-                             ))}
-                           </div>
-                         </div>
-                       )}
 
                     </TabsContent>
                   ))}
@@ -181,9 +170,18 @@ const GamingLounge = () => {
                   </div>
                   <div>
                     <p className="font-display font-bold text-sm md:text-base">{t("dashboard.available_consoles")}</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">
-                      {ps5Available}/{ps5Count} PS5 • {ps4Available}/{ps4Count} PS4
-                    </p>
+                    <div className="text-xs md:text-sm text-muted-foreground flex flex-wrap gap-2 items-center">
+                      {uniqueConsoleTypes.map((c, idx) => {
+                         const av = consoles.filter(x => x.console_type?.toLowerCase() === c && x.status === 'available').length;
+                         const tot = consoles.filter(x => x.console_type?.toLowerCase() === c).length;
+                         return (
+                           <span key={c} className="whitespace-nowrap">
+                             <strong className={c === 'ps5' ? 'text-primary' : 'text-blue-400'}>{av}</strong>/{tot} <span className="uppercase">{c}</span>
+                             {idx < uniqueConsoleTypes.length - 1 && <span className="text-border mx-1">•</span>}
+                           </span>
+                         );
+                      })}
+                    </div>
                   </div>
                 </div>
                 <div

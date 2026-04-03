@@ -63,6 +63,18 @@ const SessionsManagement = () => {
   const { data: pricing } = usePricing();
   const { data: activeSessions } = useActiveSessions();
   const { data: storeSettingsData } = useStoreSettings();
+
+  const uniqueConsoleTypes = React.useMemo(() => {
+    const types = new Set<string>();
+    consoles?.forEach(c => {
+      if (c.console_type) types.add(c.console_type.toUpperCase());
+    });
+    pricing?.forEach(p => {
+      if (p.console_type) types.add(p.console_type.toUpperCase());
+    });
+    const arr = Array.from(types).sort((a,b) => b.localeCompare(a)); 
+    return arr.length > 0 ? arr : ['PS5', 'PS4'];
+  }, [consoles, pricing]);
   const { gameShortcuts, deleteGameShortcut, isLoading: isDataLoading, clients } = useData();
 
   // Consumption Data for Selected Session
@@ -137,8 +149,8 @@ const SessionsManagement = () => {
 
           if (!applicablePricing && storeSettingsData) {
             const consoleType = (targetConsole.console_type || '').toUpperCase();
-            const globalDefaultKey = consoleType === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
-            const globalDefaultId = (storeSettingsData as unknown as StoreSettings)[globalDefaultKey as keyof StoreSettings];
+            const globalDefaultKey = `default_pricing_${consoleType.toLowerCase()}`;
+            const globalDefaultId = (storeSettingsData as any)?.[globalDefaultKey];
 
             if (globalDefaultId && globalDefaultId !== 'none') {
               applicablePricing = pricing.find(p => p.id === globalDefaultId);
@@ -565,8 +577,8 @@ const SessionsManagement = () => {
       pricingToSelect = targetConsoleObj.default_pricing_id;
     } else if (storeSettingsData && targetConsoleObj) {
       const type = targetConsoleObj.console_type.toUpperCase();
-      const key = type === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
-      const globalId = (storeSettingsData as any)[key];
+      const key = `default_pricing_${type.toLowerCase()}`;
+      const globalId = (storeSettingsData as any)?.[key];
 
       if (globalId && globalId !== 'none') {
         pricingToSelect = globalId;
@@ -607,7 +619,7 @@ const SessionsManagement = () => {
   }
 
   const handleSetShortcutDefault = async (pricingId: string, consoleType: string) => {
-    const key = consoleType === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4';
+    const key = `default_pricing_${consoleType.toLowerCase()}`;
     try {
       await updateSetting.mutateAsync({ key, value: pricingId });
       toast({
@@ -701,7 +713,7 @@ const SessionsManagement = () => {
 
                   <div className="space-y-8">
                     {/* Visual List Only (No Redundant Dropdowns) */}
-                    {['PS4', 'PS5'].map(type => (
+                    {uniqueConsoleTypes.map(type => (
                       <div key={type} className="space-y-4">
                         <div className="flex items-center justify-between border-b border-white/10 pb-2">
                           <h3 className="font-bold text-lg flex items-center gap-2">
@@ -713,9 +725,9 @@ const SessionsManagement = () => {
                         <div className="grid gap-3">
                           {pricing?.filter(p => {
                             const pType = p.console_type.toUpperCase();
-                            return type === 'PS4' ? (pType === 'PS4' || pType === 'PS4_PRO') : pType === 'PS5';
+                            return pType === type || (type === 'PS4' && pType === 'PS4_PRO');
                           }).map(p => {
-                            const isDefault = storeSettingsData?.[type === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4'] === p.id;
+                            const isDefault = (storeSettingsData as any)?.[`default_pricing_${type.toLowerCase()}`] === p.id;
 
                             return (
                               <div key={p.id} className={`p-4 rounded-xl border transition-all flex items-center justify-between group ${isDefault ? 'bg-secondary/20 border-secondary/50 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'bg-black/20 border-white/5'
@@ -769,8 +781,8 @@ const SessionsManagement = () => {
 
           {/* Active Shortcuts (Flash/Fast Tarifs) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {['PS4', 'PS5'].map(type => {
-              const defaultId = storeSettingsData?.[type === 'PS5' ? 'default_pricing_ps5' : 'default_pricing_ps4'];
+            {uniqueConsoleTypes.map(type => {
+              const defaultId = (storeSettingsData as any)?.[`default_pricing_${type.toLowerCase()}`];
               const defaultPricing = pricing?.find(p => p.id === defaultId);
 
               return (
