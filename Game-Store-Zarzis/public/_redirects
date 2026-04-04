@@ -1,3 +1,3 @@
-# SPA fallback
+# SPA fallback (Explicitly handled to avoid loops)
 /* /index.html 200
 
